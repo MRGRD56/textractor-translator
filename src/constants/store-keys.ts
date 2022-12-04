@@ -1,0 +1,1 @@
+export const CONFIG_SOURCE_KEY = 'CONFIG_SOURCE';

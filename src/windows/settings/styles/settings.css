@@ -1,0 +1,10 @@
+.settings-window {
+    height: 100%;
+}
+
+.original-text-transformer-editor {
+    height: calc(100% - 1px);
+}
+
+.original-text-transformer-editor > .monaco-editor {
+}

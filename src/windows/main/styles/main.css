@@ -1,0 +1,87 @@
+body {
+    position: relative;
+}
+
+/*.draggable-panel {*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    width: 100%;*/
+/*    height: 30px;*/
+/*    cursor: move;*/
+/*    !*-webkit-app-region: drag;*!*/
+/*}*/
+
+.text-container-wrapper {
+    padding: 8px;
+    box-sizing: border-box;
+    min-height: 100%;
+    max-height: 100%;
+    overflow-y: scroll;
+
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.text-container-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.text-container-wrapper {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    font-family: Roboto, sans-serif;
+    font-size: 16px;
+    min-height: 100%;
+    color: white;
+    text-align: center;
+}
+
+.sentence {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.sentence-original {
+
+}
+
+.sentence-translated {
+    font-weight: bold;
+}
+
+.main-toolbar {
+    display: none; /* todo temporary */
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+}
+
+.main-toolbar-item {
+
+}
+
+.main-toolbar-item > .material-symbols-outlined {
+    color: white;
+    font-size: 14px;
+
+    font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24;
+}
