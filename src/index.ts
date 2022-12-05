@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import {app, BrowserWindow, ipcMain} from 'electron';
 import {createMainWindow} from './windows/main/initMain';
 import {createSettingsWindow} from './windows/settings/initSettings';
 import initElectronStore from './electron-store/initElectronStore';
@@ -29,10 +29,19 @@ if (require('electron-squirrel-startup')) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-    createMainWindow();
-    createSettingsWindow();
+    const mainWindow = createMainWindow();
 
     initElectronStore();
+
+    ipcMain.handle('main-window.close', () => {
+        mainWindow.close();
+    });
+    ipcMain.handle('main-window.minimize', () => {
+        mainWindow.minimize();
+    });
+    ipcMain.handle('open-settings-window', () => {
+        createSettingsWindow();
+    });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

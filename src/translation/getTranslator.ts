@@ -1,8 +1,29 @@
 import {DefinedTranslator, Translator} from '../configuration/Configuration';
 import GoogleTranslator from './translators/GoogleTranslator';
 
+class IdentityTranslator implements Translator {
+    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
+        return Promise.resolve(text);
+    }
+}
+
+class NoneTranslator implements Translator {
+    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
+        return undefined;
+    }
+}
+
+class InfiniteTranslator implements Translator {
+    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
+        return new Promise<string>(() => {});
+    }
+}
+
 const translators: Record<DefinedTranslator, Translator> = {
-    GOOGLE_TRANSLATE: new GoogleTranslator()
+    GOOGLE_TRANSLATE: new GoogleTranslator(),
+    X_IDENTITY: new IdentityTranslator(),
+    X_NONE: new NoneTranslator(),
+    X_INFINITE: new InfiniteTranslator()
 };
 
 const getDefinedTranslator = (translatorType: DefinedTranslator): Translator | undefined => {

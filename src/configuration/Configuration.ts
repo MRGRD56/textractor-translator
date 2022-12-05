@@ -11,7 +11,7 @@ export interface SentenceMeta {
     timestamp: number;
 }
 
-export type DefinedTranslator = 'GOOGLE_TRANSLATE';
+export type DefinedTranslator = 'GOOGLE_TRANSLATE' | 'X_IDENTITY' | 'X_INFINITE' | 'X_NONE';
 
 export interface Translator {
     translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string>;

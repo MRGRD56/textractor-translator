@@ -41,4 +41,4 @@ declare const app: Configuration;
     editor.onDidChangeModelContent(e => {
         store.set(CONFIG_SOURCE_KEY, editor.getValue());
     });
-}, 'DOMContentLoaded');
+});

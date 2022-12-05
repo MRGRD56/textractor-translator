@@ -3,16 +3,31 @@ import {BrowserWindow} from 'electron';
 declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 declare const SETTINGS_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
+let settingsWindow: BrowserWindow | undefined = undefined;
+
 export function createSettingsWindow(): void {
-    const settingsWindow = new BrowserWindow({
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+        if (settingsWindow.isMinimized()) {
+            settingsWindow.restore();
+        }
+        settingsWindow.focus();
+        return;
+    }
+
+    settingsWindow = new BrowserWindow({
         height: 850,
         width: 1000,
         webPreferences: {
             preload: SETTINGS_WINDOW_PRELOAD_WEBPACK_ENTRY,
             sandbox: false,
             nodeIntegration: true
-        }
+        },
+        alwaysOnTop: true
     });
 
     settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);
+
+    // settingsWindow.on('close', () => {
+    //     settingsWindow = undefined;
+    // });
 }
