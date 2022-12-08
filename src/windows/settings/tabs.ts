@@ -54,7 +54,7 @@ export const initTabs = (element: HTMLElement, initialTabs: Tabs): TabsApi => {
         element.insertBefore(tabElement, newTabElement);
     };
 
-    tabsApi.onChange(() => {
+    tabsApi.onChange((changes) => {
         element.innerHTML = '';
 
         const newTabElement = document.createElement('div');

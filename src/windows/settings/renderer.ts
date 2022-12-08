@@ -9,10 +9,10 @@ import {CONFIG_SOURCE_KEY} from '../../constants/store-keys';
 import {ElectronStore} from '../../electron-store/electronStoreShared';
 import {defaultTransformerSource} from '../../configuration/constants';
 import {initTabs} from './tabs';
-import {createTab} from '../../utils/tabsCore';
+import {createTab, TabsChangeCause} from '../../utils/tabsCore';
 
 const initSettingsTabs = () => {
-    initTabs(document.getElementById('settings-tabs'), {
+    const tabsApi = initTabs(document.getElementById('settings-tabs'), {
         list: [
             createTab('Common', {
                 isPinned: true,
@@ -32,6 +32,18 @@ const initSettingsTabs = () => {
             createTab('White Album 2'),
             createTab('Aokana')
         ]
+    });
+
+    tabsApi.onChange(tabsChanges => {
+        for (const change of tabsChanges) {
+            if (change.cause !== TabsChangeCause.ACTIVE_TAB_CHANGED) {
+                continue;
+            }
+
+            console.log('Active tab changed to', change.activeTabId);
+
+            break;
+        }
     });
 };
 
