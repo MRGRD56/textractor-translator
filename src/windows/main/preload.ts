@@ -4,9 +4,10 @@ import {ipcRenderer} from 'electron';
 const isHistoryShownRef = {current: false};
 
 const initToolbar = () => {
-    const textContainerWrapper = document.getElementById('text-wrapper')!;
+    const textContainerWrapper = document.getElementById('text-wrapper');
     const textContainer = document.querySelector('.text-container');
 
+    const mainToolbar = document.querySelector('.main-toolbar');
     const closeAppButton = document.getElementById('close-app-button');
     const minimizeAppButton = document.getElementById('minimize-window-button');
     const settingsButton = document.getElementById('settings-button');
@@ -29,6 +30,11 @@ const initToolbar = () => {
             textContainer.classList.remove('history-visible');
         }
     });
+
+    mainToolbar.classList.add('force-visible');
+    setTimeout(() => {
+        mainToolbar.classList.remove('force-visible');
+    }, 2000);
 };
 
 window.addEventListener('DOMContentLoaded', () => {

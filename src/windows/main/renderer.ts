@@ -6,8 +6,8 @@
 // needed in the renderer process.
 
 import '../../../node_modules/material-symbols/index.css';
-import '../../style/basic.css';
-import './styles/main.css';
+import '../../style/basic.scss';
+import './styles/main.scss';
 
 const initializeScaling = () => {
     const body = document.body;
