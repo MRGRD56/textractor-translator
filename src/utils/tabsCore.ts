@@ -14,7 +14,8 @@ export interface Tab {
     icon?: {
         name: string;
         className?: string;
-    }
+    },
+    isActivated?: boolean;
 }
 
 export interface Tabs {
@@ -66,9 +67,10 @@ export type TabsChange = {
 
 export interface TabsApi {
     getTabs(): Tab[];
+    getTabsObject(): Tabs;
     getTabsMap(): Map<string, Tab>;
-    getActiveTab(): Tab;
-    getActiveTabId(): string;
+    getActiveTab(): Tab | undefined;
+    getActiveTabId(): string | undefined;
     setActiveTabId(tabId: string): void;
     isTabActive(tabId: string): boolean;
     getTab(tabId: string): Tab;
@@ -80,7 +82,7 @@ export interface TabsApi {
     setTabClassName(tabId: string, className: string | undefined): void;
     setTabIcon(tabId: string, icon: Tab['icon']): void;
 
-    onChange?(callback: (tabsChanges: TabsChange[]) => void): Subscription;
+    onChange(callback: (tabsChanges: TabsChange[]) => void): Subscription;
 }
 
 const tabsCore = (initialTabs: Tabs): TabsApi => {
@@ -106,13 +108,21 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
                 return a.index - b.index;
             });
         },
+        getTabsObject(): Tabs {
+            return {
+                list: this.getTabs(),
+                activeId: this.getActiveTabId()
+            };
+        },
         getTabsMap(): Map<string, Tab> {
             return tabsMap;
         },
-        getActiveTab(): Tab {
-            return tabsMap.get(activeIdRef.current);
+        getActiveTab(): Tab | undefined {
+            if (activeIdRef.current) {
+                return tabsMap.get(activeIdRef.current);
+            }
         },
-        getActiveTabId(): string {
+        getActiveTabId(): string | undefined {
             return activeIdRef.current;
         },
         setActiveTabId(tabId: string): void {
@@ -123,7 +133,7 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             return activeIdRef.current === tabId;
         },
         getTab(tabId: string): Tab {
-            return tabsMap.get(tabId);
+            return tabsMap.get(tabId)!;
         },
         addTab(tab: Tab) {
             const newTab = {
@@ -137,7 +147,7 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
         closeTab(tabId: string): Tab {
             const changes: TabsChange[] = [];
 
-            const tab = tabsMap.get(tabId);
+            const tab = tabsMap.get(tabId)!;
             tabsMap.delete(tabId);
             if (activeIdRef.current === tab.id) {
                 const tabsList = this.getTabs();
@@ -149,27 +159,27 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             return tab;
         },
         renameTab(tabId: string, newName: string): Tab {
-            const tab = tabsMap.get(tabId);
+            const tab = tabsMap.get(tabId)!;
             tab.name = newName;
             change$.next([{cause: TabsChangeCause.TAB_RENAMED, tab}]);
             return tab;
         },
         getTabIndex(tabId: string): number {
-            const tab = tabsMap.get(tabId);
+            const tab = tabsMap.get(tabId)!;
             return tab.index;
         },
         setTabIndex(tabId: string, index: number) {
-            const tab = tabsMap.get(tabId);
+            const tab = tabsMap.get(tabId)!;
             tab.index = index;
             change$.next([{cause: TabsChangeCause.TAB_MOVED, tab}]);
         },
         setTabClassName(tabId: string, className: string | undefined) {
-            const tab = tabsMap.get(tabId);
+            const tab = tabsMap.get(tabId)!;
             tab.className = className;
             change$.next([{cause: TabsChangeCause.TAB_CLASSNAME_CHANGED, tab}]);
         },
         setTabIcon(tabId: string, icon: Tab['icon']) {
-            const tab = tabsMap.get(tabId);
+            const tab = tabsMap.get(tabId)!;
             tab.icon = icon;
             change$.next([{cause: TabsChangeCause.TAB_ICON_CHANGED, tab}]);
         },

@@ -21,17 +21,17 @@ const config: ForgeConfig = {
                     {
                         name: 'main_window',
                         html: './src/windows/main/index.html',
-                        js: './src/windows/main/renderer.ts',
+                        js: './src/windows/main/renderer.tsx',
                         preload: {
-                            js: './src/windows/main/preload.ts',
+                            js: './src/windows/main/preload.tsx',
                         },
                     },
                     {
                         name: 'settings_window',
                         html: './src/windows/settings/settings.html',
-                        js: './src/windows/settings/renderer.ts',
+                        js: './src/windows/settings/renderer.tsx',
                         preload: {
-                            js: './src/windows/settings/preload.ts',
+                            js: './src/windows/settings/preload.tsx',
                         },
                     },
                 ],

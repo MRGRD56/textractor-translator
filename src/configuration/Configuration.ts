@@ -34,6 +34,6 @@ export interface Configuration {
         source: string;
         target: string;
     };
-    transformOriginal?: (sentence: Sentence) => MultiTransformedText;
-    transformTranslated?: (translatedText: string, originalSentence: Sentence) => OptionalTransformedText;
+    transformOriginal?(sentence: Sentence): MultiTransformedText;
+    transformTranslated?(translatedText: string, originalSentence: Sentence): OptionalTransformedText;
 }

@@ -1,5 +1,6 @@
 import tabsCore, {createTab, Tab, Tabs, TabsApi} from '../../utils/tabsCore';
 
+/** @deprecated */
 export const initTabs = (element: HTMLElement, initialTabs: Tabs): TabsApi => {
     element.classList.add('tabs');
 

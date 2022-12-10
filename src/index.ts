@@ -2,6 +2,7 @@ import {app, BrowserWindow, ipcMain} from 'electron';
 import {createMainWindow} from './windows/main/initMain';
 import {createSettingsWindow} from './windows/settings/initSettings';
 import initElectronStore from './electron-store/initElectronStore';
+import initTabsContextMenu from './windows/settings/profiles/initTabsContextMenu';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -32,6 +33,7 @@ app.on('ready', () => {
     const mainWindow = createMainWindow();
 
     initElectronStore();
+    initTabsContextMenu();
 
     ipcMain.handle('main-window.close', () => {
         mainWindow.close();

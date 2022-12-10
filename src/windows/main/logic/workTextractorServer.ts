@@ -3,22 +3,26 @@ import {Configuration, OptionalTransformedText, Sentence} from '../../../configu
 import getTranslator from '../../../translation/getTranslator';
 import Store from 'electron-store';
 import getConfiguration from '../../../configuration/getConfiguration';
-import {CONFIG_SOURCE_KEY} from '../../../constants/store-keys';
+import {SAVED_PROFILES_KEY} from '../../../constants/store-keys';
+import SavedProfiles from '../../settings/profiles/SavedProfiles';
+import indexArrayBy from '../../../utils/indexArrayBy';
+import {COMMON_PROFILE_ID} from '../../settings/profiles/constants';
+import getProfileConfig from '../../../configuration/getProfileConfig';
 
 const translateText = (originalText: string, config: Configuration): Promise<string> => {
     return getTranslator(config.translator)?.translate(originalText, config.languages.source, config.languages.target);
 };
 
-const showSentence = (config: Configuration, textContainer: HTMLElement, textContainerWrapper: HTMLElement, originalText: OptionalTransformedText, translatedTextPromise: Promise<string>, originalSentence: Sentence): void => {
+const showSentence = (config: Configuration, textContainer: HTMLElement, textContainerWrapper: HTMLElement, originalText: OptionalTransformedText, translatedTextPromise: Promise<string> | undefined, originalSentence: Sentence): void => {
     const originalTextDisplayed = typeof originalText === 'object' ? originalText.displayed : originalText;
     const isHtml = typeof originalText === 'object' && Boolean(originalText.isHtml);
 
     const sentenceOriginalElement = document.createElement('div');
     sentenceOriginalElement.classList.add('sentence-original');
     if (isHtml) {
-        sentenceOriginalElement.innerHTML = originalTextDisplayed;
+        sentenceOriginalElement.innerHTML = originalTextDisplayed as string;
     } else {
-        sentenceOriginalElement.textContent = originalTextDisplayed;
+        sentenceOriginalElement.textContent = originalTextDisplayed as string;
     }
 
     const sentenceTranslatedElement = document.createElement('div');
@@ -28,7 +32,7 @@ const showSentence = (config: Configuration, textContainer: HTMLElement, textCon
     if (translatedTextPromise) {
         translatedTextPromise
             .then(translatedText => {
-                const transformedText = config.transformTranslated(translatedText, originalSentence);
+                const transformedText = config.transformTranslated?.(translatedText, originalSentence);
 
                 if (transformedText === undefined) {
                     sentenceTranslatedElement.remove();
@@ -67,17 +71,13 @@ const showSentence = (config: Configuration, textContainer: HTMLElement, textCon
 
 const store = new Store();
 
-const getConfig = () => getConfiguration(store.get(CONFIG_SOURCE_KEY) as string);
-
 const workTextractorServer = () => {
     const textContainerWrapper = document.getElementById('text-wrapper')!;
     const textContainer = document.getElementById('text')!;
 
     runTextractorServer((sentence) => {
-        const {meta} = sentence;
-
-        const config = getConfig();
-        const multiTransformedText = config.transformOriginal(sentence);
+        const config = getProfileConfig(store);
+        const multiTransformedText = config.transformOriginal?.(sentence);
         const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
 
         for (const transformedText of transformedTexts) {

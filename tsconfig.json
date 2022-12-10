@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",
+    "jsx": "react-jsx",
     "allowJs": true,
     "module": "commonjs",
     "skipLibCheck": true,
@@ -13,7 +14,8 @@
     "resolveJsonModule": true,
     "paths": {
       "*": ["node_modules/*"]
-    }
+    },
+    "strict": true
   },
   "include": ["src/**/*"]
 }

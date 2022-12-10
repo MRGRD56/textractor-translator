@@ -1,0 +1,1 @@
+export const COMMON_PROFILE_ID = 'common';

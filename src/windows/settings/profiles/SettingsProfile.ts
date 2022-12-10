@@ -4,3 +4,5 @@ interface SettingsProfile {
     isPredefined?: boolean;
     configSource: string;
 }
+
+export default SettingsProfile;
