@@ -9,7 +9,8 @@ import {v4} from 'uuid';
 import {savedProfilesToTabs, tabsToSavedProfiles} from './profiles/profileTabConversions';
 import ProfileSourceEditor from './components/ProfileSourceEditor';
 import SettingsProfile from './profiles/SettingsProfile';
-import { COMMON_PROFILE_ID } from './profiles/constants';
+import {COMMON_PROFILE_ID, NEW_PROFILE_NAME} from './profiles/constants';
+import {deleteProfile} from './utils/profiles';
 
 const initialSavedProfiles = ((): SavedProfiles => {
     const firstProfileId = v4();
@@ -35,7 +36,7 @@ config.translator = 'GOOGLE_TRANSLATE';
                 configSource: `
 config.transformOriginal = ({text, meta}) => {
     return text;
-};`.trim()
+};`.trim(),
             }
         ],
         activeProfileId: firstProfileId,
@@ -88,28 +89,50 @@ const Settings: FC = () => {
     });
 
     const handleTabsChange = useCallback((tabs: Tabs, changes: TabsChange[]) => {
-        const newSavedProfiles = tabsToSavedProfiles(savedProfiles!, tabs);
-        store.set(SAVED_PROFILES_KEY, newSavedProfiles);
-        setSavedProfiles(newSavedProfiles);
-    }, [savedProfiles]);
+        store.get<SavedProfiles>(SAVED_PROFILES_KEY).then((savedProfiles) => {
+            savedProfiles ??= initialSavedProfiles;
+
+            const closedEmptyTabIds = changes
+                .map(change => {
+                    if (change.cause !== TabsChangeCause.TAB_CLOSED) {
+                        return;
+                    }
+
+                    if (change.tab.name === NEW_PROFILE_NAME && !change.tab.isActivated) {
+                        const profile = savedProfiles.profiles.find(profile => profile.id === change.tab.id);
+                        if (profile && !profile.configSource?.trim()) {
+                            return change.tab.id;
+                        }
+                    }
+                })
+                .filter(Boolean) as string[];
+
+            let newSavedProfiles = tabsToSavedProfiles(savedProfiles, tabs);
+            if (closedEmptyTabIds.length) {
+                newSavedProfiles = deleteProfile(newSavedProfiles, closedEmptyTabIds)
+            }
+
+            store.set(SAVED_PROFILES_KEY, newSavedProfiles);
+            console.log('set SAVED_PROFILES handleTabsChange', {newSavedProfiles})
+            setSavedProfiles(newSavedProfiles);
+        });
+    }, []);
 
     const handleProfileActivate = useCallback((profileId: string) => {
-        setSavedProfiles(savedProfiles => {
-            if (!savedProfiles) {
-                return savedProfiles;
-            }
+        if (!savedProfiles) {
+            return savedProfiles;
+        }
 
-            const newSavedProfiles = {
-                ...savedProfiles,
-                activeProfileId: profileId
-            }
+        const newSavedProfiles = {
+            ...savedProfiles,
+            activeProfileId: profileId
+        }
 
-            store.set(SAVED_PROFILES_KEY, newSavedProfiles)
-
-            return newSavedProfiles;
-        });
-        // TODO
-    }, []);
+        setSavedProfiles(newSavedProfiles);
+        store.set(SAVED_PROFILES_KEY, newSavedProfiles)
+        console.log('set SAVED_PROFILES handleProfileActivate', {newSavedProfiles})
+        tabsApi?.setTabsObject(savedProfilesToTabs(newSavedProfiles));
+    }, [savedProfiles, tabsApi]);
 
     const handleActiveProfileSourceChange = useCallback((profileId: string, profileSource: string) => {
         setSavedProfiles(savedProfiles => {
@@ -132,6 +155,7 @@ const Settings: FC = () => {
             };
 
             store.set(SAVED_PROFILES_KEY, newSavedProfiles);
+            console.log('set SAVED_PROFILES handleActiveProfileSourceChange', {newSavedProfiles})
             return newSavedProfiles;
         });
     }, []);

@@ -1,4 +1,5 @@
 import tabsCore, {createTab, Tab, Tabs, TabsApi} from '../../utils/tabsCore';
+import {NEW_PROFILE_NAME} from './profiles/constants';
 
 /** @deprecated */
 export const initTabs = (element: HTMLElement, initialTabs: Tabs): TabsApi => {
@@ -62,7 +63,7 @@ export const initTabs = (element: HTMLElement, initialTabs: Tabs): TabsApi => {
         newTabElement.classList.add('tab', 'new-tab');
         newTabElement.innerHTML = '<span class="material-symbols-rounded">add</span>';
         newTabElement.addEventListener('click', () => {
-            const newTab = tabsApi.addTab(createTab('New profile'));
+            const newTab = tabsApi.addTab(createTab(NEW_PROFILE_NAME));
             tabsApi.setActiveTabId(newTab.id);
         });
         element.append(newTabElement);

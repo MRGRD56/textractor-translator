@@ -1,4 +1,4 @@
-import React, {FC, MouseEventHandler} from 'react';
+import React, {FC, MouseEventHandler, useState} from 'react';
 import {Tab, TabsApi} from '../../../../utils/tabsCore';
 import classNames from 'classnames';
 import type {IpcRenderer} from 'electron';
@@ -13,6 +13,8 @@ interface Props {
 }
 
 const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) => {
+    const [isRenaming, setIsRenaming] = useState<boolean>(false);
+
     const handleTabClick = () => {
         api.setActiveTabId(tab.id);
     };
@@ -44,7 +46,7 @@ const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) 
                     onMakeActiveProfile()
                     break;
                 case 'rename':
-                    // TODO
+                    setIsRenaming(true);
                     break;
                 }
             });
@@ -62,7 +64,11 @@ const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) 
                     <span className="material-symbols-rounded">{tab.icon.name}</span>
                 </div>
             )}
-            {tab.name}
+            {isRenaming ? (
+                <div className="tab-renaming-name" contentEditable>{tab.name}</div>
+            ) : (
+                <div>{tab.name}</div>
+            )}
             {tab.isPinned ? (
                 <div className="tab-action tab-pin">
                     <span className="material-symbols-rounded">push_pin</span>

@@ -3,6 +3,7 @@ import {createTab, Tab, Tabs, TabsApi, TabsChange} from '../../../../utils/tabsC
 import {useDidMount} from 'rooks';
 import PanelTab from './PanelTab';
 import useAutoRef from '../../../../utils/useAutoRef';
+import {NEW_PROFILE_NAME} from '../../profiles/constants';
 
 interface Props {
     api: TabsApi;
@@ -23,7 +24,7 @@ const TabsPanel: FC<Props> = ({api, onChange, onProfileActivate}) => {
     });
 
     const handleNewTabClick = () => {
-        const newTab = api.addTab(createTab('New profile'));
+        const newTab = api.addTab(createTab(NEW_PROFILE_NAME));
         api.setActiveTabId(newTab.id);
     };
 

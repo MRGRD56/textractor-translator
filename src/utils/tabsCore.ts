@@ -34,6 +34,7 @@ export const createTab = (name: string, options: Omit<Tab, 'id' | 'name' | 'inde
 
 export enum TabsChangeCause {
     INIT = 'INIT',
+    TABS_CHANGED = 'TABS_CHANGED',
     ACTIVE_TAB_CHANGED = 'ACTIVE_TAB_CHANGED',
     TAB_ADDED = 'TAB_ADDED',
     TAB_CLOSED = 'TAB_CLOSED',
@@ -50,7 +51,7 @@ export enum TabsChangeCause {
 // }
 
 export type TabsChange = {
-    cause: TabsChangeCause.INIT;
+    cause: TabsChangeCause.INIT | TabsChangeCause.TABS_CHANGED;
 } | {
     cause: TabsChangeCause.ACTIVE_TAB_CHANGED;
     activeTabId: string;
@@ -68,6 +69,7 @@ export type TabsChange = {
 export interface TabsApi {
     getTabs(): Tab[];
     getTabsObject(): Tabs;
+    setTabsObject(tabs: Tabs): void;
     getTabsMap(): Map<string, Tab>;
     getActiveTab(): Tab | undefined;
     getActiveTabId(): string | undefined;
@@ -98,13 +100,13 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
     const nextIndexRef = ref(i + 1);
 
     const activeIdRef = ref<string | undefined>(initialTabs.activeId || tabs[0]?.id);
-    const tabsMap = indexArrayBy(tabs, 'id');
+    const tabsMapRef = ref<Map<string, Tab>>(indexArrayBy(tabs, 'id'));
 
     const change$ = new ReplaySubject<TabsChange[]>();
 
     const api: TabsApi = {
         getTabs(): Tab[] {
-            return getMapValues(tabsMap).sort((a, b) => {
+            return getMapValues(tabsMapRef.current).sort((a, b) => {
                 return a.index - b.index;
             });
         },
@@ -114,12 +116,17 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
                 activeId: this.getActiveTabId()
             };
         },
+        setTabsObject(tabs: Tabs): void {
+            tabsMapRef.current = indexArrayBy(tabs.list, 'id');
+            activeIdRef.current = tabs.activeId;
+            change$.next([{cause: TabsChangeCause.TABS_CHANGED}]);
+        },
         getTabsMap(): Map<string, Tab> {
-            return tabsMap;
+            return tabsMapRef.current;
         },
         getActiveTab(): Tab | undefined {
             if (activeIdRef.current) {
-                return tabsMap.get(activeIdRef.current);
+                return tabsMapRef.current.get(activeIdRef.current);
             }
         },
         getActiveTabId(): string | undefined {
@@ -133,22 +140,22 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             return activeIdRef.current === tabId;
         },
         getTab(tabId: string): Tab {
-            return tabsMap.get(tabId)!;
+            return tabsMapRef.current.get(tabId)!;
         },
         addTab(tab: Tab) {
             const newTab = {
                 ...tab,
                 index: (tab.index == null || tab.index < 0) ? nextIndexRef.current++ : tab.index
             };
-            tabsMap.set(tab.id, newTab);
+            tabsMapRef.current.set(tab.id, newTab);
             change$.next([{cause: TabsChangeCause.TAB_ADDED, tab}]);
             return newTab;
         },
         closeTab(tabId: string): Tab {
             const changes: TabsChange[] = [];
 
-            const tab = tabsMap.get(tabId)!;
-            tabsMap.delete(tabId);
+            const tab = tabsMapRef.current.get(tabId)!;
+            tabsMapRef.current.delete(tabId);
             if (activeIdRef.current === tab.id) {
                 const tabsList = this.getTabs();
                 activeIdRef.current = tabsList[tabsList.length - 1]?.id;
@@ -159,27 +166,27 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             return tab;
         },
         renameTab(tabId: string, newName: string): Tab {
-            const tab = tabsMap.get(tabId)!;
+            const tab = tabsMapRef.current.get(tabId)!;
             tab.name = newName;
             change$.next([{cause: TabsChangeCause.TAB_RENAMED, tab}]);
             return tab;
         },
         getTabIndex(tabId: string): number {
-            const tab = tabsMap.get(tabId)!;
+            const tab = tabsMapRef.current.get(tabId)!;
             return tab.index;
         },
         setTabIndex(tabId: string, index: number) {
-            const tab = tabsMap.get(tabId)!;
+            const tab = tabsMapRef.current.get(tabId)!;
             tab.index = index;
             change$.next([{cause: TabsChangeCause.TAB_MOVED, tab}]);
         },
         setTabClassName(tabId: string, className: string | undefined) {
-            const tab = tabsMap.get(tabId)!;
+            const tab = tabsMapRef.current.get(tabId)!;
             tab.className = className;
             change$.next([{cause: TabsChangeCause.TAB_CLASSNAME_CHANGED, tab}]);
         },
         setTabIcon(tabId: string, icon: Tab['icon']) {
-            const tab = tabsMap.get(tabId)!;
+            const tab = tabsMapRef.current.get(tabId)!;
             tab.icon = icon;
             change$.next([{cause: TabsChangeCause.TAB_ICON_CHANGED, tab}]);
         },
