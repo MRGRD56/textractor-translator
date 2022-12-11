@@ -1,7 +1,9 @@
-import React, {FC, MouseEventHandler, useState} from 'react';
+import React, {FC, useCallback, useState} from 'react';
 import {Tab, TabsApi} from '../../../../utils/tabsCore';
 import classNames from 'classnames';
 import type {IpcRenderer} from 'electron';
+import AutosizeInput from 'react-input-autosize';
+import useCallbackRef from '../../../../hooks/useCallbackRef';
 
 const ipcRenderer: IpcRenderer = (window as any).nodeApi.ipcRenderer;
 
@@ -14,9 +16,16 @@ interface Props {
 
 const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) => {
     const [isRenaming, setIsRenaming] = useState<boolean>(false);
+    const [newProfileName, setNewProfileName] = useState<string>();
+
+    const [tabRenameInputRef, tabRenameInputRefCallback] = useCallbackRef<HTMLInputElement>((tabRenameInput) => {
+        tabRenameInput.focus();
+    });
 
     const handleTabClick = () => {
-        api.setActiveTabId(tab.id);
+        if (!isActive) {
+            api.setActiveTabId(tab.id);
+        }
     };
 
     const handleTabAuxClick: React.MouseEventHandler<HTMLElement> = (event) => {
@@ -46,11 +55,50 @@ const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) 
                     onMakeActiveProfile()
                     break;
                 case 'rename':
+                    setNewProfileName(tab.name);
                     setIsRenaming(true);
                     break;
                 }
             });
     };
+
+    const confirmProfileRename = useCallback((newName: string, isBlur: boolean) => {
+        if (!isRenaming) {
+            return;
+        }
+
+        if (!newName?.trim()) {
+            if (isBlur) {
+                setIsRenaming(false);
+            }
+
+            return;
+        }
+
+        api.renameTab(tab.id, newName.trim());
+
+        setIsRenaming(false);
+    }, [api, isRenaming, tab]);
+
+    const handleProfileNameInputBlur = useCallback<React.FocusEventHandler<HTMLInputElement>>((event) => {
+        if (!isRenaming) {
+            return;
+        }
+
+        confirmProfileRename(event.currentTarget.value, true);
+    }, [isRenaming, confirmProfileRename]);
+
+    const handleProfileNameInputKeyDown = useCallback<React.KeyboardEventHandler<HTMLInputElement>>((event) => {
+        if (!isRenaming) {
+            return;
+        }
+
+        if (event.key === 'Enter') {
+            confirmProfileRename(event.currentTarget.value, false);
+        } else if (event.key === 'Escape') {
+            setIsRenaming(false);
+        }
+    }, [isRenaming, confirmProfileRename]);
 
     return (
         <div
@@ -65,7 +113,14 @@ const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) 
                 </div>
             )}
             {isRenaming ? (
-                <div className="tab-renaming-name" contentEditable>{tab.name}</div>
+                <AutosizeInput
+                    inputRef={tabRenameInputRefCallback}
+                    className="tab-renaming-name"
+                    value={newProfileName}
+                    onChange={event => setNewProfileName(event.currentTarget.value)}
+                    onBlur={handleProfileNameInputBlur}
+                    onKeyDown={handleProfileNameInputKeyDown}
+                />
             ) : (
                 <div>{tab.name}</div>
             )}

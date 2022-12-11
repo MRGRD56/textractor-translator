@@ -3,7 +3,7 @@ import React, {FC, useEffect} from 'react';
 // eslint-disable-next-line
 import configurationDeclarations from "!!raw-loader!../../../configuration/Configuration";
 import * as monaco from 'monaco-editor';
-import SettingsProfile from '../profiles/SettingsProfile';
+import SavedProfile from '../profiles/SavedProfile';
 import {COMMON_PROFILE_ID} from '../profiles/constants';
 
 const initializeMonacoTypes = (isCommon: boolean) => {
@@ -34,7 +34,7 @@ declare const commonConfig: Configuration;
 };
 
 interface Props {
-    profile: SettingsProfile;
+    profile: SavedProfile;
     onSourceChange: (profileId: string, profileSource: string) => void;
 }
 

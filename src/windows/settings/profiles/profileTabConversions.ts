@@ -1,7 +1,7 @@
 import SavedProfiles from './SavedProfiles';
 import {Tab, Tabs} from '../../../utils/tabsCore';
 import indexArrayBy from '../../../utils/indexArrayBy';
-import SettingsProfile from './SettingsProfile';
+import SavedProfile from './SavedProfile';
 
 export const iconActiveProfile: Tab['icon'] = {
     className: 'tab-icon-blue',
@@ -11,6 +11,17 @@ export const iconActiveProfile: Tab['icon'] = {
 export const iconCommonProfile: Tab['icon'] = {
     className: 'tab-icon-yellow',
     name: 'star'
+};
+
+export const profileToTab = (profile: SavedProfile, isActiveProfile: boolean, tabIndex  = -1): Tab => {
+    return {
+        id: profile.id,
+        name: profile.name,
+        icon: profile.isPredefined ? iconCommonProfile : isActiveProfile ? iconActiveProfile : undefined,
+        index: tabIndex,
+        isRenameable: !profile.isPredefined,
+        isActivated: isActiveProfile
+    };
 };
 
 export const savedProfilesToTabs = (savedProfiles: SavedProfiles): Tabs => {
@@ -26,14 +37,7 @@ export const savedProfilesToTabs = (savedProfiles: SavedProfiles): Tabs => {
 
         const isActiveProfile = tabId === activeProfileId;
 
-        return {
-            id: tabId,
-            name: profile.name,
-            icon: profile.isPredefined ? iconCommonProfile : isActiveProfile ? iconActiveProfile : undefined,
-            index,
-            isRenameable: !profile.isPredefined,
-            isActivated: profile.id === activeProfileId
-        };
+        return profileToTab(profile, isActiveProfile, index);
     }).filter(Boolean) as Tab[];
 
     return {
@@ -43,9 +47,16 @@ export const savedProfilesToTabs = (savedProfiles: SavedProfiles): Tabs => {
 };
 
 export const tabsToSavedProfiles = (savedProfiles: SavedProfiles, tabs: Tabs): SavedProfiles => {
+    const newTabsMap = indexArrayBy(tabs.list, 'id');
+
     return {
         profiles: [
-            ...savedProfiles.profiles,
+            ...savedProfiles.profiles.map(profile => {
+                return {
+                    ...profile,
+                    name: newTabsMap.get(profile.id)?.name ?? profile.name
+                };
+            }),
             ...tabs.list
                 .filter(tab => {
                     return !savedProfiles.profiles.some(profile => profile.id === tab.id);
@@ -55,7 +66,7 @@ export const tabsToSavedProfiles = (savedProfiles: SavedProfiles, tabs: Tabs): S
                         id: tab.id,
                         name: tab.name,
                         configSource: ''
-                    } as SettingsProfile;
+                    } as SavedProfile;
                 })
         ],
         activeProfileId: savedProfiles.activeProfileId,

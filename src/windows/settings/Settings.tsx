@@ -8,7 +8,7 @@ import SavedProfiles from './profiles/SavedProfiles';
 import {v4} from 'uuid';
 import {savedProfilesToTabs, tabsToSavedProfiles} from './profiles/profileTabConversions';
 import ProfileSourceEditor from './components/ProfileSourceEditor';
-import SettingsProfile from './profiles/SettingsProfile';
+import SavedProfile from './profiles/SavedProfile';
 import {COMMON_PROFILE_ID, NEW_PROFILE_NAME} from './profiles/constants';
 import {deleteProfile} from './utils/profiles';
 
@@ -74,7 +74,7 @@ const Settings: FC = () => {
     const [savedProfiles, setSavedProfiles] = useState<SavedProfiles>();
     const [tabsApi, setTabsApi] = useState<TabsApi>();
 
-    const activeProfileTab = useMemo<SettingsProfile | undefined>(() => {
+    const activeProfileTab = useMemo<SavedProfile | undefined>(() => {
         return savedProfiles?.profiles.find(profile => {
             return profile.id === savedProfiles.tabs.activeId
         });
@@ -160,13 +160,25 @@ const Settings: FC = () => {
         });
     }, []);
 
+    const handleProfilesChange = useCallback((newSavedProfiles: SavedProfiles) => {
+        setSavedProfiles(newSavedProfiles);
+        store.set(SAVED_PROFILES_KEY, newSavedProfiles);
+        tabsApi?.setTabsObject(savedProfilesToTabs(newSavedProfiles));
+    }, [tabsApi]);
+
     if (!savedProfiles || !tabsApi) {
         return null;
     }
 
     return (
         <>
-            <TabsPanel api={tabsApi} onChange={handleTabsChange} onProfileActivate={handleProfileActivate}/>
+            <TabsPanel
+                profiles={savedProfiles}
+                api={tabsApi}
+                onChange={handleTabsChange}
+                onProfileActivate={handleProfileActivate}
+                onProfilesChange={handleProfilesChange}
+            />
             {activeProfileTab && (
                 <ProfileSourceEditor profile={activeProfileTab} onSourceChange={handleActiveProfileSourceChange}/>
             )}

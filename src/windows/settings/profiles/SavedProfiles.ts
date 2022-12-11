@@ -1,7 +1,7 @@
-import SettingsProfile from './SettingsProfile';
+import SavedProfile from './SavedProfile';
 
 interface SavedProfiles {
-    profiles: SettingsProfile[];
+    profiles: SavedProfile[];
     activeProfileId?: string;
     tabs: {
         tabIds: string[];

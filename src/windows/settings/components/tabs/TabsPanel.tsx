@@ -4,14 +4,18 @@ import {useDidMount} from 'rooks';
 import PanelTab from './PanelTab';
 import useAutoRef from '../../../../utils/useAutoRef';
 import {NEW_PROFILE_NAME} from '../../profiles/constants';
+import AllProfilesPopup from '../profiles/AllProfilesPopup';
+import SavedProfiles from '../../profiles/SavedProfiles';
 
 interface Props {
+    profiles: SavedProfiles;
     api: TabsApi;
     onChange?: (tabs: Tabs, changes: TabsChange[]) => void;
     onProfileActivate?: (profileId: string) => void;
+    onProfilesChange: (profiles: SavedProfiles) => void;
 }
 
-const TabsPanel: FC<Props> = ({api, onChange, onProfileActivate}) => {
+const TabsPanel: FC<Props> = ({profiles, api, onChange, onProfileActivate, onProfilesChange}) => {
     const [tabs, setTabs] = useState<Tabs>(api.getTabsObject());
     const onChangeRef = useAutoRef(onChange);
 
@@ -34,17 +38,22 @@ const TabsPanel: FC<Props> = ({api, onChange, onProfileActivate}) => {
 
     return (
         <div className="tabs">
-            {tabs.list.map(tab => (
-                <PanelTab
-                    key={tab.id}
-                    tab={tab}
-                    active={tab.id === tabs.activeId}
-                    api={api}
-                    onMakeActiveProfile={handleMakeActiveProfile(tab.id)}
-                />
-            ))}
-            <div className="tab new-tab" onClick={handleNewTabClick}>
-                <span className="material-symbols-rounded">add</span>
+            <div className="tabs-panel">
+                {tabs.list.map(tab => (
+                    <PanelTab
+                        key={tab.id}
+                        tab={tab}
+                        active={tab.id === tabs.activeId}
+                        api={api}
+                        onMakeActiveProfile={handleMakeActiveProfile(tab.id)}
+                    />
+                ))}
+                <div className="tab new-tab" onClick={handleNewTabClick}>
+                    <span className="material-symbols-rounded">add</span>
+                </div>
+            </div>
+            <div className="tabs-profiles">
+                <AllProfilesPopup profiles={profiles} onProfilesChange={onProfilesChange} tabsApi={api}/>
             </div>
         </div>
     );
