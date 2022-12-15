@@ -1,11 +1,11 @@
 import {BrowserWindow, ipcMain, Menu} from 'electron';
-import {Tab} from '../../../utils/tabsCore';
+import {ProfileTab} from '../../../utils/tabsCore';
 import {COMMON_PROFILE_ID} from './constants';
 
 type MenuItem = (Electron.MenuItemConstructorOptions) | (Electron.MenuItem);
 
 const initTabsContextMenu = () => {
-    ipcMain.handle('show-profile-tab-context-menu', (event, tab: Tab) => {
+    ipcMain.handle('show-profile-tab-context-menu', (event, tab: ProfileTab) => {
         return new Promise((resolve) => {
             const isActiveProfile = tab.isActivated === true;
 

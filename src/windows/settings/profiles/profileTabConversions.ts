@@ -1,19 +1,19 @@
 import SavedProfiles from './SavedProfiles';
-import {Tab, Tabs} from '../../../utils/tabsCore';
+import {ProfileTab, ProfileTabs} from '../../../utils/tabsCore';
 import indexArrayBy from '../../../utils/indexArrayBy';
 import SavedProfile from './SavedProfile';
 
-export const iconActiveProfile: Tab['icon'] = {
+export const iconActiveProfile: ProfileTab['icon'] = {
     className: 'tab-icon-blue',
     name: 'check'
 };
 
-export const iconCommonProfile: Tab['icon'] = {
+export const iconCommonProfile: ProfileTab['icon'] = {
     className: 'tab-icon-yellow',
     name: 'star'
 };
 
-export const profileToTab = (profile: SavedProfile, isActiveProfile: boolean, tabIndex  = -1): Tab => {
+export const profileToTab = (profile: SavedProfile, isActiveProfile: boolean, tabIndex  = -1): ProfileTab => {
     return {
         id: profile.id,
         name: profile.name,
@@ -24,11 +24,11 @@ export const profileToTab = (profile: SavedProfile, isActiveProfile: boolean, ta
     };
 };
 
-export const savedProfilesToTabs = (savedProfiles: SavedProfiles): Tabs => {
+export const savedProfilesToTabs = (savedProfiles: SavedProfiles): ProfileTabs => {
     const {activeProfileId, profiles} = savedProfiles;
     const profilesMap = indexArrayBy(profiles, 'id');
 
-    const tabsList: Tab[] = savedProfiles.tabs.tabIds.map((tabId, index) => {
+    const tabsList: ProfileTab[] = savedProfiles.tabs.tabIds.map((tabId, index) => {
         const profile = profilesMap.get(tabId);
 
         if (!profile) {
@@ -38,7 +38,7 @@ export const savedProfilesToTabs = (savedProfiles: SavedProfiles): Tabs => {
         const isActiveProfile = tabId === activeProfileId;
 
         return profileToTab(profile, isActiveProfile, index);
-    }).filter(Boolean) as Tab[];
+    }).filter(Boolean) as ProfileTab[];
 
     return {
         list: tabsList,
@@ -46,7 +46,7 @@ export const savedProfilesToTabs = (savedProfiles: SavedProfiles): Tabs => {
     };
 };
 
-export const tabsToSavedProfiles = (savedProfiles: SavedProfiles, tabs: Tabs): SavedProfiles => {
+export const tabsToSavedProfiles = (savedProfiles: SavedProfiles, tabs: ProfileTabs): SavedProfiles => {
     const newTabsMap = indexArrayBy(tabs.list, 'id');
 
     return {

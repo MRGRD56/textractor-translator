@@ -1,10 +1,10 @@
-import { v4 } from "uuid";
+import {v4} from 'uuid';
 import indexArrayBy from './indexArrayBy';
 import getMapValues from './getMapValues';
 import ref from './ref';
-import {ReplaySubject, Subject, Subscription} from 'rxjs';
+import {ReplaySubject, Subscription} from 'rxjs';
 
-export interface Tab {
+export interface ProfileTab {
     id: string;
     name: string;
     index: number;
@@ -18,12 +18,12 @@ export interface Tab {
     isActivated?: boolean;
 }
 
-export interface Tabs {
+export interface ProfileTabs {
     activeId?: string;
-    list: Tab[];
+    list: ProfileTab[];
 }
 
-export const createTab = (name: string, options: Omit<Tab, 'id' | 'name' | 'index'> = {}): Tab => {
+export const createTab = (name: string, options: Omit<ProfileTab, 'id' | 'name' | 'index'> = {}): ProfileTab => {
     return {
         id: v4(),
         name,
@@ -63,31 +63,46 @@ export type TabsChange = {
         TabsChangeCause.TAB_CLASSNAME_CHANGED |
         TabsChangeCause.TAB_ICON_CHANGED |
         TabsChangeCause.TAB_MOVED;
-    tab: Tab;
+    tab: ProfileTab;
 }
 
 export interface TabsApi {
-    getTabs(): Tab[];
-    getTabsObject(): Tabs;
-    setTabsObject(tabs: Tabs): void;
-    getTabsMap(): Map<string, Tab>;
-    getActiveTab(): Tab | undefined;
+    getTabs(): ProfileTab[];
+
+    getTabsObject(): ProfileTabs;
+
+    setTabsObject(tabs: ProfileTabs): void;
+
+    getTabsMap(): Map<string, ProfileTab>;
+
+    getActiveTab(): ProfileTab | undefined;
+
     getActiveTabId(): string | undefined;
+
     setActiveTabId(tabId: string): void;
+
     isTabActive(tabId: string): boolean;
-    getTab(tabId: string): Tab;
-    addTab(tab: Tab): Tab;
-    closeTab(tabId: string): Tab;
-    renameTab(tabId: string, newName: string): Tab;
+
+    getTab(tabId: string): ProfileTab;
+
+    addTab(tab: ProfileTab): ProfileTab;
+
+    closeTab(tabId: string): ProfileTab;
+
+    renameTab(tabId: string, newName: string): ProfileTab;
+
     getTabIndex(tabId: string): number;
+
     setTabIndex(tabId: string, index: number): void;
+
     setTabClassName(tabId: string, className: string | undefined): void;
-    setTabIcon(tabId: string, icon: Tab['icon']): void;
+
+    setTabIcon(tabId: string, icon: ProfileTab['icon']): void;
 
     onChange(callback: (tabsChanges: TabsChange[]) => void): Subscription;
 }
 
-const tabsCore = (initialTabs: Tabs): TabsApi => {
+const tabsCore = (initialTabs: ProfileTabs): TabsApi => {
     const {
         list: tabs
     } = initialTabs;
@@ -100,31 +115,31 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
     const nextIndexRef = ref(i + 1);
 
     const activeIdRef = ref<string | undefined>(initialTabs.activeId || tabs[0]?.id);
-    const tabsMapRef = ref<Map<string, Tab>>(indexArrayBy(tabs, 'id'));
+    const tabsMapRef = ref<Map<string, ProfileTab>>(indexArrayBy(tabs, 'id'));
 
     const change$ = new ReplaySubject<TabsChange[]>();
 
     const api: TabsApi = {
-        getTabs(): Tab[] {
+        getTabs(): ProfileTab[] {
             return getMapValues(tabsMapRef.current).sort((a, b) => {
                 return a.index - b.index;
             });
         },
-        getTabsObject(): Tabs {
+        getTabsObject(): ProfileTabs {
             return {
                 list: this.getTabs(),
                 activeId: this.getActiveTabId()
             };
         },
-        setTabsObject(tabs: Tabs): void {
+        setTabsObject(tabs: ProfileTabs): void {
             tabsMapRef.current = indexArrayBy(tabs.list, 'id');
             activeIdRef.current = tabs.activeId;
             change$.next([{cause: TabsChangeCause.TABS_CHANGED}]);
         },
-        getTabsMap(): Map<string, Tab> {
+        getTabsMap(): Map<string, ProfileTab> {
             return tabsMapRef.current;
         },
-        getActiveTab(): Tab | undefined {
+        getActiveTab(): ProfileTab | undefined {
             if (activeIdRef.current) {
                 return tabsMapRef.current.get(activeIdRef.current);
             }
@@ -139,10 +154,10 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
         isTabActive(tabId: string): boolean {
             return activeIdRef.current === tabId;
         },
-        getTab(tabId: string): Tab {
+        getTab(tabId: string): ProfileTab {
             return tabsMapRef.current.get(tabId)!;
         },
-        addTab(tab: Tab) {
+        addTab(tab: ProfileTab) {
             const newTab = {
                 ...tab,
                 index: (tab.index == null || tab.index < 0) ? nextIndexRef.current++ : tab.index
@@ -151,7 +166,7 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             change$.next([{cause: TabsChangeCause.TAB_ADDED, tab}]);
             return newTab;
         },
-        closeTab(tabId: string): Tab {
+        closeTab(tabId: string): ProfileTab {
             const changes: TabsChange[] = [];
 
             const tab = tabsMapRef.current.get(tabId)!;
@@ -165,7 +180,7 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             change$.next(changes);
             return tab;
         },
-        renameTab(tabId: string, newName: string): Tab {
+        renameTab(tabId: string, newName: string): ProfileTab {
             const tab = tabsMapRef.current.get(tabId)!;
             tab.name = newName;
             change$.next([{cause: TabsChangeCause.TAB_RENAMED, tab}]);
@@ -185,7 +200,7 @@ const tabsCore = (initialTabs: Tabs): TabsApi => {
             tab.className = className;
             change$.next([{cause: TabsChangeCause.TAB_CLASSNAME_CHANGED, tab}]);
         },
-        setTabIcon(tabId: string, icon: Tab['icon']) {
+        setTabIcon(tabId: string, icon: ProfileTab['icon']) {
             const tab = tabsMapRef.current.get(tabId)!;
             tab.icon = icon;
             change$.next([{cause: TabsChangeCause.TAB_ICON_CHANGED, tab}]);

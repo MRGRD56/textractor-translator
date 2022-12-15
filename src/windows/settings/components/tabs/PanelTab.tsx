@@ -1,5 +1,5 @@
 import React, {FC, useCallback, useState} from 'react';
-import {Tab, TabsApi} from '../../../../utils/tabsCore';
+import {ProfileTab, TabsApi} from '../../../../utils/tabsCore';
 import classNames from 'classnames';
 import type {IpcRenderer} from 'electron';
 import AutosizeInput from 'react-input-autosize';
@@ -8,7 +8,7 @@ import useCallbackRef from '../../../../hooks/useCallbackRef';
 const ipcRenderer: IpcRenderer = (window as any).nodeApi.ipcRenderer;
 
 interface Props {
-    tab: Tab;
+    tab: ProfileTab;
     active: boolean;
     api: TabsApi;
     onMakeActiveProfile: () => void;

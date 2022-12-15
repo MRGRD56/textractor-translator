@@ -1,5 +1,5 @@
 import React, {FC, useCallback, useState} from 'react';
-import {createTab, Tab, Tabs, TabsApi, TabsChange} from '../../../../utils/tabsCore';
+import {createTab, ProfileTab, ProfileTabs, TabsApi, TabsChange} from '../../../../utils/tabsCore';
 import {useDidMount} from 'rooks';
 import PanelTab from './PanelTab';
 import useAutoRef from '../../../../utils/useAutoRef';
@@ -10,13 +10,13 @@ import SavedProfiles from '../../profiles/SavedProfiles';
 interface Props {
     profiles: SavedProfiles;
     api: TabsApi;
-    onChange?: (tabs: Tabs, changes: TabsChange[]) => void;
+    onChange?: (tabs: ProfileTabs, changes: TabsChange[]) => void;
     onProfileActivate?: (profileId: string) => void;
     onProfilesChange: (profiles: SavedProfiles) => void;
 }
 
 const TabsPanel: FC<Props> = ({profiles, api, onChange, onProfileActivate, onProfilesChange}) => {
-    const [tabs, setTabs] = useState<Tabs>(api.getTabsObject());
+    const [tabs, setTabs] = useState<ProfileTabs>(api.getTabsObject());
     const onChangeRef = useAutoRef(onChange);
 
     useDidMount(() => {

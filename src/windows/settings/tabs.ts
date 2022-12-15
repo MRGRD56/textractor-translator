@@ -1,13 +1,13 @@
-import tabsCore, {createTab, Tab, Tabs, TabsApi} from '../../utils/tabsCore';
+import tabsCore, {createTab, ProfileTab, ProfileTabs, TabsApi} from '../../utils/tabsCore';
 import {NEW_PROFILE_NAME} from './profiles/constants';
 
 /** @deprecated */
-export const initTabs = (element: HTMLElement, initialTabs: Tabs): TabsApi => {
+export const initTabs = (element: HTMLElement, initialTabs: ProfileTabs): TabsApi => {
     element.classList.add('tabs');
 
     const tabsApi = tabsCore(initialTabs);
 
-    const renderTab = (tab: Tab, newTabElement: HTMLElement) => {
+    const renderTab = (tab: ProfileTab, newTabElement: HTMLElement) => {
         const tabElement = document.createElement('div');
         tabElement.classList.add('tab');
         if (tabsApi.isTabActive(tab.id)) {

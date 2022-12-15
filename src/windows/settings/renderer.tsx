@@ -1,3 +1,4 @@
+import '../../../node_modules/antd/dist/antd.min.css'
 import '../../../node_modules/material-symbols/index.css';
 import '../../style/basic.scss';
 import './styles/settings.scss';
