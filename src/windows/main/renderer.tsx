@@ -8,24 +8,13 @@
 import '../../../node_modules/material-symbols/index.css';
 import '../../style/basic.scss';
 import './styles/main.scss';
+import watchCtrl from './utils/watchCtrl';
 
 const initializeScaling = () => {
     const body = document.body;
     const textContainer: HTMLElement = document.querySelector('.text-container')!;
 
-    const isCtrlRef = {current: false};
-
-    body.addEventListener('keydown', event => {
-        if (event.key === 'Control') {
-            isCtrlRef.current = true;
-        }
-    });
-
-    body.addEventListener('keyup', event => {
-        if (event.key === 'Control') {
-            isCtrlRef.current = false;
-        }
-    });
+    const isCtrlRef = watchCtrl();
 
     body.addEventListener('wheel', event => {
         if (!isCtrlRef.current) {

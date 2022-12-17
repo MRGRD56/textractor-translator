@@ -1,7 +1,8 @@
-import React, {FC, useState} from 'react';
+import React, {FC} from 'react';
 import {Button, Input, Space, Typography} from 'antd';
 import {CheckOutlined, CloseOutlined, FolderOpenFilled} from '@ant-design/icons';
 import {TextractorStatus} from './types';
+import showOpenDialogSync from '../../utils/showOpenDialogSync';
 
 interface Props {
     label: string;
@@ -14,6 +15,26 @@ interface Props {
 const TextractorPathPicker: FC<Props> = ({label, example, value, onChange, status}) => {
     const handleChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.currentTarget.value);
+    };
+
+    const handlePickPath = async () => {
+        const path = await showOpenDialogSync({
+            properties: ['openFile'],
+            filters: [
+                {
+                    name: 'Textractor.exe',
+                    extensions: ['exe']
+                },
+                {
+                    name: 'All Files',
+                    extensions: ['*']
+                }
+            ]
+        });
+
+        if (path && path[0]) {
+            onChange(path[0]);
+        }
     };
 
     return (
@@ -31,7 +52,7 @@ const TextractorPathPicker: FC<Props> = ({label, example, value, onChange, statu
                     onChange={handleChangeText}
                     readOnly
                 />
-                <Button icon={<FolderOpenFilled />} />
+                <Button icon={<FolderOpenFilled />} onClick={handlePickPath}/>
             </Input.Group>
         </div>
     );

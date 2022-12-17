@@ -3,6 +3,8 @@ import {createMainWindow} from './windows/main/initMain';
 import {createSettingsWindow} from './windows/settings/initSettings';
 import initElectronStore from './electron-store/initElectronStore';
 import initTabsContextMenu from './windows/settings/profiles/initTabsContextMenu';
+import listenRendererRequests from './utils/listenRendererRequests';
+import listenMainWindowRequests from './utils/listenMainWindowRequests';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -34,16 +36,8 @@ app.on('ready', () => {
 
     initElectronStore();
     initTabsContextMenu();
-
-    ipcMain.handle('main-window.close', () => {
-        mainWindow.close();
-    });
-    ipcMain.handle('main-window.minimize', () => {
-        mainWindow.minimize();
-    });
-    ipcMain.handle('open-settings-window', () => {
-        createSettingsWindow();
-    });
+    listenMainWindowRequests(mainWindow);
+    listenRendererRequests();
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

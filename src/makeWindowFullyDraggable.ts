@@ -1,7 +1,9 @@
 import {BrowserWindow} from 'electron';
 
-const VM_MOUSEMOVE = 0x0200;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
-const WM_LBUTTONUP = 0x0202;   // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove
+const WM_MOUSEMOVE = 0x0200;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove
+const WM_LBUTTONUP = 0x0202;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
+
+const MK_LBUTTON = 0x0001;
 
 const makeWindowFullyDraggable = (browserWindow: BrowserWindow): void => {
     const initialPos = {
@@ -15,20 +17,17 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow): void => {
 
     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
         dragging = false;
-
-        // const currentBounds = browserWindow.getBounds();
-        //
-        // browserWindow.setBounds({
-        //     x: ,
-        //     y: y + browserWindow.getPosition()[1] - initialPos.y,
-        //     height: initialPos.height,
-        //     width: initialPos.width,
-        // });
     });
     browserWindow.hookWindowMessage(
-        VM_MOUSEMOVE,
-        (_wParam: Buffer, lParam: Buffer) => {
+        WM_MOUSEMOVE,
+        (wParam: Buffer, lParam: Buffer) => {
             if (!browserWindow) {
+                return;
+            }
+
+            const wParamNumber: number = wParam.readInt16LE(0);
+
+            if (!(wParamNumber & MK_LBUTTON)) {
                 return;
             }
 
