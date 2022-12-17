@@ -5,10 +5,12 @@ import SettingsTextractor from './tabs/SettingsTextractor';
 import {ElectronStore} from '../../electron-store/electronStoreShared';
 import {useDidMount} from 'rooks';
 import {StoreKeys} from '../../constants/store-keys';
+import SettingsAppearance from './tabs/SettingsAppearance';
 
 enum SettingsTab {
     PROFILES = 'PROFILES',
-    TEXTRACTOR = 'TEXTRACTOR'
+    TEXTRACTOR = 'TEXTRACTOR',
+    APPEARANCE = 'APPEARANCE'
 }
 
 const tabsItems: TabsProps['items'] = [
@@ -21,6 +23,11 @@ const tabsItems: TabsProps['items'] = [
         key: SettingsTab.TEXTRACTOR,
         label: 'Textractor',
         children: <SettingsTextractor/>
+    },
+    {
+        key: SettingsTab.APPEARANCE,
+        label: 'Appearance',
+        children: <SettingsAppearance/>
     }
 ];
 

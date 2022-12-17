@@ -17,6 +17,15 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow): void => {
 
     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
         dragging = false;
+
+        // const currentBounds = browserWindow.getBounds();
+        //
+        // browserWindow.setBounds({
+        //     x: ,
+        //     y: y + browserWindow.getPosition()[1] - initialPos.y,
+        //     height: initialPos.height,
+        //     width: initialPos.width,
+        // });
     });
     browserWindow.hookWindowMessage(
         WM_MOUSEMOVE,
