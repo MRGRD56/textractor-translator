@@ -1,8 +1,9 @@
 import React, {FC} from 'react';
-import {Button, Input, Space, Typography} from 'antd';
-import {CheckOutlined, CloseOutlined, FolderOpenFilled} from '@ant-design/icons';
+import {Button, Input, Space} from 'antd';
+import {FolderOpenFilled} from '@ant-design/icons';
 import {TextractorStatus} from './types';
 import showOpenDialogSync from '../../utils/showOpenDialogSync';
+import TextractorStatusIcon from '../../components/TextractorStatusIcon';
 
 interface Props {
     label: string;
@@ -41,8 +42,7 @@ const TextractorPathPicker: FC<Props> = ({label, example, value, onChange, statu
         <div>
             <Space>
                 <div>{label}</div>
-                {status === TextractorStatus.SUCCESS && <Typography.Text type="success"><CheckOutlined /></Typography.Text>}
-                {status === TextractorStatus.ERROR && <Typography.Text type="danger"><CloseOutlined /></Typography.Text>}
+                <TextractorStatusIcon status={status}/>
             </Space>
             <Input.Group compact className="textractor-path-input-container">
                 <Input

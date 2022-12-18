@@ -2,7 +2,7 @@ import express from 'express';
 import nodeConsole from './nodeConsole';
 import {Sentence} from './configuration/Configuration';
 
-const SERVER_PORT = 8952;
+const SERVER_PORT = 18952;
 
 export const runTextractorServer = (onSentence: (sentence: Sentence) => void): void => {
     const expressApp = express();

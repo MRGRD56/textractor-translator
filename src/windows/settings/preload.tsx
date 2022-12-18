@@ -7,6 +7,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {TextractorStatus} from './tabs/settingsTextractor/types';
 import * as child_process from 'child_process';
+import downloadFile from '../../utils/downloadFile';
+import {v4} from 'uuid';
+import decompress = require('decompress');
+import ref, {NullableRef, Ref} from '../../utils/ref';
+
+const TTBRIDGE_EXTENSION_NAME = 'TextractorTranslatorBridge';
+const TTBRIDGE_EXTENSION_FILENAME = `${TTBRIDGE_EXTENSION_NAME}.xdll`;
+
+const EXTENSIONS_FILE = 'SavedExtensions.txt';
+
+const TTBRIDGE_X86_DOWNLOAD_URL = 'https://github.com/MRGRD56/MgTextractorExtensions/releases/download/TTBridge_v1.1.1/win_x86.zip';
+const TTBRIDGE_X64_DOWNLOAD_URL = 'https://github.com/MRGRD56/MgTextractorExtensions/releases/download/TTBridge_v1.1.1/win_x64.zip';
 
 const validateTextractorPath: ValidateTextractorPath = (exePath) => {
     if (fs.existsSync(exePath)) {
@@ -18,6 +30,23 @@ const validateTextractorPath: ValidateTextractorPath = (exePath) => {
     }
 
     return TextractorStatus.ERROR;
+};
+
+const checkExtensionFileExistence = (textractorDirectory: string): boolean => {
+    const ttbridgeLibraryPath = path.resolve(textractorDirectory, TTBRIDGE_EXTENSION_FILENAME);
+    return fs.existsSync(ttbridgeLibraryPath) && fs.statSync(ttbridgeLibraryPath).isFile();
+};
+
+const checkExtensionSpecifiedInList = (textractorDirectory: string): boolean => {
+    const extensionsFilePath = path.resolve(textractorDirectory, EXTENSIONS_FILE);
+    let extensionsFileText: string;
+    try {
+        extensionsFileText = fs.readFileSync(extensionsFilePath, 'utf8');
+    } catch (error) {
+        return false;
+    }
+
+    return new RegExp(`^(.+>)?${TTBRIDGE_EXTENSION_NAME}(>.*)?$`).test(extensionsFileText);
 };
 
 const nodeApi = {
@@ -68,6 +97,53 @@ const nodeApi = {
     }) as GetTextractorPaths,
     exec: (path: string): void => {
         child_process.execFile(path);
+    },
+    checkTTBridgeStatus: (textractorExePath: string): TextractorStatus => {
+        const textractorDirectory = path.dirname(textractorExePath);
+        if (!checkExtensionFileExistence(textractorDirectory)) {
+            return TextractorStatus.ERROR;
+        }
+
+        if (!checkExtensionSpecifiedInList(textractorDirectory)) {
+            return TextractorStatus.ERROR;
+        }
+
+        return TextractorStatus.SUCCESS;
+    },
+    installTTBridge: async (textractorExePath: string, type: 'x86' | 'x64'): Promise<TextractorStatus> => {
+        const textractorDirectory = path.dirname(textractorExePath);
+
+        const zipDownloadUrl = type === 'x86'
+            ? TTBRIDGE_X86_DOWNLOAD_URL
+            : TTBRIDGE_X64_DOWNLOAD_URL;
+
+        const tempDirectory = path.resolve('.', 'tmp');
+        const currentTempPath = path.resolve(tempDirectory, `TTBridge_${type}__${v4()}`);
+        const extensionZipPath = path.resolve(currentTempPath, `win_${type}.zip`);
+
+        fs.mkdirSync(currentTempPath, {recursive: true});
+
+        try {
+            await downloadFile(zipDownloadUrl, extensionZipPath);
+
+            const extractedFiles = await decompress(extensionZipPath, textractorDirectory);
+            if (!extractedFiles.length) {
+                throw new Error('No extracted files');
+            }
+        } finally {
+            fs.rmSync(currentTempPath, {recursive: true, force: true});
+        }
+
+        const extensionsFilePath = path.resolve(textractorDirectory, EXTENSIONS_FILE);
+        if (!checkExtensionSpecifiedInList(textractorDirectory)) {
+            if (fs.existsSync(extensionsFilePath)) {
+                fs.appendFileSync(extensionsFilePath, `${TTBRIDGE_EXTENSION_NAME}>`);
+            } else {
+                fs.writeFileSync(extensionsFilePath, `${TTBRIDGE_EXTENSION_NAME}>`, {encoding: 'utf8'})
+            }
+        }
+
+        return TextractorStatus.SUCCESS;
     }
 };
 

@@ -432,4 +432,18 @@
         }
     }
 
+    .ttbridge-heading {
+        margin-top: 0.25rem;
+        margin-bottom: -0.1rem;
+    }
+
+    .ttbridge-version-heading {
+        margin-top: 0.5rem;
+        margin-bottom: 0;
+
+        &:first-of-type {
+            margin-top: 0.25rem;
+        }
+    }
+
 }
