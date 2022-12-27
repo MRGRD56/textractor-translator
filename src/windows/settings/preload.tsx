@@ -53,6 +53,18 @@ const nodeApi = {
     store: electronStore,
     ipcRenderer,
     validateTextractorPath,
+    readFile: (path: string): string => {
+        return fs.readFileSync(path, 'utf8');
+    },
+    readFileAsync: (path: string): Promise<string> => {
+        return fs.promises.readFile(path, 'utf8');
+    },
+    getBasename: (filePath: string): string => {
+        return path.basename(filePath);
+    },
+    parsePath: (filePath: string): path.ParsedPath => {
+        return path.parse(filePath);
+    },
     getTextractorPaths: ((currentType, exePath, canAutofillAnother): TextractorPaths => {
         const anotherType = currentType === 'x86' ? 'x64' : 'x86';
 

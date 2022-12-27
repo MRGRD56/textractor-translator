@@ -5,12 +5,20 @@ import PopupProfile from './PopupProfile';
 import {createTab, TabsApi} from '../../../../utils/tabsCore';
 import {deleteProfile} from '../../utils/profiles';
 import {NEW_PROFILE_NAME} from '../../profiles/constants';
+import {SettingsNodeApi} from '../../preload';
+import showOpenDialogSync from '../../utils/showOpenDialogSync';
+import {v4} from 'uuid';
 
 interface Props {
     profiles: SavedProfiles;
     onProfilesChange: (profiles: SavedProfiles) => void;
     tabsApi: TabsApi;
 }
+
+const {
+    readFileAsync,
+    parsePath
+} = (window as any).nodeApi as SettingsNodeApi;
 
 const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -33,7 +41,8 @@ const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
 
         const handler = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            const isInsidePopup = target.closest('.settings-profiles-popup-wrapper');
+            const isInsidePopup = Boolean(target.closest('.settings-profiles-popup-wrapper, .settings-profiles-popup-part'));
+            console.log('HANDLER11', {event, target, isInsidePopup});
             if (!isInsidePopup) {
                 setIsOpen(false);
             }
@@ -65,6 +74,67 @@ const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
         closePopup();
     }, [closePopup, tabsApi]);
 
+    const handleImportProfileClick = useCallback(() => {
+        showOpenDialogSync({
+            properties: ['openFile'],
+            filters: [
+                {
+                    name: 'Config file',
+                    extensions: ['js']
+                },
+                {
+                    name: 'All Files',
+                    extensions: ['*']
+                }
+            ]
+        }).then(async (filePaths) => {
+            if (!filePaths) {
+                return;
+            }
+
+            let actualProfiles = profiles;
+
+            const newProfiles: SavedProfile[] = [];
+
+            for (const filePath of filePaths) {
+                const profileName = parsePath(filePath)?.name || 'Exported profile';
+                const profileContent = await readFileAsync(filePath);
+
+                newProfiles.push({
+                    name: profileName,
+                    configSource: profileContent,
+                    id: v4()
+                });
+            }
+
+            let profile: SavedProfile | undefined = undefined;
+            for (profile of newProfiles) {
+                actualProfiles = {
+                    ...actualProfiles,
+                    profiles: [
+                        ...actualProfiles.profiles,
+                        profile
+                    ],
+                    tabs: {
+                        ...actualProfiles.tabs,
+                        tabIds: [
+                            ...actualProfiles.tabs.tabIds,
+                            profile.id
+                        ]
+                    }
+                };
+                onProfilesChange(actualProfiles);
+
+                // const tab = tabsApi.addTab(createTab(profileName))
+            }
+
+            if (profile) {
+                tabsApi.setActiveTabId(profile.id);
+                closePopup();
+            }
+        })
+    }, [profiles, onProfilesChange, closePopup]);
+
     return (
         <div className="settings-profiles-popup-wrapper">
             <button className="icon-button profiles-button" onClick={handlePopupOpenClick}>
@@ -95,6 +165,20 @@ const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
                             </div>
                             <div className="profiles-popup-item-main-name">
                                 Add profile
+                            </div>
+                        </div>
+                    </div>
+                    <div className="profiles-popup-item" onClick={handleImportProfileClick}>
+                        <div className="profiles-popup-item-main">
+                            <div className="profiles-popup-item-main-icon-wrapper">
+                                <div className="profiles-popup-item-main-icon icon-gray">
+                                    <span className="material-symbols-rounded">
+                                        download
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="profiles-popup-item-main-name">
+                                Import profile
                             </div>
                         </div>
                     </div>

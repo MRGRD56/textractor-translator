@@ -1,8 +1,10 @@
-import React, {FC, useCallback} from 'react';
+import React, {FC, useCallback, useState} from 'react';
 import SavedProfile from '../../profiles/SavedProfile';
 import {TabsApi} from '../../../../utils/tabsCore';
 import classNames from 'classnames';
 import {profileToTab} from '../../profiles/profileTabConversions';
+import {Popconfirm} from 'antd';
+import {noop} from 'lodash';
 
 interface Props {
     tabsApi: TabsApi;
@@ -14,6 +16,8 @@ interface Props {
 }
 
 const PopupProfile: FC<Props> = ({tabsApi, profile, active: isActive, open: isOpen, onDelete, onPopupClose}) => {
+    const [isDeletePopupOpen, setIsDeletePopupOpen] = useState<boolean>(false);
+
     const isActiveTab = tabsApi.isTabActive(profile.id);
 
     const handleClick = useCallback(() => {
@@ -22,9 +26,9 @@ const PopupProfile: FC<Props> = ({tabsApi, profile, active: isActive, open: isOp
         onPopupClose();
     }, [tabsApi, isOpen, isActive, onPopupClose]);
 
-    const handleDeleteClick = () => {
+    const handleDeleteClick = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
         onDelete();
-        onPopupClose();
     };
 
     return (
@@ -56,12 +60,25 @@ const PopupProfile: FC<Props> = ({tabsApi, profile, active: isActive, open: isOp
                     {profile.name}
                 </div>
             </div>
-            <div className="profiles-popup-item-controls">
-                <div className="profiles-popup-item-delete" onClickCapture={handleDeleteClick}>
-                    <span className="material-symbols-rounded">
-                        close
-                    </span>
-                </div>
+            <div className="profiles-popup-item-controls" onClick={e => e.stopPropagation()}>
+                <Popconfirm
+                    placement="bottomLeft"
+                    title="Are you sure to delete this profile?"
+                    onConfirm={handleDeleteClick}
+                    onCancel={e => e?.stopPropagation()}
+                    open={isDeletePopupOpen}
+                    onOpenChange={setIsDeletePopupOpen}
+                    overlayClassName="settings-profiles-popup-part"
+                >
+                    <div className="profiles-popup-item-delete" onClickCapture={e => {
+                        e.stopPropagation();
+                        setIsDeletePopupOpen(true);
+                    }}>
+                        <span className="material-symbols-rounded">
+                            close
+                        </span>
+                    </div>
+                </Popconfirm>
             </div>
         </button>
     );
