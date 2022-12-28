@@ -451,8 +451,10 @@
 }
 
 .settings-appearance {
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    .settings-appearance-tab {
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 }

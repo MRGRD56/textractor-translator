@@ -1,5 +1,5 @@
 import express from 'express';
-import nodeConsole from './nodeConsole';
+import nodeConsole from './utils/nodeConsole';
 import {Sentence} from './configuration/Configuration';
 
 const SERVER_PORT = 18952;

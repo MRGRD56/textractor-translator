@@ -1,28 +1,59 @@
 import React, {FC} from 'react';
-import {Checkbox, Input, Radio, Slider} from 'antd';
+import {Radio, Slider, Tabs} from 'antd';
+import InputColor from '../../../components/inputColor/InputColor';
+import useStoreStateWriter from '../../../hooks/useStoreStateWriter';
+import {SettingsNodeApi} from '../preload';
+import {StoreKeys} from '../../../constants/store-keys';
+import MainWindowAppearanceConfig, {
+    MainWindowDragMode
+} from '../../../configuration/appearance/MainWindowAppearanceConfig';
+import useChangeStateHandler from '../../../hooks/useChangeStateHandler';
+
+const {
+    store
+} = (window as any).nodeApi as SettingsNodeApi;
+
+const mwAppearanceDefault: MainWindowAppearanceConfig = {
+    backgroundColor: '#000000',
+    backgroundOpacity: 80,
+    windowDragMode: MainWindowDragMode.ENTIRE_WINDOW
+};
 
 const SettingsAppearance: FC = () => {
+    const [mwAppearance, setMwAppearance] = useStoreStateWriter<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, mwAppearanceDefault);
+    const handleMwAppearanceChange = useChangeStateHandler(setMwAppearance);
+
+    if (!mwAppearance) {
+        return null;
+    }
+
     return (
         <div className="settings-appearance">
-            <label>
-                <div>
-                    Main window drag mode
-                </div>
-                <Radio.Group value="ENTIRE_WINDOW">
-                    <Radio value="ENTIRE_WINDOW">Entire window</Radio>
-                    <Radio value="TOP_PANEL">Top panel</Radio>
-                </Radio.Group>
-            </label>
+            <Tabs>
+                <Tabs.TabPane tab="Main Window">
+                    <div className="settings-appearance-tab">
+                        <label>
+                            <div>
+                                Window drag mode
+                            </div>
+                            <Radio.Group value={mwAppearance.windowDragMode} onChange={handleMwAppearanceChange('windowDragMode')}>
+                                <Radio value={MainWindowDragMode.ENTIRE_WINDOW}>Entire window</Radio>
+                                <Radio value={MainWindowDragMode.PANEL}>Top panel</Radio>
+                            </Radio.Group>
+                        </label>
 
-            <label>
-                Main window background color
-                <Input/>
-            </label>
+                        <label>
+                            Background color
+                            <InputColor value={mwAppearance.backgroundColor} onChange={handleMwAppearanceChange('backgroundColor')}/>
+                        </label>
 
-            <label>
-                Main window background opacity
-                <Slider max={100} value={0.7}/>
-            </label>
+                        <label>
+                            Background opacity
+                            <Slider max={100} value={mwAppearance.backgroundOpacity} onChange={handleMwAppearanceChange('backgroundOpacity')}/>
+                        </label>
+                    </div>
+                </Tabs.TabPane>
+            </Tabs>
         </div>
     );
 };

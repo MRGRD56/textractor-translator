@@ -89,8 +89,13 @@ const initToolbar = () => {
     }, 2000);
 };
 
+const initAppearanceSettingsHandling = () => {
+    //TODO
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     initToolbar();
     initAutoHistory();
+    initAppearanceSettingsHandling();
     workTextractorServer();
 });

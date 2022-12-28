@@ -1,6 +1,6 @@
 import {ipcMain} from 'electron';
 import Store from 'electron-store';
-import nodeConsole from '../nodeConsole';
+import nodeConsole from '../utils/nodeConsole';
 import {electronStoreKeys} from './electronStoreShared';
 
 export const initElectronStore = () => {

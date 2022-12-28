@@ -1,0 +1,13 @@
+.input {
+    padding: 1px calc(100% - 30px) 1px 3px;
+    position: relative;
+
+    &::after {
+        position: absolute;
+        left: 33px;
+        top: 50%;
+        transform: translateY(-50%);
+
+        content: attr(data-value);
+    }
+}
