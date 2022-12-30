@@ -2,11 +2,6 @@ import {runTextractorServer} from '../../../textractorServer';
 import {Configuration, OptionalTransformedText, Sentence} from '../../../configuration/Configuration';
 import getTranslator from '../../../translation/getTranslator';
 import Store from 'electron-store';
-import getConfiguration from '../../../configuration/getConfiguration';
-import {SAVED_PROFILES_KEY} from '../../../constants/store-keys';
-import SavedProfiles from '../../settings/profiles/SavedProfiles';
-import indexArrayBy from '../../../utils/indexArrayBy';
-import {COMMON_PROFILE_ID} from '../../settings/profiles/constants';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 
 const translateText = (originalText: string, config: Configuration): Promise<string> => {

@@ -1,4 +1,3 @@
-import type Store from 'electron-store';
 import {ipcRenderer} from 'electron';
 import {ElectronStore, electronStoreKeys} from './electronStoreShared';
 

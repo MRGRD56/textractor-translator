@@ -3,7 +3,7 @@ import Store from 'electron-store';
 import nodeConsole from '../utils/nodeConsole';
 import {electronStoreKeys} from './electronStoreShared';
 
-export const initElectronStore = () => {
+export const initElectronStore = (): Store => {
     const store = new Store();
 
     nodeConsole.log('Creating handlers for electronStore')
@@ -19,6 +19,10 @@ export const initElectronStore = () => {
             return (store as any)[key](...args);
         });
     }
+
+    (global as any).store = store;
+
+    return store;
 };
 
 export default initElectronStore;

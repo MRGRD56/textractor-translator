@@ -5,6 +5,7 @@ import useStoreStateWriter from '../../../hooks/useStoreStateWriter';
 import {SettingsNodeApi} from '../preload';
 import {StoreKeys} from '../../../constants/store-keys';
 import MainWindowAppearanceConfig, {
+    defaultMainWindowAppearance,
     MainWindowDragMode
 } from '../../../configuration/appearance/MainWindowAppearanceConfig';
 import useChangeStateHandler from '../../../hooks/useChangeStateHandler';
@@ -13,14 +14,8 @@ const {
     store
 } = (window as any).nodeApi as SettingsNodeApi;
 
-const mwAppearanceDefault: MainWindowAppearanceConfig = {
-    backgroundColor: '#000000',
-    backgroundOpacity: 80,
-    windowDragMode: MainWindowDragMode.ENTIRE_WINDOW
-};
-
 const SettingsAppearance: FC = () => {
-    const [mwAppearance, setMwAppearance] = useStoreStateWriter<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, mwAppearanceDefault);
+    const [mwAppearance, setMwAppearance] = useStoreStateWriter<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance);
     const handleMwAppearanceChange = useChangeStateHandler(setMwAppearance);
 
     if (!mwAppearance) {

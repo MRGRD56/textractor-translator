@@ -1,10 +1,11 @@
-import {app, BrowserWindow, ipcMain} from 'electron';
+import {app, BrowserWindow} from 'electron';
 import {createMainWindow} from './windows/main/initMain';
-import {createSettingsWindow} from './windows/settings/initSettings';
 import initElectronStore from './electron-store/initElectronStore';
 import initTabsContextMenu from './windows/settings/profiles/initTabsContextMenu';
 import listenRendererRequests from './utils/listenRendererRequests';
 import listenMainWindowRequests from './utils/listenMainWindowRequests';
+
+require('@electron/remote/main').initialize();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -32,9 +33,10 @@ if (require('electron-squirrel-startup')) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-    const mainWindow = createMainWindow();
+    const store = initElectronStore();
 
-    initElectronStore();
+    const mainWindow = createMainWindow(store);
+
     initTabsContextMenu();
     listenMainWindowRequests(mainWindow);
     listenRendererRequests();
@@ -53,7 +55,7 @@ app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-        createMainWindow();
+        createMainWindow((global as any).store);
     }
 });
 

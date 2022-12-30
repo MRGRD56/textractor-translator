@@ -10,3 +10,9 @@ interface MainWindowAppearanceConfig {
 }
 
 export default MainWindowAppearanceConfig;
+
+export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
+    backgroundColor: '#000000',
+    backgroundOpacity: 80,
+    windowDragMode: MainWindowDragMode.ENTIRE_WINDOW
+};
