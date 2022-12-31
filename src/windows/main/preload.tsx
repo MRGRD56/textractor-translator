@@ -98,7 +98,7 @@ const initAppearanceSettingsHandling = () => {
     //TODO
 
     readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
-        const backgroundColorRgba = addColorAlpha(config.backgroundColor, config.backgroundOpacity);
+        const backgroundColorRgba = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
         const container = document.querySelector('.text-container-wrapper') as HTMLElement;
         container.style.backgroundColor = backgroundColorRgba;
     });
@@ -107,9 +107,11 @@ const initAppearanceSettingsHandling = () => {
 const initWindowDragger = () => {
     const moveMwButton = document.getElementById('move-mw-button')!;
     moveMwButton.addEventListener('mouseenter', () => {
+        console.log('ENTER')
         ipcRenderer.invoke('set-main-window-draggable', true);
     });
     moveMwButton.addEventListener('mouseleave', () => {
+        console.log('LEAVE')
         ipcRenderer.invoke('set-main-window-draggable', false);
     });
 };

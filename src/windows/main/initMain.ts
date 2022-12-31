@@ -39,7 +39,7 @@ export function createMainWindow(store: Store): BrowserWindow {
     mainWindow.webContents.openDevTools();
 
     const appearanceConfig = readStoreStateSync<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance);
-    (global as any).MainDragWindowState ??= {
+    (global as any).MainWindowDragState ??= {
         isDraggable: false
     } as typeof MainWindowDragState;
 
@@ -49,7 +49,7 @@ export function createMainWindow(store: Store): BrowserWindow {
             return true;
         }
 
-        return ((global as any).MainDragWindowState as typeof MainWindowDragState)?.isDraggable;
+        return ((global as any).MainWindowDragState as typeof MainWindowDragState)?.isDraggable;
     });
 
     mainWindow.on('close', () => {
