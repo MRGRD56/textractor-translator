@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, ReactNode} from 'react';
 import {Radio, Slider, Tabs} from 'antd';
 import InputColor from '../../../components/inputColor/InputColor';
 import useStoreStateWriter from '../../../hooks/useStoreStateWriter';
@@ -13,6 +13,17 @@ import useChangeStateHandler from '../../../hooks/useChangeStateHandler';
 const {
     store
 } = (window as any).nodeApi as SettingsNodeApi;
+
+const createNumberFormatter = (formatter: (value: number) => ReactNode) => (value: number | undefined): ReactNode => {
+    if (value == null) {
+        return;
+    }
+
+    return formatter(value);
+};
+
+const percentageFormatter = createNumberFormatter((value: number) => `${value}%`);
+const pxFormatter = createNumberFormatter((value: number) => `${value}px`);
 
 const SettingsAppearance: FC = () => {
     const [mwAppearance, setMwAppearance] = useStoreStateWriter<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance);
@@ -44,7 +55,7 @@ const SettingsAppearance: FC = () => {
 
                         <label>
                             <span>Background opacity</span>
-                            <Slider min={0} max={100} value={mwAppearance.backgroundOpacity} onChange={handleMwAppearanceChange('backgroundOpacity')}/>
+                            <Slider min={0} max={100} value={mwAppearance.backgroundOpacity} onChange={handleMwAppearanceChange('backgroundOpacity')} tipFormatter={percentageFormatter}/>
                         </label>
 
                         <label>
@@ -54,17 +65,17 @@ const SettingsAppearance: FC = () => {
 
                         <label>
                             <span>Border opacity</span>
-                            <Slider min={0} max={100} value={mwAppearance.borderOpacity} onChange={handleMwAppearanceChange('borderOpacity')}/>
+                            <Slider min={0} max={100} value={mwAppearance.borderOpacity} onChange={handleMwAppearanceChange('borderOpacity')} tipFormatter={percentageFormatter}/>
                         </label>
 
                         <label>
                             <span>Border width</span>
-                            <Slider min={0} max={20} value={mwAppearance.borderThickness} onChange={handleMwAppearanceChange('borderThickness')}/>
+                            <Slider min={0} max={20} value={mwAppearance.borderThickness} onChange={handleMwAppearanceChange('borderThickness')} tipFormatter={pxFormatter}/>
                         </label>
 
                         <label>
                             <span>Border roundness</span>
-                            <Slider min={0} max={20} value={mwAppearance.borderRadius} onChange={handleMwAppearanceChange('borderRadius')}/>
+                            <Slider min={0} max={20} value={mwAppearance.borderRadius} onChange={handleMwAppearanceChange('borderRadius')} tipFormatter={pxFormatter}/>
                         </label>
                     </div>
                 </Tabs.TabPane>
