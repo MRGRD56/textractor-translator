@@ -28,9 +28,9 @@ const SettingsAppearance: FC = () => {
                 <Tabs.TabPane tab="Main Window">
                     <div className="settings-appearance-tab">
                         <label>
-                            <div>
+                            <span>
                                 Window drag mode
-                            </div>
+                            </span>
                             <Radio.Group value={mwAppearance.windowDragMode} onChange={handleMwAppearanceChange('windowDragMode')}>
                                 <Radio value={MainWindowDragMode.ENTIRE_WINDOW}>Entire window</Radio>
                                 <Radio value={MainWindowDragMode.PANEL}>Top panel</Radio>
@@ -38,13 +38,33 @@ const SettingsAppearance: FC = () => {
                         </label>
 
                         <label>
-                            Background color
+                            <span>Background color</span>
                             <InputColor value={mwAppearance.backgroundColor} onChange={handleMwAppearanceChange('backgroundColor')}/>
                         </label>
 
                         <label>
-                            Background opacity
-                            <Slider max={100} value={mwAppearance.backgroundOpacity} onChange={handleMwAppearanceChange('backgroundOpacity')}/>
+                            <span>Background opacity</span>
+                            <Slider min={0} max={100} value={mwAppearance.backgroundOpacity} onChange={handleMwAppearanceChange('backgroundOpacity')}/>
+                        </label>
+
+                        <label>
+                            <span>Border color</span>
+                            <InputColor value={mwAppearance.borderColor} onChange={handleMwAppearanceChange('borderColor')}/>
+                        </label>
+
+                        <label>
+                            <span>Border opacity</span>
+                            <Slider min={0} max={100} value={mwAppearance.borderOpacity} onChange={handleMwAppearanceChange('borderOpacity')}/>
+                        </label>
+
+                        <label>
+                            <span>Border width</span>
+                            <Slider min={0} max={20} value={mwAppearance.borderThickness} onChange={handleMwAppearanceChange('borderThickness')}/>
+                        </label>
+
+                        <label>
+                            <span>Border roundness</span>
+                            <Slider min={0} max={20} value={mwAppearance.borderRadius} onChange={handleMwAppearanceChange('borderRadius')}/>
                         </label>
                     </div>
                 </Tabs.TabPane>

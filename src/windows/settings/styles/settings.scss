@@ -451,10 +451,39 @@
 }
 
 .settings-appearance {
+    width: 100%;
+    padding: 0 8px 8px 8px;
+
+    .ant-tabs-nav {
+        background: white !important;
+    }
+
     .settings-appearance-tab {
-        padding: 8px;
+        padding-top: 8px;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        width: 100%;
+
+        & > label {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            min-height: 32px;
+
+            & > span:first-child {
+                min-width: 140px;
+            }
+
+            & > *:nth-child(2) {
+                flex: 1;
+
+                &.app-input-color {
+                    padding: 1px calc(100% - 170px) 1px 3px;
+                }
+            }
+        }
     }
 }

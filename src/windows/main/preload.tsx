@@ -5,7 +5,9 @@ import watchCtrl from './utils/watchCtrl';
 import readStoreStateLazy from '../../utils/readStoreStateLazy';
 import electronStore from '../../electron-store/electronStore';
 import {StoreKeys} from '../../constants/store-keys';
-import MainWindowAppearanceConfig, {defaultMainWindowAppearance} from '../../configuration/appearance/MainWindowAppearanceConfig';
+import MainWindowAppearanceConfig, {
+    defaultMainWindowAppearance
+} from '../../configuration/appearance/MainWindowAppearanceConfig';
 import addColorAlpha from '../../utils/addColorAlpha';
 
 const isHistoryShownRef = ref<boolean>(false);
@@ -95,23 +97,22 @@ const initToolbar = () => {
 };
 
 const initAppearanceSettingsHandling = () => {
-    //TODO
-
     readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
-        const backgroundColorRgba = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
         const container = document.querySelector('.text-container-wrapper') as HTMLElement;
-        container.style.backgroundColor = backgroundColorRgba;
+
+        container.style.backgroundColor = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
+        container.style.borderRadius = `${config.borderRadius}px`;
+        container.style.borderWidth = `${config.borderThickness}px`;
+        container.style.borderColor = addColorAlpha(config.borderColor, config.borderOpacity / 100);
     });
 };
 
 const initWindowDragger = () => {
     const moveMwButton = document.getElementById('move-mw-button')!;
     moveMwButton.addEventListener('mouseenter', () => {
-        console.log('ENTER')
         ipcRenderer.invoke('set-main-window-draggable', true);
     });
     moveMwButton.addEventListener('mouseleave', () => {
-        console.log('LEAVE')
         ipcRenderer.invoke('set-main-window-draggable', false);
     });
 };

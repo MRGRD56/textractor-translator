@@ -75,6 +75,8 @@ const workTextractorServer = () => {
         const multiTransformedText = config.transformOriginal?.(sentence);
         const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
 
+        console.log('New Sentence', {sentence, transformedTexts});
+
         for (const transformedText of transformedTexts) {
             if (transformedText !== undefined) {
                 const text = typeof transformedText === 'object' ? transformedText.plain : transformedText;

@@ -1,11 +1,12 @@
-import {BrowserWindow} from 'electron';
+import type {BrowserWindow} from 'electron';
+import type {BrowserWindow as AcrylicBrowserWindow} from 'electron-acrylic-window';
 
 const WM_MOUSEMOVE = 0x0200;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove
 const WM_LBUTTONUP = 0x0202;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
 
 const MK_LBUTTON = 0x0001;
 
-const makeWindowFullyDraggable = (browserWindow: BrowserWindow, isDraggable: () => boolean): void => {
+const makeWindowFullyDraggable = (browserWindow: BrowserWindow | AcrylicBrowserWindow, isDraggable: () => boolean): void => {
     const initialPos = {
         x: 0,
         y: 0,

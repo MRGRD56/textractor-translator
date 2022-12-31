@@ -18,10 +18,9 @@ const initTabsContextMenu = () => {
                 ...(tab.id === COMMON_PROFILE_ID ? [] : [
                     {
                         label: 'Make active',
-                        enabled: !isActiveProfile,
                         type: 'checkbox',
                         checked: isActiveProfile,
-                        click: isActiveProfile ? undefined : finish('make-active')
+                        click: finish('make-active')
                     },
                     {
                         label: 'Rename',

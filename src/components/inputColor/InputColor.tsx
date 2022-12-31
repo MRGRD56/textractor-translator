@@ -29,7 +29,7 @@ const InputColor: FC<InputColorProps> = ({type, className, onChange, ...props}) 
         <Input
             ref={inputRef}
             type={type || 'color'}
-            className={classNames(styles.input, className)}
+            className={classNames('app-input-color', styles.input, className)}
             data-value={actualValue}
             onChange={handleChange}
             {...props}

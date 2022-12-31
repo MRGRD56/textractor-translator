@@ -52,7 +52,7 @@ const PanelTab: FC<Props> = ({tab, active: isActive, api, onMakeActiveProfile}) 
                     api.closeTab(tab.id);
                     break;
                 case 'make-active':
-                    onMakeActiveProfile()
+                    onMakeActiveProfile();
                     break;
                 case 'rename':
                     setNewProfileName(tab.name);

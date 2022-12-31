@@ -105,8 +105,10 @@ const SettingsProfiles: FC = () => {
 
         const newSavedProfiles = {
             ...savedProfiles,
-            activeProfileId: profileId
+            activeProfileId: savedProfiles.activeProfileId === profileId ? undefined : profileId
         }
+
+        console.log('newSavedProfiles', newSavedProfiles);
 
         setSavedProfiles(newSavedProfiles);
         store.set(SAVED_PROFILES_KEY, newSavedProfiles)
