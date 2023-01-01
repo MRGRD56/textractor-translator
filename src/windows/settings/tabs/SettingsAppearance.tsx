@@ -44,6 +44,7 @@ const SettingsAppearance: FC = () => {
                             </span>
                             <Radio.Group value={mwAppearance.windowDragMode} onChange={handleMwAppearanceChange('windowDragMode')}>
                                 <Radio value={MainWindowDragMode.ENTIRE_WINDOW}>Entire window</Radio>
+                                <Radio value={MainWindowDragMode.BACKGROUND}>Background</Radio>
                                 <Radio value={MainWindowDragMode.PANEL}>Top panel</Radio>
                             </Radio.Group>
                         </label>

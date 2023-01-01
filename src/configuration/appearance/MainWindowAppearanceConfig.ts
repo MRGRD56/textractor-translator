@@ -2,6 +2,7 @@ import type {VibrancyEffect, VibrancyTheme} from 'electron-acrylic-window';
 
 export enum MainWindowDragMode {
     ENTIRE_WINDOW = 'ENTIRE_WINDOW',
+    BACKGROUND = 'BACKGROUND',
     PANEL = 'PANEL'
 }
 

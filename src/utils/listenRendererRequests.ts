@@ -26,7 +26,16 @@ const listenRendererRequests = (): void => {
         } else {
             (global as any).MainWindowDragState = {isDraggable} as typeof MainWindowDragState;
         }
-    })
+    });
+
+    ipcMain.handle('set-main-window-draggable-top-panel-only', (event, isDraggable: boolean) => {
+        const mainWindowDragState = ((global as any).MainWindowDragState as typeof MainWindowDragState | undefined);
+        if (mainWindowDragState) {
+            mainWindowDragState.isDraggableTopPanelOnly = isDraggable;
+        } else {
+            (global as any).MainWindowDragState = {isDraggableTopPanelOnly: isDraggable} as typeof MainWindowDragState;
+        }
+    });
 };
 
 export default listenRendererRequests;

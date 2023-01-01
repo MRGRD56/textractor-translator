@@ -1,5 +1,6 @@
 const MainWindowDragState = {
-    isDraggable: false
+    isDraggable: false,
+    isDraggableTopPanelOnly: false
 };
 
 (global as any).MainDragWindowState = MainWindowDragState;

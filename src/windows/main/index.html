@@ -13,10 +13,10 @@
 <!--            content="default-src 'self'; script-src 'self'"-->
 <!--    />-->
 </head>
-<body>
+<body data-mw-drag="true">
 <!--    <div class="draggable-panel"></div>-->
 <div class="main-toolbar-hover-area">
-    <div class="main-toolbar">
+    <div class="main-toolbar" data-mw-drag="false">
         <button class="main-toolbar-item" id="close-app-button">
             <span class="material-symbols-rounded">close</span>
         </button>
@@ -30,14 +30,14 @@
             <span class="material-symbols-rounded">history</span>
         </button>
 
-        <div class="main-toolbar-item main-toolbar-dragger" id="move-mw-button">
+        <div class="main-toolbar-item main-toolbar-dragger" id="move-mw-button" data-mw-drag="true">
             <span class="material-symbols-rounded">drag_indicator</span>
         </div>
     </div>
 </div>
 
 <div id="text-wrapper" class="text-container-wrapper">
-    <div id="text" class="text-container"></div>
+    <div id="text" class="text-container" data-mw-drag="false"></div>
 </div>
 
 </body>
