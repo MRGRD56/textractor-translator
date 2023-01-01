@@ -100,14 +100,24 @@ const initToolbar = () => {
 const initAppearanceSettingsHandling = () => {
     readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
         const container = document.querySelector('.text-container-wrapper') as HTMLElement;
+        const mainToolbar = document.querySelector('.main-toolbar') as HTMLElement;
+        const moveButton = document.getElementById('move-mw-button') as HTMLElement;
 
         container.style.backgroundColor = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
         container.style.borderRadius = `${config.borderRadius}px`;
+        mainToolbar.style.borderTopRightRadius = `${config.borderRadius}px`;
         container.style.borderWidth = `${config.borderThickness}px`;
         container.style.borderColor = addColorAlpha(config.borderColor, config.borderOpacity / 100);
 
         const isWindowDraggableItself = config.windowDragMode !== MainWindowDragMode.PANEL;
         document.body.setAttribute('data-mw-drag', String(isWindowDraggableItself));
+
+        const isFullyDraggable = config.windowDragMode === MainWindowDragMode.ENTIRE_WINDOW;
+        if (isFullyDraggable) {
+            moveButton.classList.add('d-none');
+        } else {
+            moveButton.classList.remove('d-none');
+        }
     });
 };
 
