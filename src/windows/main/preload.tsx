@@ -1,6 +1,6 @@
 import workTextractorServer from './logic/workTextractorServer';
 import {ipcRenderer} from 'electron';
-import ref, {NullableRef} from '../../utils/ref';
+import ref from '../../utils/ref';
 import watchCtrl from './utils/watchCtrl';
 import readStoreStateLazy from '../../utils/readStoreStateLazy';
 import electronStore from '../../electron-store/electronStore';
@@ -11,6 +11,10 @@ import MainWindowAppearanceConfig, {
 } from '../../configuration/appearance/MainWindowAppearanceConfig';
 import addColorAlpha from '../../utils/addColorAlpha';
 import initWindowDragger from './logic/initWindowDragger';
+import TextAppearanceConfig, {
+    defaultOriginalTextAppearance,
+    defaultTranslatedTextAppearance
+} from '../../configuration/appearance/TextAppearanceConfig';
 
 const isHistoryShownRef = ref<boolean>(false);
 
@@ -99,16 +103,41 @@ const initToolbar = () => {
 };
 
 const initAppearanceSettingsHandling = () => {
-    readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
-        const container = document.querySelector<HTMLElement>('.text-container-wrapper')!;
-        const mainToolbar = document.querySelector<HTMLElement>('.main-toolbar')!;
-        const moveButton = document.getElementById('move-mw-button')!;
+    const mainWindowStyleElement = document.getElementById('customizable-styles__main-window')!;
+    const originalTextStyleElement = document.getElementById('customizable-styles__original-text')!;
+    const translatedTextStyleElement = document.getElementById('customizable-styles__translated-text')!;
 
-        container.style.backgroundColor = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
-        container.style.borderRadius = `${config.borderRadius}px`;
-        mainToolbar.style.borderTopRightRadius = `${config.borderRadius}px`;
-        container.style.borderWidth = `${config.borderThickness}px`;
-        container.style.borderColor = addColorAlpha(config.borderColor, config.borderOpacity / 100);
+    const container = document.querySelector<HTMLElement>('.text-container-wrapper')!;
+    const mainToolbar = document.querySelector<HTMLElement>('.main-toolbar')!;
+    const moveButton = document.getElementById('move-mw-button')!;
+
+    readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
+        mainWindowStyleElement.innerHTML = `
+            .text-container-wrapper {
+                background-color: ${addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100)};
+                border-radius: ${config.borderRadius}px;
+                border-width: ${config.borderThickness}px;
+                border-color: ${addColorAlpha(config.borderColor, config.borderOpacity / 100)};
+                color: ${config.textColor};
+                font-family: "${config.fontFamily || 'Roboto'}", sans-serif;
+                font-size: ${config.fontSize ?? 20}px;
+                line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+            }
+            
+            .main-toolbar {
+                border-top-right-radius: ${config.borderRadius}px;
+            }
+        `;
+
+        // container.style.backgroundColor = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
+        // container.style.borderRadius = `${config.borderRadius}px`;
+        // mainToolbar.style.borderTopRightRadius = `${config.borderRadius}px`;
+        // container.style.borderWidth = `${config.borderThickness}px`;
+        // container.style.borderColor = addColorAlpha(config.borderColor, config.borderOpacity / 100);
+        // container.style.color = config.textColor;
+        // container.style.fontFamily = `"${config.fontFamily}", 'Roboto', sans-serif`;
+        // container.style.fontSize = `${config.fontSize ?? 20}px`;
+        // container.style.lineHeight = config.lineHeight ? `${config.lineHeight}%` : '';
 
         const isWindowDraggableItself = config.windowDragMode !== MainWindowDragMode.PANEL;
         document.body.setAttribute('data-mw-drag', String(isWindowDraggableItself));
@@ -120,6 +149,25 @@ const initAppearanceSettingsHandling = () => {
             moveButton.classList.remove('d-none');
         }
     });
+
+    const handleTextAppearanceChanges = (key: StoreKeys, defaultConfig: TextAppearanceConfig, styleElement: HTMLElement, styledSelector: string) => {
+        readStoreStateLazy(electronStore, key, defaultConfig, (config) => {
+            styleElement.innerHTML = `
+                ${styledSelector} {
+                    color: ${config.textColor ? addColorAlpha(config.textColor, config.textOpacity / 100) : 'inherit'};
+                    font-size: ${config.fontSize == null ? 'inherit' : config.fontSize + '%'};
+                    font-family: "${config.fontFamily}", inherit, sans-serif;
+                    font-weight: ${config.fontWeight ?? 'inherit'};
+                    font-style: ${config.isItalic ? 'italic' : 'normal'};
+                    text-decoration: ${config.isUnderlined ? 'underline' : 'none'};
+                    line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+                }
+            `;
+        });
+    };
+
+    handleTextAppearanceChanges(StoreKeys.SETTINGS_APPEARANCE_ORIGINAL_TEXT, defaultOriginalTextAppearance, originalTextStyleElement, '.sentence-original');
+    handleTextAppearanceChanges(StoreKeys.SETTINGS_APPEARANCE_TRANSLATED_TEXT, defaultTranslatedTextAppearance, translatedTextStyleElement, '.sentence-translated');
 };
 
 window.addEventListener('DOMContentLoaded', () => {

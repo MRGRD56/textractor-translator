@@ -85,6 +85,11 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                 <span>Font size</span>
                 <Slider min={6} max={50} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')} tipFormatter={pxFormatter}/>
             </label>
+
+            <label>
+                <span>Text line height</span>
+                <Slider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
+            </label>
         </div>
     );
 };

@@ -42,7 +42,7 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     backgroundBlurEffect: 'acrylic',
     fontFamily: 'Roboto',
     fontSize: 20,
-    lineHeight: 100,
+    lineHeight: 120,
     textColor: '#ffffff',
     paddingTop: 8,
     paddingRight: 10,

@@ -13,7 +13,7 @@ const useInstalledFontsOptions = (ipcRenderer: IpcRenderer): SelectProps['option
 
         return fonts.map(font => ({
             value: font,
-            label: <div style={{fontFamily: `"${font}"`}}>{font}</div>
+            label: <div style={{fontFamily: `"${font}"`}} title={font}>{font}</div>
         }));
     }, [fonts]);
 };

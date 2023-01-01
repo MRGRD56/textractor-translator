@@ -29,6 +29,9 @@ body {
     border: 2px solid rgba(200, 200, 200, 0.15);
 
     font-size: 20px;
+    font-family: Roboto, sans-serif;
+    //min-height: 100%;
+    color: white;
 
     /* Hide scrollbar for IE, Edge and Firefox */
     -ms-overflow-style: none;  /* IE and Edge */
@@ -44,9 +47,6 @@ body {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
-        font-family: Roboto, sans-serif;
-        //min-height: 100%;
-        color: white;
 
         &:not(.history-visible) .sentence:not(:last-child) {
             display: none;
@@ -58,13 +58,13 @@ body {
             align-items: flex-start;
             gap: 4px;
 
-            .sentence-original {
-                opacity: 0.95;
-            }
-
-            .sentence-translated {
-                font-weight: bold;
-            }
+            //.sentence-original {
+            //    opacity: 0.95;
+            //}
+            //
+            //.sentence-translated {
+            //    font-weight: bold;
+            //}
         }
     }
 }

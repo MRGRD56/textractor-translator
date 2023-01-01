@@ -1,7 +1,7 @@
 interface TextAppearanceConfig {
     textColor?: string;
     textOpacity: number;
-    fontSizeValue: number;
+    fontSize: number;
     // fontSizeUnit: string;
     fontFamily?: string;
     fontWeight: number;
@@ -15,7 +15,7 @@ export default TextAppearanceConfig;
 export const defaultOriginalTextAppearance: TextAppearanceConfig = {
     textColor: undefined,
     textOpacity: 100,
-    fontSizeValue: 100,
+    fontSize: 100,
     fontFamily: undefined,
     fontWeight: 400,
     isItalic: false,
