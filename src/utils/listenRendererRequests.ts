@@ -1,6 +1,7 @@
 import {dialog, ipcMain, OpenDialogSyncOptions} from 'electron';
 import {createSettingsWindow} from '../windows/settings/initSettings';
 import MainWindowDragState from '../windows/main/logic/MainWindowDragState';
+import {getFonts, IOptions} from 'font-list';
 
 const listenRendererRequests = (): void => {
     ipcMain.handle('open-settings-window', () => {
@@ -35,6 +36,12 @@ const listenRendererRequests = (): void => {
         } else {
             (global as any).MainWindowDragState = {isDraggableTopPanelOnly: isDraggable} as typeof MainWindowDragState;
         }
+    });
+
+    ipcMain.handle('get-installed-fonts', (event, options: IOptions) => {
+        return getFonts(options).then(fonts => {
+            return [...new Set([...fonts, 'Roboto'])].sort((a, b) => a.localeCompare(b));
+        });
     });
 };
 

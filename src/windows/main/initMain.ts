@@ -43,7 +43,7 @@ export function createMainWindow(store: Store): BrowserWindow {
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 
     const appearanceConfig = readStoreStateSync<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (appearanceConfig) => {
         // const currentVibrancy = getVibrancyConfig(appearanceConfig);

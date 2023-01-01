@@ -1,5 +1,5 @@
-import React, {FC, ReactNode} from 'react';
-import {Radio, Slider, Tabs} from 'antd';
+import React, {FC, ReactNode, useMemo} from 'react';
+import {Radio, Slider, Tabs, TabsProps} from 'antd';
 import InputColor from '../../../components/inputColor/InputColor';
 import useStoreStateWriter from '../../../hooks/useStoreStateWriter';
 import {SettingsNodeApi} from '../preload';
@@ -9,25 +9,50 @@ import MainWindowAppearanceConfig, {
     MainWindowDragMode
 } from '../../../configuration/appearance/MainWindowAppearanceConfig';
 import useChangeStateHandler from '../../../hooks/useChangeStateHandler';
+import generateArray from '../../../utils/generateArray';
+import MainWindowAppearance from './settingsAppearance/MainWindowAppearance';
+import TextAppearanceConfig, {
+    defaultOriginalTextAppearance, defaultTranslatedTextAppearance
+} from '../../../configuration/appearance/TextAppearanceConfig';
+import TextAppearance from './settingsAppearance/TextAppearance';
 
 const {
     store
 } = (window as any).nodeApi as SettingsNodeApi;
 
-const createNumberFormatter = (formatter: (value: number) => ReactNode) => (value: number | undefined): ReactNode => {
-    if (value == null) {
-        return;
-    }
-
-    return formatter(value);
-};
-
-const percentageFormatter = createNumberFormatter((value: number) => `${value}%`);
-const pxFormatter = createNumberFormatter((value: number) => `${value}px`);
-
 const SettingsAppearance: FC = () => {
     const [mwAppearance, setMwAppearance] = useStoreStateWriter<MainWindowAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance);
     const handleMwAppearanceChange = useChangeStateHandler(setMwAppearance);
+
+    const [originalTextAppearance, setOriginalTextAppearance] = useStoreStateWriter<TextAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_ORIGINAL_TEXT, defaultOriginalTextAppearance);
+    const handleOriginalTextAppearanceChange = useChangeStateHandler(setOriginalTextAppearance);
+
+    const [translatedTextAppearance, setTranslatedTextAppearance] = useStoreStateWriter<TextAppearanceConfig>(store, StoreKeys.SETTINGS_APPEARANCE_TRANSLATED_TEXT, defaultTranslatedTextAppearance);
+    const handleTranslatedTextAppearanceChange = useChangeStateHandler(setTranslatedTextAppearance);
+
+    const tabs = useMemo<TabsProps['items']>(() => {
+        if (!mwAppearance || !originalTextAppearance || !translatedTextAppearance) {
+            return;
+        }
+
+        return [
+            {
+                key: 'MAIN_WINDOW',
+                label: 'Main Window',
+                children: <MainWindowAppearance appearance={mwAppearance} onAppearanceChange={handleMwAppearanceChange}/>
+            },
+            {
+                key: 'ORIGINAL_TEXT',
+                label: 'Original Text',
+                children: <TextAppearance appearance={originalTextAppearance} onAppearanceChange={handleOriginalTextAppearanceChange}/>
+            },
+            {
+                key: 'TRANSLATED_TEXT',
+                label: 'Translated Text',
+                children: <TextAppearance appearance={translatedTextAppearance} onAppearanceChange={handleTranslatedTextAppearanceChange}/>
+            }
+        ];
+    }, [mwAppearance, handleMwAppearanceChange, originalTextAppearance, handleOriginalTextAppearanceChange, translatedTextAppearance, handleTranslatedTextAppearanceChange]);
 
     if (!mwAppearance) {
         return null;
@@ -35,52 +60,7 @@ const SettingsAppearance: FC = () => {
 
     return (
         <div className="settings-appearance">
-            <Tabs>
-                <Tabs.TabPane tab="Main Window">
-                    <div className="settings-appearance-tab">
-                        <label>
-                            <span>
-                                Window drag mode
-                            </span>
-                            <Radio.Group value={mwAppearance.windowDragMode} onChange={handleMwAppearanceChange('windowDragMode')}>
-                                <Radio value={MainWindowDragMode.ENTIRE_WINDOW}>Entire window</Radio>
-                                <Radio value={MainWindowDragMode.BACKGROUND}>Background</Radio>
-                                <Radio value={MainWindowDragMode.PANEL}>Top panel</Radio>
-                            </Radio.Group>
-                        </label>
-
-                        <label>
-                            <span>Background color</span>
-                            <InputColor value={mwAppearance.backgroundColor} onChange={handleMwAppearanceChange('backgroundColor')}/>
-                        </label>
-
-                        <label>
-                            <span>Background opacity</span>
-                            <Slider min={0} max={100} value={mwAppearance.backgroundOpacity} onChange={handleMwAppearanceChange('backgroundOpacity')} tipFormatter={percentageFormatter}/>
-                        </label>
-
-                        <label>
-                            <span>Border color</span>
-                            <InputColor value={mwAppearance.borderColor} onChange={handleMwAppearanceChange('borderColor')}/>
-                        </label>
-
-                        <label>
-                            <span>Border opacity</span>
-                            <Slider min={0} max={100} value={mwAppearance.borderOpacity} onChange={handleMwAppearanceChange('borderOpacity')} tipFormatter={percentageFormatter}/>
-                        </label>
-
-                        <label>
-                            <span>Border width</span>
-                            <Slider min={0} max={20} value={mwAppearance.borderThickness} onChange={handleMwAppearanceChange('borderThickness')} tipFormatter={pxFormatter}/>
-                        </label>
-
-                        <label>
-                            <span>Border roundness</span>
-                            <Slider min={0} max={20} value={mwAppearance.borderRadius} onChange={handleMwAppearanceChange('borderRadius')} tipFormatter={pxFormatter}/>
-                        </label>
-                    </div>
-                </Tabs.TabPane>
-            </Tabs>
+            <Tabs items={tabs}/>
         </div>
     );
 };

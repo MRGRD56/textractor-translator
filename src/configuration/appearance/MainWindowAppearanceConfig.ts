@@ -17,6 +17,14 @@ interface MainWindowAppearanceConfig {
     isBackgroundBlurEnabled: boolean;
     backgroundBlurTheme: VibrancyTheme;
     backgroundBlurEffect: VibrancyEffect;
+    fontFamily: string;
+    fontSize: number;
+    lineHeight: number;
+    textColor: string;
+    paddingTop: number;
+    paddingRight: number;
+    paddingBottom: number;
+    paddingLeft: number;
 }
 
 export default MainWindowAppearanceConfig;
@@ -31,5 +39,13 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     windowDragMode: MainWindowDragMode.BACKGROUND,
     isBackgroundBlurEnabled: false,
     backgroundBlurTheme: 'dark',
-    backgroundBlurEffect: 'acrylic'
+    backgroundBlurEffect: 'acrylic',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    lineHeight: 100,
+    textColor: '#ffffff',
+    paddingTop: 8,
+    paddingRight: 10,
+    paddingBottom: 8,
+    paddingLeft: 10
 };
