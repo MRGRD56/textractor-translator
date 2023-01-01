@@ -14,10 +14,10 @@ export default TextAppearanceConfig;
 
 export const defaultOriginalTextAppearance: TextAppearanceConfig = {
     textColor: undefined,
-    textOpacity: 100,
+    textOpacity: 92,
     fontSize: 100,
     fontFamily: undefined,
-    fontWeight: 400,
+    fontWeight: 300,
     isItalic: false,
     isUnderlined: false,
     lineHeight: undefined
@@ -25,5 +25,6 @@ export const defaultOriginalTextAppearance: TextAppearanceConfig = {
 
 export const defaultTranslatedTextAppearance: TextAppearanceConfig = {
     ...defaultOriginalTextAppearance,
-    fontWeight: 700
+    fontWeight: 500,
+    textOpacity: 100
 };
