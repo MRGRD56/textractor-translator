@@ -28,7 +28,7 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     borderOpacity: 0.15,
     borderThickness: 1,
     borderRadius: 4,
-    windowDragMode: MainWindowDragMode.ENTIRE_WINDOW,
+    windowDragMode: MainWindowDragMode.BACKGROUND,
     isBackgroundBlurEnabled: false,
     backgroundBlurTheme: 'dark',
     backgroundBlurEffect: 'acrylic'
