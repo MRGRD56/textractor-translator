@@ -1,6 +1,6 @@
 # Textractor Translator `under development`
 
-![textractor-translator](https://user-images.githubusercontent.com/35491968/210263140-b81718a9-d95e-48a3-978d-2dba3ed1fccb.png)
+![textractor-translator](https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png)
 
 ### Version 2022-12-17
 
