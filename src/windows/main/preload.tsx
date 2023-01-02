@@ -112,7 +112,7 @@ const initAppearanceSettingsHandling = () => {
     const moveButton = document.getElementById('move-mw-button')!;
 
     readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
-        mainWindowStyleElement.innerHTML = `
+        mainWindowStyleElement.innerHTML = `            
             .text-container-wrapper {
                 background-color: ${addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100)};
                 border-radius: ${config.borderRadius}px;
@@ -122,6 +122,7 @@ const initAppearanceSettingsHandling = () => {
                 font-family: "${config.fontFamily || 'Roboto'}", sans-serif;
                 font-size: ${config.fontSize ?? 20}px;
                 line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+                padding: ${config.paddingTop ?? 8}px ${config.paddingRight ?? 10}px ${config.paddingBottom ?? 8}px ${config.paddingLeft ?? 10}px;
             }
             
             .main-toolbar {

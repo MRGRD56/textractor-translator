@@ -452,10 +452,15 @@
 
 .settings-appearance {
     width: 100%;
-    padding: 0 8px 8px 8px;
+    //padding: 0 8px 8px 8px;
 
     .ant-tabs-nav {
         background: white !important;
+        padding: 0 8px;
+    }
+
+    .ant-tabs-content {
+        padding: 2px 8px 8px 8px;
     }
 
     .settings-appearance-tab {
@@ -465,7 +470,11 @@
         gap: 12px;
         width: 100%;
 
-        & > label {
+        .label {
+            cursor: default;
+        }
+
+        & > label, & > .label {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -484,6 +493,15 @@
                     padding: 1px calc(100% - 170px) 1px 3px;
                 }
             }
+        }
+
+        .mwa__arrow-inputs {
+            gap: 10px;
+        }
+
+        .mwa__arrow-icon {
+            padding-left: 2px;
+            padding-right: 2px;
         }
     }
 }

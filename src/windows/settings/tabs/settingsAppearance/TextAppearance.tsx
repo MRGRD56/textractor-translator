@@ -4,9 +4,10 @@ import TextAppearanceConfig from '../../../../configuration/appearance/TextAppea
 import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 import useInstalledFontsOptions from '../../../../hooks/useInstalledFontsOptions';
 import InputColor from '../../../../components/inputColor/InputColor';
-import {Button, Select, SelectProps, Slider} from 'antd';
+import {Button, Select, SelectProps, Slider, Space} from 'antd';
 import {percentageFormatter, pxFormatter} from '../utils/formatters';
 import {ItalicOutlined, UnderlineOutlined} from '@ant-design/icons';
+import CheckboxButton from '../../../../components/checkboxButton/CheckboxButton';
 
 const {ipcRenderer} = getSettingsNodeApi();
 
@@ -93,15 +94,17 @@ const TextAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
 
             <label>
                 <span>Font style</span>
-                <Select
-                    value={appearance.fontWeight}
-                    onChange={onAppearanceChange('fontWeight')}
-                    options={fontWeightsOptions}
-                />
-                
-                {/*TODO*/}
-                {/*<Button icon={<ItalicOutlined/>}/>*/}
-                {/*<Button icon={<UnderlineOutlined/>}/>*/}
+                <div className="flex-row-100">
+                    <Select
+                        value={appearance.fontWeight}
+                        onChange={onAppearanceChange('fontWeight')}
+                        options={fontWeightsOptions}
+                        className="flex-row-100-child"
+                    />
+
+                    <CheckboxButton icon={<ItalicOutlined/>} checked={appearance.isItalic} onCheckedChange={onAppearanceChange('isItalic')}/>
+                    <CheckboxButton icon={<UnderlineOutlined/>} checked={appearance.isUnderlined} onCheckedChange={onAppearanceChange('isUnderlined')}/>
+                </div>
             </label>
         </div>
     );

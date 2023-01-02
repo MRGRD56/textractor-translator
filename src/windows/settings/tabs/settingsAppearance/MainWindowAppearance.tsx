@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {Radio, Select, Slider} from 'antd';
+import {InputNumber, Radio, Select, Slider, Tooltip} from 'antd';
 import MainWindowAppearanceConfig, {
     MainWindowDragMode
 } from '../../../../configuration/appearance/MainWindowAppearanceConfig';
@@ -8,6 +8,7 @@ import {ChangeStateHandler} from '../../../../hooks/useChangeStateHandler';
 import {percentageFormatter, pxFormatter} from '../utils/formatters';
 import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 import useInstalledFontsOptions from '../../../../hooks/useInstalledFontsOptions';
+import {DownOutlined, LeftOutlined, RightOutlined, UpOutlined} from '@ant-design/icons';
 
 const {ipcRenderer} = getSettingsNodeApi();
 
@@ -90,6 +91,36 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                 <span>Text line height</span>
                 <Slider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
             </label>
+
+            <div className="label">
+                <span title="Padding">Inner indents</span>
+                <div className="flex-row-100 mwa__arrow-inputs">
+                    <Tooltip placement="bottom" title="Top indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <DownOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingTop} onChange={value => onAppearanceChange('paddingTop')(value ?? 0)} min={0} max={100}/>
+                        </div>
+                    </Tooltip>
+                    <Tooltip placement="bottom" title="Bottom indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <UpOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingBottom} onChange={value => onAppearanceChange('paddingBottom')(value ?? 0)} min={0} max={100}/>
+                        </div>
+                    </Tooltip>
+                    <Tooltip placement="bottom" title="Left indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <RightOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingLeft} onChange={value => onAppearanceChange('paddingLeft')(value ?? 0)} min={0} max={100}/>
+                        </div>
+                    </Tooltip>
+                    <Tooltip placement="bottom" title="Right indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <LeftOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingRight} onChange={value => onAppearanceChange('paddingRight')(value ?? 0)} min={0} max={100}/>
+                        </div>
+                    </Tooltip>
+                </div>
+            </div>
         </div>
     );
 };
