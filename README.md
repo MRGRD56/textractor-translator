@@ -1,4 +1,4 @@
-# textractor-translator `under development`
+# Textractor Translator `under development`
 
 ![textractor-translator](https://user-images.githubusercontent.com/35491968/210263140-b81718a9-d95e-48a3-978d-2dba3ed1fccb.png)
 
