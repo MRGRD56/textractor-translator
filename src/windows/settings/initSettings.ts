@@ -1,4 +1,4 @@
-import {BrowserWindow} from 'electron';
+import {BrowserWindow, shell} from 'electron';
 
 declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 declare const SETTINGS_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -23,6 +23,11 @@ export function createSettingsWindow(): void {
             nodeIntegration: true
         },
         alwaysOnTop: true
+    });
+
+    settingsWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
     });
 
     settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);

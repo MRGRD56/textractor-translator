@@ -6,11 +6,13 @@ import {ElectronStore} from '../../electron-store/electronStoreShared';
 import {useDidMount} from 'rooks';
 import {StoreKeys} from '../../constants/store-keys';
 import SettingsAppearance from './tabs/SettingsAppearance';
+import SettingsAbout from './tabs/SettingsAbout';
 
 enum SettingsTab {
     PROFILES = 'PROFILES',
     TEXTRACTOR = 'TEXTRACTOR',
-    APPEARANCE = 'APPEARANCE'
+    APPEARANCE = 'APPEARANCE',
+    ABOUT = 'ABOUT'
 }
 
 const tabsItems: TabsProps['items'] = [
@@ -28,6 +30,11 @@ const tabsItems: TabsProps['items'] = [
         key: SettingsTab.APPEARANCE,
         label: 'Appearance',
         children: <SettingsAppearance/>
+    },
+    {
+        key: SettingsTab.ABOUT,
+        label: 'About',
+        children: <SettingsAbout/>
     }
 ];
 

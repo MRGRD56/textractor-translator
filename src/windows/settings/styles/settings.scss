@@ -487,3 +487,19 @@
         }
     }
 }
+
+.settings-tab__about {
+    width: 100%;
+    padding: 4px 8px;
+
+    .app-author-container {
+        font-size: 1rem;
+    }
+
+    .the-app-picture {
+        width: 100%;
+        max-width: 600px;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+}
