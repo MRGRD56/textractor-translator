@@ -8,7 +8,15 @@ const translateText = (originalText: string, config: Configuration): Promise<str
     return getTranslator(config.translator)?.translate(originalText, config.languages.source, config.languages.target);
 };
 
-const showSentence = (config: Configuration, textContainer: HTMLElement, textContainerWrapper: HTMLElement, originalText: OptionalTransformedText, translatedTextPromise: Promise<string> | undefined, originalSentence: Sentence): void => {
+const showSentence = (
+    config: Configuration,
+    textContainer: HTMLElement,
+    textContainerWrapper: HTMLElement,
+    sampleTextContainer: HTMLElement,
+    originalText: OptionalTransformedText,
+    translatedTextPromise: Promise<string> | undefined,
+    originalSentence: Sentence
+): void => {
     const originalTextDisplayed = typeof originalText === 'object' ? originalText.displayed : originalText;
     const isHtml = typeof originalText === 'object' && Boolean(originalText.isHtml);
 
@@ -59,6 +67,7 @@ const showSentence = (config: Configuration, textContainer: HTMLElement, textCon
         sentenceElement.append(sentenceTranslatedElement);
     }
 
+    sampleTextContainer.classList.add('d-none');
     textContainer.append(sentenceElement);
 
     textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
@@ -69,6 +78,7 @@ const store = new Store();
 const workTextractorServer = () => {
     const textContainerWrapper = document.getElementById('text-wrapper')!;
     const textContainer = document.getElementById('text')!;
+    const sampleTextContainer = document.getElementById('text-sample')!;
 
     runTextractorServer((sentence) => {
         const config = getProfileConfig(store);
@@ -81,7 +91,7 @@ const workTextractorServer = () => {
             if (transformedText !== undefined) {
                 const text = typeof transformedText === 'object' ? transformedText.plain : transformedText;
 
-                showSentence(config, textContainer, textContainerWrapper, transformedText, translateText(text, config), sentence);
+                showSentence(config, textContainer, textContainerWrapper, sampleTextContainer, transformedText, translateText(text, config), sentence);
             }
         }
     });

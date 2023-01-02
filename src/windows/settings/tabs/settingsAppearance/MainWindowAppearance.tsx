@@ -26,7 +26,7 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
 
     return (
         <div className="settings-appearance-tab">
-            <label>
+            <div className="label">
                 <span>
                     Window drag mode
                 </span>
@@ -35,7 +35,7 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                     <Radio value={MainWindowDragMode.BACKGROUND}>Background</Radio>
                     <Radio value={MainWindowDragMode.PANEL}>Top panel</Radio>
                 </Radio.Group>
-            </label>
+            </div>
 
             <label>
                 <span>Background color</span>
@@ -97,25 +97,25 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                 <div className="flex-row-100 mwa__arrow-inputs">
                     <Tooltip placement="bottom" title="Top indent">
                         <div className="flex-row-100-child flex-row-100">
-                            <DownOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
+                            <UpOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
                             <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingTop} onChange={value => onAppearanceChange('paddingTop')(value ?? 0)} min={0} max={100}/>
                         </div>
                     </Tooltip>
                     <Tooltip placement="bottom" title="Bottom indent">
                         <div className="flex-row-100-child flex-row-100">
-                            <UpOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
+                            <DownOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
                             <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingBottom} onChange={value => onAppearanceChange('paddingBottom')(value ?? 0)} min={0} max={100}/>
                         </div>
                     </Tooltip>
                     <Tooltip placement="bottom" title="Left indent">
                         <div className="flex-row-100-child flex-row-100">
-                            <RightOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
+                            <LeftOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
                             <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingLeft} onChange={value => onAppearanceChange('paddingLeft')(value ?? 0)} min={0} max={100}/>
                         </div>
                     </Tooltip>
                     <Tooltip placement="bottom" title="Right indent">
                         <div className="flex-row-100-child flex-row-100">
-                            <LeftOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
+                            <RightOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
                             <InputNumber className="flex-row-100-child mwa__arrow-input" value={appearance.paddingRight} onChange={value => onAppearanceChange('paddingRight')(value ?? 0)} min={0} max={100}/>
                         </div>
                     </Tooltip>

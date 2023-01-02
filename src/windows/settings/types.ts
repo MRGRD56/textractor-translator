@@ -18,3 +18,12 @@ export interface TTBridge {
 export type GetTextractorPaths = (type: 'x86' | 'x64', path: string, canAutofillAnother: boolean) => TextractorPaths;
 
 export type ValidateTextractorPath = (exePath: string) => TextractorStatus;
+
+export enum SettingsTab {
+    PROFILES = 'PROFILES',
+    TEXTRACTOR = 'TEXTRACTOR',
+    APPEARANCE = 'APPEARANCE',
+    ABOUT = 'ABOUT'
+}
+
+export const defaultSettingsTab: SettingsTab = SettingsTab.PROFILES;

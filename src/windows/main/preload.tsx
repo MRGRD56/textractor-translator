@@ -15,6 +15,7 @@ import TextAppearanceConfig, {
     defaultOriginalTextAppearance,
     defaultTranslatedTextAppearance
 } from '../../configuration/appearance/TextAppearanceConfig';
+import {defaultSettingsTab, SettingsTab} from '../settings/types';
 
 const isHistoryShownRef = ref<boolean>(false);
 
@@ -157,7 +158,7 @@ const initAppearanceSettingsHandling = () => {
                 ${styledSelector} {
                     color: ${config.textColor ? addColorAlpha(config.textColor, config.textOpacity / 100) : 'inherit'};
                     font-size: ${config.fontSize == null ? 'inherit' : config.fontSize + '%'};
-                    font-family: "${config.fontFamily}", inherit, sans-serif;
+                    font-family: ${config.fontFamily ? `"${config.fontFamily}"` : 'inherit'};
                     font-weight: ${config.fontWeight ?? 'inherit'};
                     font-style: ${config.isItalic ? 'italic' : 'normal'};
                     text-decoration: ${config.isUnderlined ? 'underline' : 'none'};
@@ -171,10 +172,65 @@ const initAppearanceSettingsHandling = () => {
     handleTextAppearanceChanges(StoreKeys.SETTINGS_APPEARANCE_TRANSLATED_TEXT, defaultTranslatedTextAppearance, translatedTextStyleElement, '.sentence-translated');
 };
 
+const initSampleTextShowing = () => {
+    const textContainer = document.getElementById('text')!;
+    const sampleTextContainer = document.getElementById('text-sample')!;
+
+    const isSettingsWindowOpenRef = ref<boolean>();
+    const currentSettingsTabRef = ref<SettingsTab>();
+
+    const checkSampleTextVisibility = async (): Promise<boolean> => {
+        const isTextContainerEmpty = !textContainer.childElementCount;
+
+        if (!isTextContainerEmpty) {
+            return false;
+        }
+
+        const currentSettingsTab = currentSettingsTabRef.current;
+
+        if (currentSettingsTab !== SettingsTab.APPEARANCE) {
+            return false;
+        }
+
+        const isSettingsWindowOpen = isSettingsWindowOpenRef.current
+            ?? await ipcRenderer.invoke('global-get', 'app_isSettingsWindowOpen')
+            ?? false;
+
+        if (!isSettingsWindowOpen) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const updateSampleTextVisibility = async () => {
+        const isVisible = await checkSampleTextVisibility();
+        if (isVisible) {
+            sampleTextContainer.classList.remove('d-none');
+        } else {
+            sampleTextContainer.classList.add('d-none');
+        }
+    };
+
+    ipcRenderer.on('settings-window.@opened', () => {
+        isSettingsWindowOpenRef.current = true;
+        updateSampleTextVisibility();
+    });
+    ipcRenderer.on('settings-window.@closed', () => {
+        isSettingsWindowOpenRef.current = false;
+        updateSampleTextVisibility();
+    });
+    readStoreStateLazy(electronStore, StoreKeys.SETTINGS_TAB, defaultSettingsTab, tab => {
+        currentSettingsTabRef.current = tab;
+        updateSampleTextVisibility();
+    });
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     initToolbar();
     initWindowDragger();
     initAutoHistory();
     initAppearanceSettingsHandling();
+    initSampleTextShowing();
     workTextractorServer();
 });

@@ -61,6 +61,7 @@ const TextAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
     return (
         <div className="settings-appearance-tab">
             <label>
+                {/*TODO add clear button*/}
                 <span>Text color</span>
                 <InputColor value={appearance.textColor} onChange={onAppearanceChange('textColor')}/>
             </label>

@@ -25,12 +25,24 @@ export function createSettingsWindow(): void {
         alwaysOnTop: true
     });
 
+    settingsWindow.on('close', () => {
+        (global as any).app_isSettingsWindowOpen = false;
+        BrowserWindow.getAllWindows().forEach(window => {
+            window.webContents.send('settings-window.@closed');
+        });
+    });
+
     settingsWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
         return { action: 'deny' };
     });
 
     settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);
+
+    (global as any).app_isSettingsWindowOpen = true;
+    BrowserWindow.getAllWindows().forEach(window => {
+        window.webContents.send('settings-window.@opened');
+    });
 
     // settingsWindow.on('close', () => {
     //     settingsWindow = undefined;

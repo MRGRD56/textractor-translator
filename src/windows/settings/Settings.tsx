@@ -7,13 +7,7 @@ import {useDidMount} from 'rooks';
 import {StoreKeys} from '../../constants/store-keys';
 import SettingsAppearance from './tabs/SettingsAppearance';
 import SettingsAbout from './tabs/SettingsAbout';
-
-enum SettingsTab {
-    PROFILES = 'PROFILES',
-    TEXTRACTOR = 'TEXTRACTOR',
-    APPEARANCE = 'APPEARANCE',
-    ABOUT = 'ABOUT'
-}
+import {defaultSettingsTab, SettingsTab} from './types';
 
 const tabsItems: TabsProps['items'] = [
     {
@@ -45,7 +39,7 @@ const Settings: FC = () => {
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
     useDidMount(async () => {
-        const savedActiveTab = await store.get<SettingsTab>(StoreKeys.SETTINGS_TAB, SettingsTab.PROFILES);
+        const savedActiveTab = await store.get<SettingsTab>(StoreKeys.SETTINGS_TAB, defaultSettingsTab);
         setActiveTab(savedActiveTab);
         setIsInitialized(true);
     });
