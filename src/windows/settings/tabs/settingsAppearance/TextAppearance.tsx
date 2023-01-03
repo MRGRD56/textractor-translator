@@ -8,12 +8,16 @@ import {Button, Select, SelectProps, Slider, Space} from 'antd';
 import {percentageFormatter, pxFormatter} from '../utils/formatters';
 import {ItalicOutlined, UnderlineOutlined} from '@ant-design/icons';
 import CheckboxButton from '../../../../components/checkboxButton/CheckboxButton';
+import InputColorExtended from '../../../../components/inputColor/InputColorExtended';
+import MainWindowAppearanceConfig from '../../../../configuration/appearance/MainWindowAppearanceConfig';
+import ValueSlider from '../../../../components/valueSlider/ValueSlider';
 
 const {ipcRenderer} = getSettingsNodeApi();
 
 interface Props {
     appearance: TextAppearanceConfig;
     onAppearanceChange: ChangeStateHandler<TextAppearanceConfig>;
+    mwAppearance: MainWindowAppearanceConfig;
 }
 
 const fontWeightsOptions: SelectProps['options'] = [
@@ -55,7 +59,7 @@ const fontWeightsOptions: SelectProps['options'] = [
     }
 ];
 
-const TextAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
+const TextAppearance: FC<Props> = ({appearance, onAppearanceChange, mwAppearance}) => {
     const fontsOptions = useInstalledFontsOptions(ipcRenderer);
 
     return (
@@ -63,12 +67,15 @@ const TextAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
             <label>
                 {/*TODO add clear button*/}
                 <span>Text color</span>
-                <InputColor value={appearance.textColor} onChange={onAppearanceChange('textColor')}/>
+                <InputColorExtended
+                    value={appearance.textColor} onChange={onAppearanceChange('textColor')} allowClear
+                    placeholder={mwAppearance.textColor} placeholderColor={mwAppearance.textColor}
+                />
             </label>
 
             <label>
                 <span>Text opacity</span>
-                <Slider min={0} max={100} value={appearance.textOpacity} onChange={onAppearanceChange('textOpacity')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={0} max={100} value={appearance.textOpacity} onChange={onAppearanceChange('textOpacity')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
@@ -79,18 +86,18 @@ const TextAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                     options={fontsOptions}
                     showSearch
                     allowClear
-                    placeholder="Inherited"
+                    placeholder={mwAppearance.fontFamily}
                 />
             </label>
 
             <label>
                 <span>Font size</span>
-                <Slider min={10} max={200} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={10} max={200} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
                 <span>Text line height</span>
-                <Slider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>

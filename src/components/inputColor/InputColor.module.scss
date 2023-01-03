@@ -10,4 +10,20 @@
 
         content: attr(data-value);
     }
+
+    &[data-empty=true]::after {
+        color: #bfbfbf;
+    }
 }
+
+.extendedContainer {
+    position: relative;
+
+    .clearIcon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+

@@ -9,6 +9,7 @@ import {percentageFormatter, pxFormatter} from '../utils/formatters';
 import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 import useInstalledFontsOptions from '../../../../hooks/useInstalledFontsOptions';
 import {DownOutlined, LeftOutlined, RightOutlined, UpOutlined} from '@ant-design/icons';
+import ValueSlider from '../../../../components/valueSlider/ValueSlider';
 
 const {ipcRenderer} = getSettingsNodeApi();
 
@@ -44,7 +45,7 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
 
             <label>
                 <span>Background opacity</span>
-                <Slider min={0} max={100} value={appearance.backgroundOpacity} onChange={onAppearanceChange('backgroundOpacity')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={0} max={100} value={appearance.backgroundOpacity} onChange={onAppearanceChange('backgroundOpacity')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
@@ -54,17 +55,17 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
 
             <label>
                 <span>Border opacity</span>
-                <Slider min={0} max={100} value={appearance.borderOpacity} onChange={onAppearanceChange('borderOpacity')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={0} max={100} value={appearance.borderOpacity} onChange={onAppearanceChange('borderOpacity')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
                 <span>Border width</span>
-                <Slider min={0} max={20} value={appearance.borderThickness} onChange={onAppearanceChange('borderThickness')} tipFormatter={pxFormatter}/>
+                <ValueSlider min={0} max={20} value={appearance.borderThickness} onChange={onAppearanceChange('borderThickness')} tipFormatter={pxFormatter}/>
             </label>
 
             <label>
                 <span>Border roundness</span>
-                <Slider min={0} max={20} value={appearance.borderRadius} onChange={onAppearanceChange('borderRadius')} tipFormatter={pxFormatter}/>
+                <ValueSlider min={0} max={30} value={appearance.borderRadius} onChange={onAppearanceChange('borderRadius')} tipFormatter={pxFormatter}/>
             </label>
 
             <label>
@@ -84,12 +85,12 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
 
             <label>
                 <span>Font size</span>
-                <Slider min={6} max={50} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')} tipFormatter={pxFormatter}/>
+                <ValueSlider min={6} max={50} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')} tipFormatter={pxFormatter}/>
             </label>
 
             <label>
                 <span>Text line height</span>
-                <Slider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
             </label>
 
             <div className="label">

@@ -127,7 +127,7 @@ const initAppearanceSettingsHandling = () => {
             }
             
             .main-toolbar {
-                border-top-right-radius: ${config.borderRadius}px;
+                border-radius: 0 ${config.borderRadius ?? 4}px 0 ${Math.min(config.borderRadius ?? 4, 8)}px;
             }
         `;
 
