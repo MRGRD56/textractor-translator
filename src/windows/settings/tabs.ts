@@ -18,7 +18,7 @@ export const initTabs = (element: HTMLElement, initialTabs: ProfileTabs): TabsAp
         }
         if (tab.icon) {
             const iconElement = document.createElement('div');
-            iconElement.classList.add('tab-icon', tab.icon.className);
+            iconElement.classList.add('tab-icon', tab.icon.className!);
             iconElement.innerHTML = `<span class="material-symbols-rounded">${tab.icon.name}</span>`;
             tabElement.append(iconElement);
         }

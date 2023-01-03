@@ -8,7 +8,7 @@ const SettingsAbout: FC = () => {
                 <span className="app-author-container">by <a href="https://github.com/MRGRD56/textractor-translator" target="_blank">MRGRD56</a></span>
             </h1>
 
-            <img src="/assets/textractor-translator.png" alt="Textractor Translator" className="the-app-picture"/>
+            <img src="../assets/textractor-translator.png" alt="Textractor Translator" className="the-app-picture"/>
         </Space>
     );
 };

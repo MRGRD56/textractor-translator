@@ -30,7 +30,7 @@ const showSentence = (
 
     const sentenceTranslatedElement = document.createElement('div');
     sentenceTranslatedElement.classList.add('sentence-translated');
-    sentenceTranslatedElement.innerHTML = '<div class="loading-horiz"><img src="/assets/loading-horiz.svg" alt="Translating..."></div>';
+    sentenceTranslatedElement.innerHTML = '<div class="loading-horiz"><img src="../assets/loading-horiz.svg" alt="Translating..."></div>';
 
     if (translatedTextPromise) {
         translatedTextPromise

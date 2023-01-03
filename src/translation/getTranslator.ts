@@ -9,7 +9,7 @@ class IdentityTranslator implements Translator {
 
 class NoneTranslator implements Translator {
     translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
-        return undefined;
+        return undefined as any;
     }
 }
 

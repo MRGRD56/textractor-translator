@@ -11,7 +11,8 @@ const getProfileConfig = (store: Store, profileId?: string): Configuration => {
     const savedProfilesMap = indexArrayBy(savedProfiles.profiles, 'id');
 
     const commonProfile = savedProfilesMap.get(COMMON_PROFILE_ID);
-    const activeProfile = savedProfilesMap.get(profileId ?? savedProfiles.activeProfileId);
+    const activeProfileId = profileId ?? savedProfiles.activeProfileId;
+    const activeProfile = activeProfileId ? savedProfilesMap.get(activeProfileId) : undefined;
 
     return getConfiguration(commonProfile?.configSource, activeProfile?.configSource);
 };
