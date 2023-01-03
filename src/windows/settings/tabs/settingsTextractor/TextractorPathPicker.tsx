@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {Button, Input, Space} from 'antd';
+import {Button, Checkbox, Input, Space} from 'antd';
 import {FolderOpenFilled} from '@ant-design/icons';
 import {TextractorStatus} from './types';
 import showOpenDialogSync from '../../utils/showOpenDialogSync';
@@ -11,9 +11,11 @@ interface Props {
     value: string | undefined;
     onChange: (value: string) => void;
     status: TextractorStatus | undefined;
+    isAutorun: boolean;
+    onAutorunChange: (isAutorun: boolean) => void;
 }
 
-const TextractorPathPicker: FC<Props> = ({label, example, value, onChange, status}) => {
+const TextractorPathPicker: FC<Props> = ({label, example, value, onChange, status, isAutorun, onAutorunChange}) => {
     const handleChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.currentTarget.value);
     };
@@ -54,6 +56,14 @@ const TextractorPathPicker: FC<Props> = ({label, example, value, onChange, statu
                 />
                 <Button icon={<FolderOpenFilled />} onClick={handlePickPath}/>
             </Input.Group>
+            <Checkbox
+                style={{marginTop: '2px'}}
+                disabled={status !== TextractorStatus.SUCCESS}
+                checked={isAutorun}
+                onChange={e => onAutorunChange(e.target.checked)}
+            >
+                Autorun
+            </Checkbox>
         </div>
     );
 };

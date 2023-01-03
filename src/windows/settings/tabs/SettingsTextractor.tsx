@@ -7,6 +7,7 @@ import {useDidMount} from 'rooks';
 import {StoreKeys} from '../../../constants/store-keys';
 import type {SettingsNodeApi} from '../preload';
 import TextractorStatusIcon from '../components/TextractorStatusIcon';
+import {TextractorType} from '../../../configuration';
 
 const {
     store,
@@ -35,9 +36,12 @@ const SettingsTextractor: FC = () => {
     const [ttbridgeX86, setTtbridgeX86] = useState<TTBridge>();
     const [ttbridgeX64, setTtbridgeX64] = useState<TTBridge>();
 
+    const [autorun, setAutorun] = useState<TextractorType | null>(null);
+
     useDidMount(async () => {
         const savedX86 = await store.get<string | undefined>(StoreKeys.TEXTRACTOR_X86_PATH);
         const savedX64 = await store.get<string | undefined>(StoreKeys.TEXTRACTOR_X64_PATH);
+        const savedAutorun = await store.get<TextractorType | null>(StoreKeys.TEXTRACTOR_AUTORUN);
 
         if (savedX86 != null) {
             const newPathX86: TextractorPath = {
@@ -55,11 +59,12 @@ const SettingsTextractor: FC = () => {
             setPathX64(newPathX64);
             setTtbridgeX64(checkTTBridgeByPath(newPathX64));
         }
+        setAutorun(savedAutorun);
 
         setIsInitialized(true);
     });
 
-    const handlePathChange = (pathType: 'x86' | 'x64') => (path: string) => {
+    const handlePathChange = (pathType: TextractorType) => (path: string) => {
         const anotherPath = pathType === 'x86' ? pathX64 : pathX86;
 
         const paths = getTextractorPaths(pathType, path, !anotherPath?.path?.trim());
@@ -85,7 +90,7 @@ const SettingsTextractor: FC = () => {
         exec(path);
     };
 
-    const handleTTBridgeInstall = (pathType: 'x86' | 'x64') => async () => {
+    const handleTTBridgeInstall = (pathType: TextractorType) => async () => {
         const path = pathType === 'x86' ? pathX86 : pathX64;
         const setTtbridge = pathType === 'x86' ? setTtbridgeX86 : setTtbridgeX64;
 
@@ -107,6 +112,14 @@ const SettingsTextractor: FC = () => {
                 isInstalling: false
             }));
         }
+    };
+
+    const handleAutorunChange = (type: TextractorType) => (isAutorun: boolean) => {
+        console.log('handleAC', type, isAutorun);
+        const newAutorun = isAutorun ? type : null;
+
+        setAutorun(newAutorun);
+        store.set(StoreKeys.TEXTRACTOR_AUTORUN, newAutorun);
     };
 
     if (!isInitialized) {
@@ -141,6 +154,8 @@ const SettingsTextractor: FC = () => {
                 value={pathX86?.path}
                 onChange={handlePathChange('x86')}
                 status={pathX86?.status}
+                isAutorun={autorun === 'x86'}
+                onAutorunChange={handleAutorunChange('x86')}
             />
 
             <TextractorPathPicker
@@ -149,6 +164,8 @@ const SettingsTextractor: FC = () => {
                 value={pathX64?.path}
                 onChange={handlePathChange('x64')}
                 status={pathX64?.status}
+                isAutorun={autorun === 'x64'}
+                onAutorunChange={handleAutorunChange('x64')}
             />
 
             <h2 className="ttbridge-heading">Textractor Translator Bridge</h2>

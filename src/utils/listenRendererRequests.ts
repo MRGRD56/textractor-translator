@@ -2,6 +2,7 @@ import {dialog, ipcMain, OpenDialogSyncOptions} from 'electron';
 import {createSettingsWindow} from '../windows/settings/initSettings';
 import MainWindowDragState from '../windows/main/logic/MainWindowDragState';
 import {getFonts, IOptions} from 'font-list';
+import * as child_process from 'child_process';
 
 const listenRendererRequests = (): void => {
     ipcMain.handle('open-settings-window', () => {
@@ -42,6 +43,10 @@ const listenRendererRequests = (): void => {
         return getFonts(options).then(fonts => {
             return [...new Set([...fonts, 'Roboto'])].sort((a, b) => a.localeCompare(b));
         });
+    });
+
+    ipcMain.handle('child-process.exec-file', (event, path: string) => {
+        child_process.execFile(path);
     });
 };
 

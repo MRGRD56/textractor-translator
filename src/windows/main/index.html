@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Textractor Translator</title>
+    <style>.d-none { display: none !important; } body { overflow: hidden; }</style>
 <!--    &lt;!&ndash; https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP &ndash;&gt;-->
 <!--    <meta-->
 <!--            http-equiv="Content-Security-Policy"-->
@@ -13,7 +14,7 @@
 <!--            content="default-src 'self'; script-src 'self'"-->
 <!--    />-->
 </head>
-<body data-mw-drag="true">
+<body data-mw-drag="true" class="d-none">
 <style id="customizable-styles__main-window"></style>
 <style id="customizable-styles__original-text"></style>
 <style id="customizable-styles__translated-text"></style>
@@ -49,5 +50,10 @@
     </div>
 </div>
 
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.remove('d-none');
+    });
+</script>
 </body>
 </html>

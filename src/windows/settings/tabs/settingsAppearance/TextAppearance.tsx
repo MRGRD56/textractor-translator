@@ -3,9 +3,8 @@ import {ChangeStateHandler} from '../../../../hooks/useChangeStateHandler';
 import TextAppearanceConfig from '../../../../configuration/appearance/TextAppearanceConfig';
 import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 import useInstalledFontsOptions from '../../../../hooks/useInstalledFontsOptions';
-import InputColor from '../../../../components/inputColor/InputColor';
-import {Button, Select, SelectProps, Slider, Space} from 'antd';
-import {percentageFormatter, pxFormatter} from '../utils/formatters';
+import {Checkbox, Select, SelectProps} from 'antd';
+import {percentageFormatter} from '../utils/formatters';
 import {ItalicOutlined, UnderlineOutlined} from '@ant-design/icons';
 import CheckboxButton from '../../../../components/checkboxButton/CheckboxButton';
 import InputColorExtended from '../../../../components/inputColor/InputColorExtended';
@@ -15,6 +14,7 @@ import ValueSlider from '../../../../components/valueSlider/ValueSlider';
 const {ipcRenderer} = getSettingsNodeApi();
 
 interface Props {
+    type: 'original' | 'translated';
     appearance: TextAppearanceConfig;
     onAppearanceChange: ChangeStateHandler<TextAppearanceConfig>;
     mwAppearance: MainWindowAppearanceConfig;
@@ -59,13 +59,18 @@ const fontWeightsOptions: SelectProps['options'] = [
     }
 ];
 
-const TextAppearance: FC<Props> = ({appearance, onAppearanceChange, mwAppearance}) => {
+const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppearance}) => {
     const fontsOptions = useInstalledFontsOptions(ipcRenderer);
 
     return (
         <div className="settings-appearance-tab">
+            <div>
+                <Checkbox checked={appearance.isDisplayed} onChange={e => onAppearanceChange('isDisplayed')(e.target.checked)}>
+                    {type === 'original' ? 'Original text' : type === 'translated' ? 'Translated text' : 'Text'}{' '}visibility
+                </Checkbox>
+            </div>
+
             <label>
-                {/*TODO add clear button*/}
                 <span>Text color</span>
                 <InputColorExtended
                     value={appearance.textColor} onChange={onAppearanceChange('textColor')} allowClear

@@ -26,4 +26,4 @@ export enum SettingsTab {
     ABOUT = 'ABOUT'
 }
 
-export const defaultSettingsTab: SettingsTab = SettingsTab.PROFILES;
+export const defaultSettingsTab: SettingsTab = SettingsTab.TEXTRACTOR;

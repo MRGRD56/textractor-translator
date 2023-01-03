@@ -44,12 +44,12 @@ const SettingsAppearance: FC = () => {
             {
                 key: 'ORIGINAL_TEXT',
                 label: 'Original Text',
-                children: <TextAppearance appearance={originalTextAppearance} onAppearanceChange={handleOriginalTextAppearanceChange} mwAppearance={mwAppearance}/>
+                children: <TextAppearance type="original" appearance={originalTextAppearance} onAppearanceChange={handleOriginalTextAppearanceChange} mwAppearance={mwAppearance}/>
             },
             {
                 key: 'TRANSLATED_TEXT',
                 label: 'Translated Text',
-                children: <TextAppearance appearance={translatedTextAppearance} onAppearanceChange={handleTranslatedTextAppearanceChange} mwAppearance={mwAppearance}/>
+                children: <TextAppearance type="translated" appearance={translatedTextAppearance} onAppearanceChange={handleTranslatedTextAppearanceChange} mwAppearance={mwAppearance}/>
             }
         ];
     }, [mwAppearance, handleMwAppearanceChange, originalTextAppearance, handleOriginalTextAppearanceChange, translatedTextAppearance, handleTranslatedTextAppearanceChange]);

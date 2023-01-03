@@ -34,8 +34,6 @@ const handleDragElementChange = (event: MouseEvent, element: HTMLElement, lmbUpL
 
     const isLeftButtonPressed = Boolean(event.buttons & LEFT_MOUSE_BUTTON_CODE);
 
-    console.log('drag element change', {isDraggable, isLeftButtonPressed, event, eventButtons: event.buttons})
-
     if (isDraggable && isLeftButtonPressed) {
         if (!lmbUpListenerRef.current) {
             lmbUpListenerRef.current = (event) => {

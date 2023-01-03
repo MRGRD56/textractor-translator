@@ -2,15 +2,14 @@
 
 import electronStore from '../../electron-store/electronStore';
 import {contextBridge, ipcRenderer} from 'electron';
-import {GetTextractorPaths, TextractorPath, TextractorPaths, ValidateTextractorPath} from './types';
+import {GetTextractorPaths, TextractorPath, TextractorPaths} from './types';
 import * as fs from 'fs';
 import * as path from 'path';
 import {TextractorStatus} from './tabs/settingsTextractor/types';
-import * as child_process from 'child_process';
 import downloadFile from '../../utils/downloadFile';
 import {v4} from 'uuid';
+import validateTextractorPath from '../../utils/logic/validateTextractorPath';
 import decompress = require('decompress');
-import ref, {NullableRef, Ref} from '../../utils/ref';
 
 const TTBRIDGE_EXTENSION_NAME = 'TextractorTranslatorBridge';
 const TTBRIDGE_EXTENSION_FILENAME = `${TTBRIDGE_EXTENSION_NAME}.xdll`;
@@ -19,18 +18,6 @@ const EXTENSIONS_FILE = 'SavedExtensions.txt';
 
 const TTBRIDGE_X86_DOWNLOAD_URL = 'https://github.com/MRGRD56/MgTextractorExtensions/releases/download/TTBridge_v1.1.1/win_x86.zip';
 const TTBRIDGE_X64_DOWNLOAD_URL = 'https://github.com/MRGRD56/MgTextractorExtensions/releases/download/TTBridge_v1.1.1/win_x64.zip';
-
-const validateTextractorPath: ValidateTextractorPath = (exePath) => {
-    if (fs.existsSync(exePath)) {
-        if (fs.statSync(exePath).isFile()) {
-            if (path.basename(exePath) === 'Textractor.exe') {
-                return TextractorStatus.SUCCESS;
-            }
-        }
-    }
-
-    return TextractorStatus.ERROR;
-};
 
 const checkExtensionFileExistence = (textractorDirectory: string): boolean => {
     const ttbridgeLibraryPath = path.resolve(textractorDirectory, TTBRIDGE_EXTENSION_FILENAME);
@@ -108,7 +95,7 @@ const nodeApi = {
         } as TextractorPaths;
     }) as GetTextractorPaths,
     exec: (path: string): void => {
-        child_process.execFile(path);
+        ipcRenderer.invoke('child-process.exec-file', path);
     },
     checkTTBridgeStatus: (textractorExePath: string): TextractorStatus => {
         const textractorDirectory = path.dirname(textractorExePath);

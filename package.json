@@ -1,8 +1,8 @@
 {
   "name": "textractor-translator",
-  "productName": "textractor-translator",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "productName": "TextractorTranslator",
+  "version": "0.2.0",
+  "description": "Textractor Translator",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",

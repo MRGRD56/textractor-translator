@@ -1,0 +1,1 @@
+export type TextractorType = 'x86' | 'x64';

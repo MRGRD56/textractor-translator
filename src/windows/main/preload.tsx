@@ -156,6 +156,7 @@ const initAppearanceSettingsHandling = () => {
         readStoreStateLazy(electronStore, key, defaultConfig, (config) => {
             styleElement.innerHTML = `
                 ${styledSelector} {
+                    ${config.isDisplayed === false ? 'display: none !important;' : ''}
                     color: ${config.textColor || 'inherit'};
                     opacity: ${config.textOpacity == null ? 'inherit' : (config.textOpacity / 100)};
                     font-size: ${config.fontSize == null ? 'inherit' : config.fontSize + '%'};

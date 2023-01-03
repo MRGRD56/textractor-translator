@@ -4,6 +4,7 @@ import initElectronStore from './electron-store/initElectronStore';
 import initTabsContextMenu from './windows/settings/profiles/initTabsContextMenu';
 import listenRendererRequests from './utils/listenRendererRequests';
 import listenMainWindowRequests from './utils/listenMainWindowRequests';
+import autorunTextractor from './utils/logic/autorunTextractor';
 
 require('@electron/remote/main').initialize();
 
@@ -40,6 +41,7 @@ app.on('ready', () => {
     initTabsContextMenu();
     listenMainWindowRequests(mainWindow);
     listenRendererRequests();
+    autorunTextractor(store);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
