@@ -2,6 +2,8 @@
 
 <img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="600">
 
+### Demo: translating a visual novel from Japanese to English
+
 ![textractor-translator-v0 2 0-demo_3](https://user-images.githubusercontent.com/35491968/210839740-3f1b3801-1b06-4814-9dba-0a737b7890cd.gif)
 
 ### Version 0.2.0
