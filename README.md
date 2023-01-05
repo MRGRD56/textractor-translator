@@ -4,29 +4,29 @@
 
 ### Version 0.2.0
 
-#### Summer Pockets
+#### Summer Pockets `en -> ru`
 
 ![image](https://user-images.githubusercontent.com/35491968/210804578-bbef4152-c46c-4722-bd9e-3a6cdaadee4d.png)
 
 ### Version 2023-01-03
 
-#### Aokana
+#### Aokana `en -> ru`
 
 ![image](https://user-images.githubusercontent.com/35491968/210275440-7ccfa536-922f-4f72-bec8-d20c7f160f20.png)
 
 ### Version 2022-12-17
 
-#### Memoria
+#### Memoria `en -> ru`
 
 ![Без названия (4)](https://user-images.githubusercontent.com/35491968/208255633-71fe3183-2762-480d-a50c-7f88f5b69fb0.jpg)
 
-#### Aokana
+#### Aokana `en -> ru`
 
 ![image](https://user-images.githubusercontent.com/35491968/209694538-5e491b2f-25db-4418-b2e9-8ac6db492dab.png)
 
 ### Version 2022-12-05
 
-#### White Album 2
+#### White Album 2 `en -> ru`
 
 ![image](https://user-images.githubusercontent.com/35491968/205514998-f00fcb94-93c9-4bfd-8b73-bbbce2f1ee15.png)  
 
