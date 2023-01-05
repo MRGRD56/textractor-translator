@@ -37,6 +37,7 @@ It can be installed right in the app:
 - ⚠️ Fix dragging when history mode is enabled
 - Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
 - Add more appearance settings: text shadows, outline, text only background, vertical and horizontal text alignment
+- Add a dictionary of words, you can add words there while reading and learn them later
 
 ---
 
