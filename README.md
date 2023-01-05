@@ -2,7 +2,6 @@
 
 <img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="600">
 
-![textractor-translator-v0 2 0-demo_2](https://user-images.githubusercontent.com/35491968/210834896-4e10696a-e07f-4935-9d19-2ecf394194b7.gif)
 ![textractor-translator-v0 2 0-demo_3](https://user-images.githubusercontent.com/35491968/210839740-3f1b3801-1b06-4814-9dba-0a737b7890cd.gif)
 
 ### Version 0.2.0
