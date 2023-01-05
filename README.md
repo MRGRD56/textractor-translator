@@ -1,6 +1,8 @@
 # Textractor Translator `under development`
 
-<img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="800">
+<img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="600">
+
+![textractor-translator-v0 2 0-demo_2](https://user-images.githubusercontent.com/35491968/210834896-4e10696a-e07f-4935-9d19-2ecf394194b7.gif)
 
 ### Version 0.2.0
 
