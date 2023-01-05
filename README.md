@@ -38,6 +38,9 @@ It can be installed right in the app:
 - Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
 - Add more appearance settings: text shadows, outline, text only background, vertical and horizontal text alignment
 - Add a dictionary of words, you can add words there while reading and learn them later
+- Add DeepL translator, improve custom translator creating feature
+- Maybe move languages and translator settings somewhere from profiles code
+- Profiles: add translator and languages options to `config.transformOriginal`
 
 ---
 
