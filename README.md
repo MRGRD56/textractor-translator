@@ -43,6 +43,8 @@ It can be installed right in the app:
 
 - ⚠️ Add a "retry" button if an error occurred while translating
 - ⚠️ Fix dragging when history mode is enabled
+- Limit history size
+- Maybe save history to the storage and also add "clear history" button
 - Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
 - Add more appearance settings: text shadows, outline, text only background, vertical and horizontal text alignment
 - Add a dictionary of words, you can add words there while reading and learn them later
