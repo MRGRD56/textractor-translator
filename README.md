@@ -31,6 +31,13 @@ It can be installed right in the app:
 ![image](https://user-images.githubusercontent.com/35491968/209697469-ba47b501-9c52-4a22-9c48-a43d8fb4089d.png)
 
 
+#### Ideas to be implemented in the future
+
+- ⚠️ Add a "retry" button if an error occurred while translating
+- ⚠️ Fix dragging when history mode is enabled
+- Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
+- Add more appearance settings: text shadows, outline, text only background, vertical and horizontal text alignment
+
 ---
 
 __`readme` coming soon...__
