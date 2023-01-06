@@ -45,6 +45,8 @@ It can be installed right in the app:
 
 - ⚠️ Add a "retry" button if an error occurred while translating, also add auto retries
 - ⚠️ Fix dragging when history mode is enabled
+- Maybe return `200 OK` immediately after a reqeust (`/sentence`) to the app
+- If Textractor Translator is not running, TTBridge shows errors when sending `/sentence` requests to the app, so Textractor crashes
 - Sometimes Google Translator works incorrectly, returning incomplete sentences as a translation, fix it if possible
 - Limit history size
 - Maybe add "export history" feature
