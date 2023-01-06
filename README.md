@@ -45,7 +45,9 @@ It can be installed right in the app:
 
 - ⚠️ Add a "retry" button if an error occurred while translating, also add auto retries
 - ⚠️ Fix dragging when history mode is enabled
+- Sometimes Google Translator works incorrectly, returning incomplete sentences as a translation, fix it if possible
 - Limit history size
+- Maybe add "export history" feature
 - Maybe save history to the storage and also add "clear history" button
 - Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
 - Add more appearance settings: text shadows, outline, text only background, vertical and horizontal text alignment
