@@ -43,7 +43,7 @@ It can be installed right in the app:
 
 #### Ideas to be implemented in the future
 
-- ⚠️ Add a "retry" button if an error occurred while translating
+- ⚠️ Add a "retry" button if an error occurred while translating, also add auto retries
 - ⚠️ Fix dragging when history mode is enabled
 - Limit history size
 - Maybe save history to the storage and also add "clear history" button
