@@ -53,6 +53,8 @@ It can be installed right in the app:
 - Add DeepL translator, improve custom translator creating feature
 - Maybe move languages and translator settings somewhere from profiles code
 - Profiles: add translator and languages options to `config.transformOriginal`
+- Profiles: add `translators` object with predefined translators (objects, not names) in it
+- Add Google Translate extension if it's possible
 
 ---
 
