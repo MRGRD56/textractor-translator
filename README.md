@@ -59,6 +59,7 @@ It can be installed right in the app:
 - Profiles: add translator and languages options to `config.transformOriginal`
 - Profiles: add `translators` object with predefined translators (objects, not names) in it
 - Add Google Translate extension if it's possible
+- Add a `global` object so it's possible to store some global (mutable) variables
 
 ---
 
