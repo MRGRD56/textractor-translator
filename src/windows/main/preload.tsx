@@ -7,7 +7,8 @@ import electronStore from '../../electron-store/electronStore';
 import {StoreKeys} from '../../constants/store-keys';
 import MainWindowAppearanceConfig, {
     defaultMainWindowAppearance,
-    MainWindowDragMode
+    MainWindowDragMode,
+    TextOutlineType
 } from '../../configuration/appearance/MainWindowAppearanceConfig';
 import addColorAlpha from '../../utils/addColorAlpha';
 import initWindowDragger from './logic/initWindowDragger';
@@ -103,6 +104,35 @@ const initToolbar = () => {
     }, 2000);
 };
 
+const getTextOutlineCss = (config: MainWindowAppearanceConfig): string => {
+    const {textOutlineType} = config;
+    if (!textOutlineType) {
+        return '';
+    }
+
+    const {textOutlineThickness, textOutlineColor} = config;
+
+    if (textOutlineType === TextOutlineType.OUTER) {
+        const textShadow =
+            `-${textOutlineThickness}px -${textOutlineThickness}px 0 ${textOutlineColor},
+             0                         -${textOutlineThickness}px 0 ${textOutlineColor},
+             ${textOutlineThickness}px -${textOutlineThickness}px 0 ${textOutlineColor},
+             ${textOutlineThickness}px  0                         0 ${textOutlineColor},
+             ${textOutlineThickness}px  ${textOutlineThickness}px 0 ${textOutlineColor},
+             0                          ${textOutlineThickness}px 0 ${textOutlineColor},
+            -${textOutlineThickness}px  ${textOutlineThickness}px 0 ${textOutlineColor},
+            -${textOutlineThickness}px  0                         0 ${textOutlineColor}`;
+
+        return `text-shadow: ${textShadow};`;
+    }
+
+    if (textOutlineType === TextOutlineType.INNER) {
+        return `-webkit-text-stroke: ${textOutlineThickness}px ${textOutlineColor};`;
+    }
+
+    return '';
+};
+
 const initAppearanceSettingsHandling = () => {
     const mainWindowStyleElement = document.getElementById('customizable-styles__main-window')!;
     const originalTextStyleElement = document.getElementById('customizable-styles__original-text')!;
@@ -124,6 +154,7 @@ const initAppearanceSettingsHandling = () => {
                 font-size: ${config.fontSize ?? 20}px;
                 line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
                 padding: ${config.paddingTop ?? 8}px ${config.paddingRight ?? 10}px ${config.paddingBottom ?? 8}px ${config.paddingLeft ?? 10}px;
+                ${getTextOutlineCss(config)}
             }
             
             .main-toolbar {
@@ -165,6 +196,12 @@ const initAppearanceSettingsHandling = () => {
                     font-style: ${config.isItalic ? 'italic' : 'normal'};
                     text-decoration: ${config.isUnderlined ? 'underline' : 'none'};
                     line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+                    
+                    transition: opacity 0.12s ease-in;
+                }
+                
+                html:not(:hover) ${styledSelector} {
+                    ${config.isDisplayedOnHoverOnly ? 'opacity: 0;' : ''}
                 }
             `;
         });

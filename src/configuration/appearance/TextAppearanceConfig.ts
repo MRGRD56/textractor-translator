@@ -1,5 +1,6 @@
 interface TextAppearanceConfig {
     isDisplayed: boolean;
+    isDisplayedOnHoverOnly: boolean;
     textColor?: string;
     textOpacity: number;
     fontSize: number;
@@ -15,6 +16,7 @@ export default TextAppearanceConfig;
 
 export const defaultOriginalTextAppearance: TextAppearanceConfig = {
     isDisplayed: true,
+    isDisplayedOnHoverOnly: false,
     textColor: undefined,
     textOpacity: 92,
     fontSize: 85,

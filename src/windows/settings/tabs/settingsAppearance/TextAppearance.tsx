@@ -70,6 +70,12 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
                 </Checkbox>
             </div>
 
+            <div>
+                <Checkbox disabled={!appearance.isDisplayed} checked={appearance.isDisplayedOnHoverOnly} onChange={e => onAppearanceChange('isDisplayedOnHoverOnly')(e.target.checked)}>
+                    Show only on hover
+                </Checkbox>
+            </div>
+
             <label>
                 <span>Text color</span>
                 <InputColorExtended

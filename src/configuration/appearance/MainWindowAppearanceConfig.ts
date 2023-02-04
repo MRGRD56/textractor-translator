@@ -6,6 +6,11 @@ export enum MainWindowDragMode {
     PANEL = 'PANEL'
 }
 
+export enum TextOutlineType {
+    OUTER = 'OUTER',
+    INNER = 'INNER'
+}
+
 interface MainWindowAppearanceConfig {
     windowDragMode: MainWindowDragMode;
     backgroundColor: string;
@@ -25,6 +30,9 @@ interface MainWindowAppearanceConfig {
     paddingRight: number;
     paddingBottom: number;
     paddingLeft: number;
+    textOutlineType: TextOutlineType | undefined;
+    textOutlineColor: string;
+    textOutlineThickness: number;
 }
 
 export default MainWindowAppearanceConfig;
@@ -47,5 +55,8 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     paddingTop: 8,
     paddingRight: 10,
     paddingBottom: 8,
-    paddingLeft: 10
+    paddingLeft: 10,
+    textOutlineType: undefined,
+    textOutlineColor: '#000000',
+    textOutlineThickness: 1.2
 };

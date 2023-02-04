@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import {InputNumber, Radio, Select, Slider, Tooltip} from 'antd';
 import MainWindowAppearanceConfig, {
-    MainWindowDragMode
+    MainWindowDragMode, TextOutlineType
 } from '../../../../configuration/appearance/MainWindowAppearanceConfig';
 import InputColor from '../../../../components/inputColor/InputColor';
 import {ChangeStateHandler} from '../../../../hooks/useChangeStateHandler';
@@ -122,6 +122,32 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                     </Tooltip>
                 </div>
             </div>
+
+            <label>
+                <span>Text outline</span>
+                <Select
+                    value={appearance.textOutlineType}
+                    onChange={onAppearanceChange('textOutlineType')}
+                >
+                    <Select.Option key={undefined}>None</Select.Option>
+                    <Select.Option key={TextOutlineType.OUTER}>Outer</Select.Option>
+                    <Select.Option key={TextOutlineType.INNER}>Inner</Select.Option>
+                </Select>
+            </label>
+
+            {appearance.textOutlineType ? (
+                <>
+                    <label>
+                        <span>Outline color</span>
+                        <InputColor value={appearance.textOutlineColor} onChange={onAppearanceChange('textOutlineColor')}/>
+                    </label>
+
+                    <label>
+                        <span>Outline width</span>
+                        <ValueSlider min={0} max={10} step={0.1} value={appearance.textOutlineThickness} onChange={onAppearanceChange('textOutlineThickness')} tipFormatter={pxFormatter}/>
+                    </label>
+                </>
+            ) : null}
         </div>
     );
 };
