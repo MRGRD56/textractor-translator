@@ -6,6 +6,12 @@
 
 ![textractor-translator-v0 2 0-demo_3](https://user-images.githubusercontent.com/35491968/210839740-3f1b3801-1b06-4814-9dba-0a737b7890cd.gif)
 
+### Version 0.2.1
+
+#### Summer Pockets `en` -> `ru`
+
+![image](https://user-images.githubusercontent.com/35491968/216782294-7ac22557-c6a8-40c1-968f-9ad88c8ec810.png)
+
 ### Version 0.2.0
 
 #### Summer Pockets `en -> ru`
@@ -52,7 +58,7 @@ It can be installed right in the app:
 - Maybe add "export history" feature
 - Maybe save history to the storage and also add "clear history" button
 - Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
-- Add more appearance settings: text shadows, outline, text only background, vertical and horizontal text alignment
+- Add more appearance settings: text shadows, outline (✅), text only background, vertical and horizontal text alignment
 - Add a dictionary of words, you can add words there while reading and learn them later
 - Add DeepL translator, improve custom translator creating feature
 - Maybe move languages and translator settings somewhere from profiles code
