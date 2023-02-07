@@ -8,7 +8,7 @@
 
 ### Version 0.2.1
 
-#### Summer Pockets `en` -> `ru`
+#### Summer Pockets `en -> ru`
 
 ![image](https://user-images.githubusercontent.com/35491968/216782294-7ac22557-c6a8-40c1-968f-9ad88c8ec810.png)
 
