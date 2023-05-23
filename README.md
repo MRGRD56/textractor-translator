@@ -68,6 +68,7 @@ It can be installed right in the app:
 - Add a `global` object so it's possible to store some global (mutable) variables
 - Fix this:  
 ![image](https://user-images.githubusercontent.com/35491968/215345061-34eb33c0-68f2-4651-b826-422856eff69c.png)
+- Добавить возможность настраивать конфиг TTBridge (и вернуть туда JSON конфиг), включая возможность настройки порта для коммуникации TTBridge и Textractor Translator 
 
 ---
 
