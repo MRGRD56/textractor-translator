@@ -53,22 +53,23 @@ It can be installed right in the app:
 - ⚠️ Fix dragging when history mode is enabled
 - Maybe return `200 OK` immediately after a reqeust (`/sentence`) to the app
 - If Textractor Translator is not running, TTBridge shows errors when sending `/sentence` requests to the app, so Textractor crashes
-- Sometimes Google Translator works incorrectly, returning incomplete sentences as a translation, fix it if possible
+- <u>Sometimes Google Translator works incorrectly, returning incomplete sentences as a translation, fix it if possible</u> (not possible)
 - Limit history size
-- Maybe add "export history" feature
-- Maybe save history to the storage and also add "clear history" button
-- Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
-- Add more appearance settings: text shadows, outline (✅), text only background, vertical and horizontal text alignment
+- ⏬ Maybe add "export history" feature
+- ⏬ Maybe save history to the storage and also add "clear history" button
+- ⏬ Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
+- ⏬ Add more appearance settings: text shadows, outline (✅), text only background, vertical and horizontal text alignment
 - Add a dictionary of words, you can add words there while reading and learn them later
 - Add DeepL translator, improve custom translator creating feature
 - Maybe move languages and translator settings somewhere from profiles code
 - Profiles: add translator and languages options to `config.transformOriginal`
 - Profiles: add `translators` object with predefined translators (objects, not names) in it
-- Add Google Translate extension if it's possible
-- Add a `global` object so it's possible to store some global (mutable) variables
+- ⏬ Add Google Translate extension if it's possible
+- Add a `global` object so that it's possible to store some global (mutable) variables
 - Fix this:  
 ![image](https://user-images.githubusercontent.com/35491968/215345061-34eb33c0-68f2-4651-b826-422856eff69c.png)
 - Добавить возможность настраивать конфиг TTBridge (и вернуть туда JSON конфиг), включая возможность настройки порта для коммуникации TTBridge и Textractor Translator 
+- Добавить перевод с контекстом для более точного перевода
 
 ---
 
