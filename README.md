@@ -73,4 +73,8 @@ It can be installed right in the app:
 
 ---
 
+See also: https://github.com/MRGRD56/RealTimeTranslator
+
+---
+
 __`readme` coming soon...__
