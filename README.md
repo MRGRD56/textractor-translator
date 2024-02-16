@@ -109,7 +109,7 @@ common.style = (text, css) => {
 };
 ```
 
-##### Siglis
+##### Siglus Engine
 
 ```js
 config.transformOriginal = ({text, meta}) => {
