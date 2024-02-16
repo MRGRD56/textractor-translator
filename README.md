@@ -52,6 +52,194 @@ Requires `TextractorTranslatorBridge.xdll` or `HttpSender.xdll` extension for Te
 It can be installed right in the app:  
 ![image](https://user-images.githubusercontent.com/35491968/209697469-ba47b501-9c52-4a22-9c48-a43d8fb4089d.png)
 
+#### Some configs that can be used
+
+##### Common
+
+```js
+config.languages = {
+    source: 'en',
+    target: 'ru'
+};
+
+config.translator = 'GOOGLE_TRANSLATE';
+
+// config.translator = {
+//     translate: (text, sourceLanguage, targetLanguage) => {
+//         if (/^[.,-?"']*$/.test(text)) {
+//             return text;
+//         }
+// 
+//         return 
+//     }
+// };
+
+config.transformOriginal = ({text, meta}) => {
+    if (text.startsWith('Textractor:') || text.startsWith('vnreng:')) {
+        return undefined;
+    }
+
+    return text;
+};
+
+config.transformTranslated = (text) => {
+    return {
+        plain: text,
+        displayed: common.htmlifyText(text),
+        isHtml: true
+    };
+};
+
+const nameColor = '#ef9a9a';
+
+/** @param {string} text */
+common.htmlifyText = (text) => {
+    return text
+        .replace(/^([^:]+?): ["«](.+)["»][.!?]?$/, '<span style="color: ' + nameColor + ';">$1:</span> «$2»')
+};
+
+/** @param {string} text */
+common.htmlifyTextJa = (text) => {
+    return text
+        .replace(/^([^:]+?): 「(.+)」[.!?]?$/, '<span style="color: ' + nameColor + ';">$1:</span> 「$2」')
+};
+
+common.style = (text, css) => {
+    return `<span style="${css}">${text}</span>`;
+};
+```
+
+##### Siglis
+
+```js
+config.transformOriginal = ({text, meta}) => {
+    text = commonConfig.transformOriginal({text, meta});
+    if (!text) {
+        return text;
+    }
+
+    const result = text
+        .replaceAll(/([a-z]\d){2,}/g, '')
+        .replaceAll(/_stage_action/g, '');
+        
+    if (!result?.trim()) {
+        return;
+    }
+
+    return result;
+};
+
+config.transformTranslated = (text) => text
+    .replaceAll('…', '...');
+```
+
+##### Aokana EN
+
+```js
+const {style, htmlifyText} = common;
+
+config.transformOriginal = ({text, meta}) => {
+    text = commonConfig.transformOriginal({text, meta});
+    if (!text) {
+        return;
+    }
+
+    const englishText = /([【　].+?)␂/.exec(text)?.[1]?.trim();
+
+    if (!englishText) {
+        return;
+    }
+
+    const plainText = englishText
+        .replace(/^【(.+?)】：(.+)$/, '$1: "$2"');
+
+    if (!plainText) {
+        return;
+    }
+
+    return {
+        plain: plainText,
+        displayed: htmlifyText(plainText),
+        isHtml: true
+    };
+};
+```
+
+##### Aokana JA
+
+```js
+const {style, htmlifyText, htmlifyTextJa} = common;
+
+config.languages.source = 'ja';
+config.languages.target = 'en';
+
+config.transformOriginal = ({text, meta}) => {
+    text = commonConfig.transformOriginal({text, meta});
+    if (!text) {
+        return;
+    }
+
+    const japaneseText = /␂([【　]?.+?)␂/.exec(text)?.[1]?.trim();
+
+    if (!japaneseText) {
+        return;
+    }
+
+    const plainText = japaneseText
+        .replace(/^【(.+?)】：(.+)$/, '$1: $2');
+
+    if (!plainText) {
+        return;
+    }
+
+    return {
+        plain: plainText,
+        displayed: htmlifyTextJa(plainText),
+        isHtml: true
+    };
+};
+```
+
+##### White Album 2
+
+```js
+// /** @param {string} text */
+// const htmlifyText = (text) => {
+//     return text
+//         .replace(/^([^:]+?): ["«](.+)["»][.!?]?$/, '<span style="color: #ffcdd2;">$1:</span> «$2»')
+// };
+
+config.transformOriginal = ({text, meta}) => {
+    text = commonConfig.transformOriginal({text, meta});
+    if (!text) {
+        return;
+    }
+
+    if (/^mv\d+$/.test(text) || text === 'sepia.AMP') {
+        return;
+    }
+
+    const normalText = text
+        .replaceAll('~', ',')
+        .replaceAll('\\n', ' ')
+        .replaceAll('�c', '...')
+        .replaceAll('�`', '~')
+        .replaceAll('�[', ' - ')
+        .replaceAll('\\k', '❄️');
+    
+    const plainText = normalText
+        .replace(/^([^:"]+?)"(.+)"$/, '$1: "$2"');
+
+    // const displayedText = normalText
+    //     .replace(/^(.+?)"(.*)"$/, '<b style="color: #ffcdd2;">$1:</b> "$2"');
+    
+    return {
+        plain: plainText,
+        displayed: common.htmlifyText(plainText),
+        isHtml: true
+    };
+};
+```
 
 #### Ideas to be implemented in the future
 
