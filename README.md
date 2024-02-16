@@ -8,7 +8,7 @@ It requires [Textractor](https://github.com/Artikash/Textractor) to work. I don'
 It's in early stage of development and not every visual novel can be translated using it.  
 You need some JavaScript knowledge to configure and use this application.
 
-The purpose of this software is to make Textractor as customizable as possible (it's not yet), be able to configure it individually for each game (it's not so convenient yet).
+The purpose of this software is to be able to customize Textractor in terms of parsing, modifying and translating texts for each separate game.
 
 ### Demo: translating a visual novel from Japanese to English
 
