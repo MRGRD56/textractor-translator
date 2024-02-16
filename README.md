@@ -3,7 +3,7 @@
 <img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="600">
 
 Lets you translate visual novels in real time, while reading.  
-It requires [Textractor](https://github.com/Artikash/Textractor) to work.
+It requires [Textractor](https://github.com/Artikash/Textractor) to work. I don't have anything to do with the original software (Textractor) developers.
 
 It's in early stage of development and not every visual novel can be translated using it.  
 You need some JavaScript knowledge to configure and use this application.
