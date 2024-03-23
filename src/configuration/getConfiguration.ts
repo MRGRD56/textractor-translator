@@ -6,6 +6,7 @@ import transformTranslated from '../transformation/transformTranslated';
 interface CommonConfigContext {
     config: Configuration;
     common: object;
+    memory: object;
 }
 
 interface CustomConfigContext extends CommonConfigContext {
@@ -23,6 +24,8 @@ const safeEvalVoid = (code: string, context?: Record<string, any>): void => {
     safeEval(functionCode, context);
 };
 
+const memory = {};
+
 const getCommonConfiguration = (configSourceCode: string | undefined): CommonConfigContext => {
     const context: CommonConfigContext = {
         config: {
@@ -34,7 +37,8 @@ const getCommonConfiguration = (configSourceCode: string | undefined): CommonCon
             transformOriginal: undefined,
             transformTranslated: undefined
         },
-        common: {}
+        common: {},
+        memory
     };
 
     if (configSourceCode != null) {
@@ -57,7 +61,8 @@ const getConfiguration = (commonConfigSourceCode: string | undefined, configSour
     const context: CustomConfigContext = {
         common: commonConfigContext.common,
         commonConfig: commonConfigContext.config,
-        config: {...commonConfigContext.config}
+        config: {...commonConfigContext.config},
+        memory
     };
 
     safeEvalVoid(configSourceCode, context);

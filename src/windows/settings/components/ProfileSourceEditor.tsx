@@ -16,6 +16,7 @@ const initializeMonacoTypes = (isCommon: boolean) => {
             content: configDeclarationsUsable + `
 declare const config: Configuration;
 const common: object;
+const memory: object;
 `.trimEnd() + (isCommon ? '' : `
 
 declare const commonConfig: Configuration;

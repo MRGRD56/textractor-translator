@@ -3,6 +3,7 @@ import {Configuration, OptionalTransformedText, Sentence} from '../../../configu
 import getTranslator from '../../../translation/getTranslator';
 import Store from 'electron-store';
 import getProfileConfig from '../../../configuration/getProfileConfig';
+import nodeConsole from '../../../utils/nodeConsole';
 
 const translateText = (originalText: string, config: Configuration): Promise<string> => {
     return getTranslator(config.translator)?.translate(originalText, config.languages.source, config.languages.target);
@@ -85,7 +86,7 @@ const workTextractorServer = () => {
         const multiTransformedText = config.transformOriginal?.(sentence);
         const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
 
-        console.log('New Sentence', {sentence, transformedTexts});
+        nodeConsole.log('New Sentence', {sentence, transformedTexts});
 
         for (const transformedText of transformedTexts) {
             if (transformedText !== undefined) {
