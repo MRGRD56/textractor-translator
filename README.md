@@ -273,6 +273,7 @@ config.transformOriginal = ({text, meta}) => {
         .replaceAll(/\\n/g, ' ')
         .replaceAll(/\\\w/g, '')
         .replaceAll('�', '\'')
+        .replaceAll('#4', '~')
         .trim();
     
     if (!plainText) {
