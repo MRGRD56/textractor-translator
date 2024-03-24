@@ -65,17 +65,31 @@ config.languages = {
     target: 'ru'
 };
 
-config.translator = 'GOOGLE_TRANSLATE';
+// implements caching translations of not really long sentences
+// also optimizes translation if there are no English letters in text when translating from English - this kind of text returns as is
+config.translator = {
+    translate: async (text, sourceLanguage, targetLanguage) => {
+        const googleTranslate = () => DefinedTranslators.GOOGLE_TRANSLATE.translate(text, sourceLanguage, targetLanguage);
 
-// config.translator = {
-//     translate: (text, sourceLanguage, targetLanguage) => {
-//         if (/^[.,-?"']*$/.test(text)) {
-//             return text;
-//         }
-// 
-//         return 
-//     }
-// };
+        if (sourceLanguage === 'en' && !/[a-z]+/i.test(text)) {
+            return text;
+        }
+
+        if (text.length <= 50) {
+            const translatedCache = memory.translatedCache ??= {};
+            const cachedTranslation = translatedCache[text];
+            if (cachedTranslation === undefined) {
+                const translation = await googleTranslate();
+                translatedCache[text] = translation;
+                return translation;
+            } else {
+                return cachedTranslation;
+            }
+        }
+
+        return DefinedTranslators.GOOGLE_TRANSLATE.translate(text, sourceLanguage, targetLanguage);
+    }
+};
 
 config.transformOriginal = ({text, meta}) => {
     if (text.startsWith('Textractor:') || text.startsWith('vnreng:')) {
@@ -240,6 +254,47 @@ config.transformOriginal = ({text, meta}) => {
         plain: plainText,
         displayed: common.htmlifyText(plainText),
         isHtml: true
+    };
+};
+```
+
+##### eden* PLUS+MOSAIC (English edition)
+
+```js
+config.transformOriginal = ({text, meta}) => {
+    console.log('transformOriginal called');
+
+    text = commonConfig.transformOriginal({text, meta});
+
+    if (!text) {
+        return;
+    }
+    
+    text = text
+        .replaceAll(/\S+\.(png|ogg|ani)/g, '')
+        .replaceAll(/\\n/g, ' ')
+        .replaceAll(/\\\w/g, '')
+        .trim();
+    
+    if (!text) {
+        return;
+    }
+
+    const plainText = text
+        .replaceAll('�', '\'');
+
+    return {
+        plain: plainText,
+        displayed: plainText,
+        isHtml: false
+    };
+};
+
+config.transformTranslated = (text) => {
+    return {
+        plain: text,
+        displayed: text,
+        isHtml: false
     };
 };
 ```
