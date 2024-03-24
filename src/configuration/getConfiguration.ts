@@ -1,12 +1,20 @@
-import {Configuration} from './Configuration';
+import {Configuration, DefinedTranslators} from './Configuration';
 import safeEval from 'safe-eval';
 import transformOriginal from '../transformation/transformOriginal';
 import transformTranslated from '../transformation/transformTranslated';
+import nodeConsole from '../utils/nodeConsole';
+import {DefinedTranslatorsImpl} from '../translation/DefinedTranslators';
+import httpRequest from '../utils/httpRequest';
+import * as queryString from 'query-string';
 
 interface CommonConfigContext {
     config: Configuration;
     common: object;
     memory: object;
+    DefinedTranslators: DefinedTranslators;
+    httpRequest: typeof httpRequest;
+    queryString: typeof queryString
+    // console: Console;
 }
 
 interface CustomConfigContext extends CommonConfigContext {
@@ -29,16 +37,20 @@ const memory = {};
 const getCommonConfiguration = (configSourceCode: string | undefined): CommonConfigContext => {
     const context: CommonConfigContext = {
         config: {
-            translator: 'GOOGLE_TRANSLATE',
+            translator: DefinedTranslatorsImpl.INSTANCE.GOOGLE_TRANSLATE,
             languages: {
-                source: 'en',
+                source: 'auto',
                 target: 'en'
             },
             transformOriginal: undefined,
             transformTranslated: undefined
         },
         common: {},
-        memory
+        memory,
+        DefinedTranslators: DefinedTranslatorsImpl.INSTANCE,
+        httpRequest,
+        queryString
+        // console: rendererConsole
     };
 
     if (configSourceCode != null) {
@@ -52,22 +64,32 @@ const getCommonConfiguration = (configSourceCode: string | undefined): CommonCon
 };
 
 const getConfiguration = (commonConfigSourceCode: string | undefined, configSourceCode: string | undefined): Configuration => {
-    const commonConfigContext = getCommonConfiguration(commonConfigSourceCode);
+    try {
+        const commonConfigContext = getCommonConfiguration(commonConfigSourceCode);
 
-    if (configSourceCode == null) {
-        return commonConfigContext.config;
+        if (configSourceCode == null) {
+            return commonConfigContext.config;
+        }
+
+        const context: CustomConfigContext = {
+            common: commonConfigContext.common,
+            commonConfig: commonConfigContext.config,
+            config: {...commonConfigContext.config},
+            memory,
+            DefinedTranslators: DefinedTranslatorsImpl.INSTANCE,
+            httpRequest,
+            queryString
+            // console: console
+        };
+
+        safeEvalVoid(configSourceCode, context);
+
+        return context.config;
+    } catch (e) {
+        console.error('Error loading configuration', e);
+        nodeConsole.error('Error loading configuration', e);
+        throw e;
     }
-
-    const context: CustomConfigContext = {
-        common: commonConfigContext.common,
-        commonConfig: commonConfigContext.config,
-        config: {...commonConfigContext.config},
-        memory
-    };
-
-    safeEvalVoid(configSourceCode, context);
-
-    return context.config;
 };
 
 export default getConfiguration;

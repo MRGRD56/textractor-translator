@@ -11,10 +11,15 @@ export interface SentenceMeta {
     timestamp: number;
 }
 
-export type DefinedTranslator = 'GOOGLE_TRANSLATE' | 'X_IDENTITY' | 'X_INFINITE' | 'X_NONE';
-
 export interface Translator {
     translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string>;
+}
+
+export interface DefinedTranslators {
+    GOOGLE_TRANSLATE: Translator,
+    X_IDENTITY: Translator,
+    X_INFINITE: Translator,
+    X_NONE: Translator
 }
 
 export interface DisplayedTransformedText {
@@ -29,7 +34,7 @@ export type TransformedText = DisplayedTransformedText | string;
 export type MultiTransformedText = OptionalTransformedText | OptionalTransformedText[];
 
 export interface Configuration {
-    translator: DefinedTranslator | Translator;
+    translator: Translator;
     languages: {
         source: string;
         target: string;

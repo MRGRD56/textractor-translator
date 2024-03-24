@@ -5,7 +5,7 @@ import SavedProfiles from '../profiles/SavedProfiles';
 import tabsCore, {ProfileTabs, TabsApi, TabsChange, TabsChangeCause} from '../../../utils/tabsCore';
 import SavedProfile from '../profiles/SavedProfile';
 import {useDidMount} from 'rooks';
-import {SAVED_PROFILES_KEY} from '../../../constants/store-keys';
+import {StoreKeys} from '../../../constants/store-keys';
 import {savedProfilesToTabs, tabsToSavedProfiles} from '../profiles/profileTabConversions';
 import {COMMON_PROFILE_ID, NEW_PROFILE_NAME} from '../profiles/constants';
 import {deleteProfile} from '../utils/profiles';
@@ -27,7 +27,7 @@ config.languages = {
     target: 'en'
 };
 
-config.translator = 'GOOGLE_TRANSLATE';
+config.translator = DefinedTranslators.GOOGLE_TRANSLATE;
 `.trim()
             },
             {
@@ -61,7 +61,7 @@ const SettingsProfiles: FC = () => {
     }, [savedProfiles]);
 
     useDidMount(async () => {
-        const loadedSavedProfiles: SavedProfiles = await store.get(SAVED_PROFILES_KEY, initialSavedProfiles);
+        const loadedSavedProfiles: SavedProfiles = await store.get(StoreKeys.SAVED_PROFILES, initialSavedProfiles);
         const loadedTabs = savedProfilesToTabs(loadedSavedProfiles);
         const loadedTabsApi = tabsCore(loadedTabs)
         setSavedProfiles(loadedSavedProfiles);
@@ -69,7 +69,7 @@ const SettingsProfiles: FC = () => {
     });
 
     const handleTabsChange = useCallback((tabs: ProfileTabs, changes: TabsChange[]) => {
-        store.get<SavedProfiles>(SAVED_PROFILES_KEY).then((savedProfiles) => {
+        store.get<SavedProfiles>(StoreKeys.SAVED_PROFILES).then((savedProfiles) => {
             savedProfiles ??= initialSavedProfiles;
 
             const closedEmptyTabIds = changes
@@ -92,7 +92,7 @@ const SettingsProfiles: FC = () => {
                 newSavedProfiles = deleteProfile(newSavedProfiles, closedEmptyTabIds)
             }
 
-            store.set(SAVED_PROFILES_KEY, newSavedProfiles);
+            store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles);
             console.log('set SAVED_PROFILES handleTabsChange', {newSavedProfiles})
             setSavedProfiles(newSavedProfiles);
         });
@@ -111,7 +111,7 @@ const SettingsProfiles: FC = () => {
         console.log('newSavedProfiles', newSavedProfiles);
 
         setSavedProfiles(newSavedProfiles);
-        store.set(SAVED_PROFILES_KEY, newSavedProfiles)
+        store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles)
         console.log('set SAVED_PROFILES handleProfileActivate', {newSavedProfiles})
         tabsApi?.setTabsObject(savedProfilesToTabs(newSavedProfiles));
     }, [savedProfiles, tabsApi]);
@@ -136,7 +136,7 @@ const SettingsProfiles: FC = () => {
                 })
             };
 
-            store.set(SAVED_PROFILES_KEY, newSavedProfiles);
+            store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles);
             console.log('set SAVED_PROFILES handleActiveProfileSourceChange', {newSavedProfiles})
             return newSavedProfiles;
         });
@@ -144,7 +144,7 @@ const SettingsProfiles: FC = () => {
 
     const handleProfilesChange = useCallback((newSavedProfiles: SavedProfiles) => {
         setSavedProfiles(newSavedProfiles);
-        store.set(SAVED_PROFILES_KEY, newSavedProfiles);
+        store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles);
         tabsApi?.setTabsObject(savedProfilesToTabs(newSavedProfiles));
     }, [tabsApi]);
 

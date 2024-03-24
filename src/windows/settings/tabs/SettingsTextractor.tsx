@@ -172,7 +172,7 @@ const SettingsTextractor: FC = () => {
 
             <div>Required to send sentences to Textractor Translator</div>
 
-            <h3 className="ttbridge-version-heading">TTBridge x86</h3>
+            <h3 className="ttbridge-version-heading">TextractorPipe x86</h3>
             <Space>
                 <Button
                     type={ttbridgeX86?.status === TextractorStatus.SUCCESS ? 'default' : 'primary'}
@@ -188,7 +188,7 @@ const SettingsTextractor: FC = () => {
                 </Space>
             </Space>
 
-            <h3 className="ttbridge-version-heading">TTBridge x64</h3>
+            <h3 className="ttbridge-version-heading">TextractorPipe x64</h3>
             <Space>
                 <Button
                     type={ttbridgeX64?.status === TextractorStatus.SUCCESS ? 'default' : 'primary'}

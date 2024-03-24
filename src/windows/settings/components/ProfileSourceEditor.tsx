@@ -2,14 +2,28 @@ import React, {FC, useEffect} from 'react';
 // @ts-ignore
 // eslint-disable-next-line
 import configurationDeclarations from "!!raw-loader!../../../configuration/Configuration";
+// @ts-ignore
+// eslint-disable-next-line
+import electronRequestDeclarations from '!!raw-loader!electron-request/dist/index'
+// @ts-ignore
+// eslint-disable-next-line
+// import queryStringDeclarations from '!!raw-loader!query-string/index'
 import * as monaco from 'monaco-editor';
 import SavedProfile from '../profiles/SavedProfile';
 import {COMMON_PROFILE_ID} from '../profiles/constants';
 
 const initializeMonacoTypes = (isCommon: boolean) => {
-    const configDeclarationsUsable = configurationDeclarations
+    const declarations = [
+        electronRequestDeclarations.toString()
+            .replace(/declare const main:.*;/g, ''),
+        configurationDeclarations,
+    ];
+
+    const configDeclarationsUsable = declarations
+        .join('\n\n')
         .replace(/export default \w+;?/, '')
-        .replace(/export ([a-z]+) /g, '$1 ');
+        .replace(/export ([a-z]+) /g, '$1 ')
+        .replace(/export \{.*};/g, '');
 
     monaco.languages.typescript.javascriptDefaults.setExtraLibs([
         {
@@ -17,6 +31,9 @@ const initializeMonacoTypes = (isCommon: boolean) => {
 declare const config: Configuration;
 const common: object;
 const memory: object;
+const DefinedTranslators: DefinedTranslators;
+const httpRequest: (requestURL: string, options?: Options) => Promise<Response>;
+const queryString: any;
 `.trimEnd() + (isCommon ? '' : `
 
 declare const commonConfig: Configuration;
@@ -69,7 +86,7 @@ const ProfileSourceEditor: FC<Props> = ({profile, onSourceChange}) => {
 
     return (
         <div className="settings-profile-editor-wrapper">
-            <div id="original-text-transformer-javascript" className="original-text-transformer-editor" />
+            <div id="original-text-transformer-javascript" className="original-text-transformer-editor"/>
         </div>
     );
 };

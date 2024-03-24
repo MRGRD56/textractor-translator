@@ -11,13 +11,13 @@ import {v4} from 'uuid';
 import validateTextractorPath from '../../utils/logic/validateTextractorPath';
 import decompress = require('decompress');
 
-const TTBRIDGE_EXTENSION_NAME = 'TextractorTranslatorBridge';
+const TTBRIDGE_EXTENSION_NAME = 'TextractorPipe';
 const TTBRIDGE_EXTENSION_FILENAME = `${TTBRIDGE_EXTENSION_NAME}.xdll`;
 
 const EXTENSIONS_FILE = 'SavedExtensions.txt';
 
-const TTBRIDGE_X86_DOWNLOAD_URL = 'https://github.com/MRGRD56/MgTextractorExtensions/releases/download/TTBridge_v1.1.1/win_x86.zip';
-const TTBRIDGE_X64_DOWNLOAD_URL = 'https://github.com/MRGRD56/MgTextractorExtensions/releases/download/TTBridge_v1.1.1/win_x64.zip';
+const TTBRIDGE_X86_DOWNLOAD_URL = 'https://github.com/MRGRD56/textractor-integration-extensions/releases/download/TextractorPipe_v1.0.0/win_x86.zip';
+const TTBRIDGE_X64_DOWNLOAD_URL = 'https://github.com/MRGRD56/textractor-integration-extensions/releases/download/TextractorPipe_v1.0.0/win_x64.zip';
 
 const checkExtensionFileExistence = (textractorDirectory: string): boolean => {
     const ttbridgeLibraryPath = path.resolve(textractorDirectory, TTBRIDGE_EXTENSION_FILENAME);
@@ -117,7 +117,7 @@ const nodeApi = {
             : TTBRIDGE_X64_DOWNLOAD_URL;
 
         const tempDirectory = path.resolve('.', 'tmp');
-        const currentTempPath = path.resolve(tempDirectory, `TTBridge_${type}__${v4()}`);
+        const currentTempPath = path.resolve(tempDirectory, `${TTBRIDGE_EXTENSION_NAME}_${type}__${v4()}`);
         const extensionZipPath = path.resolve(currentTempPath, `win_${type}.zip`);
 
         fs.mkdirSync(currentTempPath, {recursive: true});
@@ -152,6 +152,16 @@ contextBridge.exposeInMainWorld(
     'nodeApi',
     nodeApi
 )
+
+window.addEventListener('DOMContentLoaded', () => {
+    ipcRenderer.on('console-method', (event, { method, args }) => {
+        if (typeof (console as any)[method] === 'function') {
+            (console as any)[method](...args);
+        } else {
+            console.warn(`Trying to call an unsupported method '${method}' on console`);
+        }
+    });
+});
 
 // (window as any).electron = {
 //     helloworld: () => {

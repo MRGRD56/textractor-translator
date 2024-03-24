@@ -1,12 +1,11 @@
-import {runTextractorServer} from '../../../textractorServer';
+import {listenToPipe} from '../../../textractorServer';
 import {Configuration, OptionalTransformedText, Sentence} from '../../../configuration/Configuration';
-import getTranslator from '../../../translation/getTranslator';
 import Store from 'electron-store';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 import nodeConsole from '../../../utils/nodeConsole';
 
 const translateText = (originalText: string, config: Configuration): Promise<string> => {
-    return getTranslator(config.translator)?.translate(originalText, config.languages.source, config.languages.target);
+    return config.translator?.translate(originalText, config.languages.source, config.languages.target);
 };
 
 const showSentence = (
@@ -81,19 +80,24 @@ const workTextractorServer = () => {
     const textContainer = document.getElementById('text')!;
     const sampleTextContainer = document.getElementById('text-sample')!;
 
-    runTextractorServer((sentence) => {
-        const config = getProfileConfig(store);
-        const multiTransformedText = config.transformOriginal?.(sentence);
-        const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
+    listenToPipe((sentence) => {
+        try {
+            const config = getProfileConfig(store);
+            const multiTransformedText = config.transformOriginal?.(sentence);
+            const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
 
-        nodeConsole.log('New Sentence', {sentence, transformedTexts});
+            console.log('New Sentence', {sentence, transformedTexts});
 
-        for (const transformedText of transformedTexts) {
-            if (transformedText !== undefined) {
-                const text = typeof transformedText === 'object' ? transformedText.plain : transformedText;
+            for (const transformedText of transformedTexts) {
+                if (transformedText !== undefined) {
+                    const text = typeof transformedText === 'object' ? transformedText.plain : transformedText;
 
-                showSentence(config, textContainer, textContainerWrapper, sampleTextContainer, transformedText, translateText(text, config), sentence);
+                    showSentence(config, textContainer, textContainerWrapper, sampleTextContainer, transformedText, translateText(text, config), sentence);
+                }
             }
+        } catch (e) {
+            nodeConsole.error('Error handling a sentence', e);
+            console.error('Error handling a sentence', e);
         }
     });
 };

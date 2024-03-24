@@ -87,6 +87,7 @@ const initToolbar = () => {
     const minimizeAppButton = document.getElementById('minimize-window-button')!;
     const settingsButton = document.getElementById('settings-button')!;
     const historyButton = document.getElementById('history-button')!;
+    const devtoolsButton = document.getElementById('devtools-button')!;
 
     closeAppButton.addEventListener('click', () => ipcRenderer.invoke('main-window.close'));
 
@@ -97,6 +98,8 @@ const initToolbar = () => {
     historyButton.addEventListener('click', () => {
         toggleHistory();
     });
+
+    devtoolsButton.addEventListener('click', () => ipcRenderer.invoke('main-window.devtools'));
 
     mainToolbar.classList.add('force-visible');
     setTimeout(() => {
