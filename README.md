@@ -49,9 +49,10 @@ The purpose of this software is to be able to fine-tune Textractor in terms of p
 ![image](https://user-images.githubusercontent.com/35491968/205514998-f00fcb94-93c9-4bfd-8b73-bbbce2f1ee15.png)  
 
 
-Requires `TextractorTranslatorBridge.xdll` or `HttpSender.xdll` extension for Textractor: https://github.com/MRGRD56/MgTextractorExtensions
+Requires `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions
+The app will not work without this extension installed.
 
-It can be installed right in the app:  
+The extension can be installed right in the app:  
 ![image](https://user-images.githubusercontent.com/35491968/209697469-ba47b501-9c52-4a22-9c48-a43d8fb4089d.png)
 
 #### Some configs that can be used
@@ -64,17 +65,31 @@ config.languages = {
     target: 'ru'
 };
 
-config.translator = 'GOOGLE_TRANSLATE';
+// implements caching translations of not really long sentences
+// also optimizes translation if there are no English letters in text when translating from English - this kind of text returns as is
+config.translator = {
+    translate: async (text, sourceLanguage, targetLanguage) => {
+        const googleTranslate = () => DefinedTranslators.GOOGLE_TRANSLATE.translate(text, sourceLanguage, targetLanguage);
 
-// config.translator = {
-//     translate: (text, sourceLanguage, targetLanguage) => {
-//         if (/^[.,-?"']*$/.test(text)) {
-//             return text;
-//         }
-// 
-//         return 
-//     }
-// };
+        if (sourceLanguage === 'en' && !/[a-z]+/i.test(text)) {
+            return text;
+        }
+
+        if (text.length <= 50) {
+            const translatedCache = memory.translatedCache ??= {};
+            const cachedTranslation = translatedCache[text];
+            if (cachedTranslation === undefined) {
+                const translation = await googleTranslate();
+                translatedCache[text] = translation;
+                return translation;
+            } else {
+                return cachedTranslation;
+            }
+        }
+
+        return googleTranslate();
+    }
+};
 
 config.transformOriginal = ({text, meta}) => {
     if (text.startsWith('Textractor:') || text.startsWith('vnreng:')) {
@@ -243,13 +258,54 @@ config.transformOriginal = ({text, meta}) => {
 };
 ```
 
+##### eden* PLUS+MOSAIC (English edition)
+
+```js
+config.transformOriginal = ({text, meta}) => {
+    console.log('transformOriginal called');
+
+    text = commonConfig.transformOriginal({text, meta});
+
+    if (!text) {
+        return;
+    }
+    
+    text = text
+        .replaceAll(/\S+\.(png|ogg|ani)/g, '')
+        .replaceAll(/\\n/g, ' ')
+        .replaceAll(/\\\w/g, '')
+        .trim();
+    
+    if (!text) {
+        return;
+    }
+
+    const plainText = text
+        .replaceAll('�', '\'');
+
+    return {
+        plain: plainText,
+        displayed: plainText,
+        isHtml: false
+    };
+};
+
+config.transformTranslated = (text) => {
+    return {
+        plain: text,
+        displayed: text,
+        isHtml: false
+    };
+};
+```
+
 #### Ideas to be implemented in the future
 
-- ⚠️ Add a "retry" button if an error occurred while translating, also add auto retries
+- ⚠️ Add a "retry" button if an error occurred while translating, also add auto retries (since v0.3.0 auto retries can be implemented by creating an own translator by extending the existing, in theory)
 - ⚠️ Fix dragging when history mode is enabled
-- Maybe return `200 OK` immediately after a reqeust (`/sentence`) to the app
-- If Textractor Translator is not running, TTBridge shows errors when sending `/sentence` requests to the app, so Textractor crashes
-- <u>Sometimes Google Translator works incorrectly, returning incomplete sentences as a translation, fix it if possible</u> (not possible)
+- ~Maybe return `200 OK` immediately after a reqeust (`/sentence`) to the app~ Not relevant anymore since HTTP has been replaced with named pipes
+- ~If Textractor Translator is not running, TTBridge shows errors when sending `/sentence` requests to the app, so Textractor crashes~ Probably not relevant anymore
+- ~Sometimes Google Translator works incorrectly, returning incomplete sentences as a translation, fix it if possible~ (not possible)
 - Limit history size
 - ⏬ Maybe add "export history" feature
 - ⏬ Maybe save history to the storage and also add "clear history" button
@@ -259,12 +315,12 @@ config.transformOriginal = ({text, meta}) => {
 - Add DeepL translator, improve custom translator creating feature
 - Maybe move languages and translator settings somewhere from profiles code
 - Profiles: add translator and languages options to `config.transformOriginal`
-- Profiles: add `translators` object with predefined translators (objects, not names) in it
+- ~Profiles: add `translators` object with predefined translators (objects, not names) in it~ The `DefinedTranslators` object has been added
 - ⏬ Add Google Translate extension if it's possible
-- Add a `global` object so that it's possible to store some global (mutable) variables
-- ⚠️ Fix this:  
-![image](https://user-images.githubusercontent.com/35491968/215345061-34eb33c0-68f2-4651-b826-422856eff69c.png)
-- Добавить возможность настраивать конфиг TTBridge (и вернуть туда JSON конфиг), включая возможность настройки порта для коммуникации TTBridge и Textractor Translator 
+- ~Add a `global` object so that it's possible to store some global (mutable) variables~ The `memory` variable has been added for this purpose
+- ~⚠️ Fix this: https://user-images.githubusercontent.com/35491968/215345061-34eb33c0-68f2-4651-b826-422856eff69c.png~ Not relevant
+- ~Добавить возможность настраивать конфиг TTBridge (и вернуть туда JSON конфиг), включая возможность настройки порта для коммуникации TTBridge и Textractor Translator~
+- Добавить возможность настраивать TextractorPipe, включая возможность фильтрации отправляемых данных (например только `isCurrentSelect` или все без исключения)
 - Добавить перевод с контекстом для более точного перевода
 
 ---
