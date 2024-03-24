@@ -262,26 +262,22 @@ config.transformOriginal = ({text, meta}) => {
 
 ```js
 config.transformOriginal = ({text, meta}) => {
-    console.log('transformOriginal called');
-
     text = commonConfig.transformOriginal({text, meta});
 
     if (!text) {
         return;
     }
     
-    text = text
+    const plainText = text
         .replaceAll(/\S+\.(png|ogg|ani)/g, '')
         .replaceAll(/\\n/g, ' ')
         .replaceAll(/\\\w/g, '')
+        .replaceAll('�', '\'')
         .trim();
     
-    if (!text) {
+    if (!plainText) {
         return;
     }
-
-    const plainText = text
-        .replaceAll('�', '\'');
 
     return {
         plain: plainText,
