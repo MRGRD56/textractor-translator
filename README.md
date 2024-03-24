@@ -49,9 +49,10 @@ The purpose of this software is to be able to fine-tune Textractor in terms of p
 ![image](https://user-images.githubusercontent.com/35491968/205514998-f00fcb94-93c9-4bfd-8b73-bbbce2f1ee15.png)  
 
 
-Requires `TextractorTranslatorBridge.xdll` or `HttpSender.xdll` extension for Textractor: https://github.com/MRGRD56/MgTextractorExtensions
+Requires `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions
+The app will not work without this extension installed.
 
-It can be installed right in the app:  
+The extension can be installed right in the app:  
 ![image](https://user-images.githubusercontent.com/35491968/209697469-ba47b501-9c52-4a22-9c48-a43d8fb4089d.png)
 
 #### Some configs that can be used
