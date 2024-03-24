@@ -80,6 +80,11 @@ const SettingsTextractor: FC = () => {
             store.set(StoreKeys.TEXTRACTOR_X64_PATH, paths.x64.path);
             setTtbridgeX64(checkTTBridgeByPath(paths.x64));
         }
+
+        if (!autorun) {
+            store.set(StoreKeys.TEXTRACTOR_AUTORUN, pathType);
+            setAutorun(pathType);
+        }
     };
 
     const handleTextractorRun = (path: string | undefined) => () => {

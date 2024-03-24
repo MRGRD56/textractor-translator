@@ -1,4 +1,4 @@
-import workTextractorServer from './logic/workTextractorServer';
+import workTextractorPipe from './logic/workTextractorPipe';
 import {ipcRenderer} from 'electron';
 import ref from '../../utils/ref';
 import watchCtrl from './utils/watchCtrl';
@@ -274,5 +274,5 @@ window.addEventListener('DOMContentLoaded', () => {
     initAutoHistory();
     initAppearanceSettingsHandling();
     initSampleTextShowing();
-    workTextractorServer();
+    workTextractorPipe();
 });

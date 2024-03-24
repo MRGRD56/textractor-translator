@@ -11,41 +11,7 @@ import {COMMON_PROFILE_ID, NEW_PROFILE_NAME} from '../profiles/constants';
 import {deleteProfile} from '../utils/profiles';
 import {v4} from 'uuid';
 import {ElectronStore} from '../../../electron-store/electronStoreShared';
-
-const initialSavedProfiles = ((): SavedProfiles => {
-    const firstProfileId = v4();
-
-    return {
-        profiles: [
-            {
-                id: COMMON_PROFILE_ID,
-                name: 'Common',
-                isPredefined: true,
-                configSource: `
-config.languages = {
-    source: 'auto',
-    target: 'en'
-};
-
-config.translator = DefinedTranslators.GOOGLE_TRANSLATE;
-`.trim()
-            },
-            {
-                id: firstProfileId,
-                name: 'New profile',
-                configSource: `
-config.transformOriginal = ({text, meta}) => {
-    return text;
-};`.trim(),
-            }
-        ],
-        activeProfileId: firstProfileId,
-        tabs: {
-            tabIds: [COMMON_PROFILE_ID, firstProfileId],
-            activeId: firstProfileId
-        }
-    };
-})();
+import initializeSavedProfiles from '../../../configuration/initializeSavedProfiles';
 
 
 const store: ElectronStore = (window as any).nodeApi.store;
@@ -61,7 +27,7 @@ const SettingsProfiles: FC = () => {
     }, [savedProfiles]);
 
     useDidMount(async () => {
-        const loadedSavedProfiles: SavedProfiles = await store.get(StoreKeys.SAVED_PROFILES, initialSavedProfiles);
+        const loadedSavedProfiles: SavedProfiles = await store.get(StoreKeys.SAVED_PROFILES) ?? initializeSavedProfiles(store);
         const loadedTabs = savedProfilesToTabs(loadedSavedProfiles);
         const loadedTabsApi = tabsCore(loadedTabs)
         setSavedProfiles(loadedSavedProfiles);
@@ -70,7 +36,7 @@ const SettingsProfiles: FC = () => {
 
     const handleTabsChange = useCallback((tabs: ProfileTabs, changes: TabsChange[]) => {
         store.get<SavedProfiles>(StoreKeys.SAVED_PROFILES).then((savedProfiles) => {
-            savedProfiles ??= initialSavedProfiles;
+            savedProfiles ??= initializeSavedProfiles(store);
 
             const closedEmptyTabIds = changes
                 .map(change => {

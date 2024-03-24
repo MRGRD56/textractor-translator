@@ -75,7 +75,7 @@ const showSentence = (
 
 const store = new Store();
 
-const workTextractorServer = () => {
+const workTextractorPipe = () => {
     const textContainerWrapper = document.getElementById('text-wrapper')!;
     const textContainer = document.getElementById('text')!;
     const sampleTextContainer = document.getElementById('text-sample')!;
@@ -102,4 +102,4 @@ const workTextractorServer = () => {
     });
 };
 
-export default workTextractorServer;
+export default workTextractorPipe;
