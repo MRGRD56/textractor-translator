@@ -14,7 +14,7 @@ interface CommonConfigContext {
     DefinedTranslators: DefinedTranslators;
     httpRequest: typeof httpRequest;
     queryString: typeof queryString
-    // console: Console;
+    console: Console;
 }
 
 interface CustomConfigContext extends CommonConfigContext {
@@ -49,8 +49,8 @@ const getCommonConfiguration = (configSourceCode: string | undefined): CommonCon
         memory,
         DefinedTranslators: DefinedTranslatorsImpl.INSTANCE,
         httpRequest,
-        queryString
-        // console: rendererConsole
+        queryString,
+        console
     };
 
     if (configSourceCode != null) {
@@ -78,8 +78,8 @@ const getConfiguration = (commonConfigSourceCode: string | undefined, configSour
             memory,
             DefinedTranslators: DefinedTranslatorsImpl.INSTANCE,
             httpRequest,
-            queryString
-            // console: console
+            queryString,
+            console
         };
 
         safeEvalVoid(configSourceCode, context);
