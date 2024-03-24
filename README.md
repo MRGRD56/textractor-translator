@@ -87,7 +87,7 @@ config.translator = {
             }
         }
 
-        return DefinedTranslators.GOOGLE_TRANSLATE.translate(text, sourceLanguage, targetLanguage);
+        return googleTranslate();
     }
 };
 
