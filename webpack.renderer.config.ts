@@ -2,6 +2,7 @@ import type { Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
+import path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const webpack = require('webpack');
@@ -23,5 +24,8 @@ export const rendererConfig: Configuration = {
     ],
     resolve: {
         extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
+        alias: {
+            '@types/node': path.resolve(__dirname, 'node_modules/@types/node')
+        }
     },
 };

@@ -2,10 +2,9 @@ import {BrowserWindow, ipcMain} from 'electron';
 import Store from 'electron-store';
 import nodeConsole from '../utils/nodeConsole';
 import {electronStoreKeysSimple} from './electronStoreShared';
+import store from './store';
 
 export const initElectronStore = (): Store => {
-    const store = new Store();
-
     nodeConsole.log('Creating handlers for electronStore')
 
     for (const key of electronStoreKeysSimple) {

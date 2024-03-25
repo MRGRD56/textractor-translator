@@ -1,6 +1,5 @@
 import {listenToPipe} from '../../../textractorServer';
 import {Configuration, OptionalTransformedText, Sentence} from '../../../configuration/Configuration';
-import Store from 'electron-store';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 import nodeConsole from '../../../utils/nodeConsole';
 
@@ -73,8 +72,6 @@ const showSentence = (
     textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
 };
 
-const store = new Store();
-
 const workTextractorPipe = () => {
     const textContainerWrapper = document.getElementById('text-wrapper')!;
     const textContainer = document.getElementById('text')!;
@@ -82,7 +79,7 @@ const workTextractorPipe = () => {
 
     listenToPipe((sentence) => {
         try {
-            const config = getProfileConfig(store);
+            const config = getProfileConfig();
             const multiTransformedText = config.transformOriginal?.(sentence);
             const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
 

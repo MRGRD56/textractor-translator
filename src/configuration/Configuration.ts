@@ -15,11 +15,20 @@ export interface Translator {
     translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string>;
 }
 
+export interface LibreTranslatorConfig {
+    host?: string;
+    apiKey?: string;
+    format?: 'text' | 'html';
+}
+
 export interface DefinedTranslators {
-    GOOGLE_TRANSLATE: Translator,
-    X_IDENTITY: Translator,
-    X_INFINITE: Translator,
-    X_NONE: Translator
+    GoogleTranslate: () => Translator,
+    LibreTranslate: (config?: LibreTranslatorConfig) => Translator;
+    debug: {
+        Identity: () => Translator;
+        Infinite: () => Translator;
+        None: () => Translator;
+    }
 }
 
 export interface DisplayedTransformedText {
@@ -39,6 +48,8 @@ export interface Configuration {
         source: string;
         target: string;
     };
+
     transformOriginal?(sentence: Sentence): MultiTransformedText;
+
     transformTranslated?(translatedText: string, originalSentence: Sentence): OptionalTransformedText;
 }

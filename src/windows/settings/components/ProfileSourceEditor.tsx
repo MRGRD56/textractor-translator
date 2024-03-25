@@ -4,35 +4,49 @@ import React, {FC, useEffect} from 'react';
 import configurationDeclarations from "!!raw-loader!../../../configuration/Configuration";
 // @ts-ignore
 // eslint-disable-next-line
-import electronRequestDeclarations from '!!raw-loader!electron-request/dist/index'
+import electronRequestDeclarations from '!!raw-loader!electron-request/dist/index.d.ts'
 // @ts-ignore
 // eslint-disable-next-line
-// import queryStringDeclarations from '!!raw-loader!query-string/index'
+import queryStringDeclarations from '!!raw-loader!query-string/index.d.ts'
+// @ts-ignore
+// eslint-disable-next-line
+import nodeNetDeclarations from '!!raw-loader!@types/node/net.d.ts'
 import * as monaco from 'monaco-editor';
 import SavedProfile from '../profiles/SavedProfile';
 import {COMMON_PROFILE_ID} from '../profiles/constants';
 
 const initializeMonacoTypes = (isCommon: boolean) => {
-    const declarations = [
-        electronRequestDeclarations.toString()
-            .replace(/declare const main:.*;/g, ''),
-        configurationDeclarations,
-    ];
-
-    const configDeclarationsUsable = declarations
-        .join('\n\n')
+    const configDeclarationsUsable = configurationDeclarations
         .replace(/export default \w+;?/, '')
-        .replace(/export ([a-z]+) /g, '$1 ')
-        .replace(/export \{.*};/g, '');
+        .replace(/export \{.*};/g, '')
+        .replace(/export ([a-z]+) /g, '$1 ');
 
     monaco.languages.typescript.javascriptDefaults.setExtraLibs([
+        {
+            content: nodeNetDeclarations
+                .replace('declare module \'net\' {', 'declare namespace net {')
+                .replace('declare module \'node:net\' {\n    export * from \'net\';\n}', ''),
+            filePath: 'node/net.ts'
+        },
+        {
+            content: 'declare namespace queryString {\n' + (queryStringDeclarations.toString()
+                .replace(/export \{.*};/g, ''))
+            + '\n}',
+            filePath: 'queryString.ts'
+        },
+        {
+            content: 'declare namespace ElectronRequest {\n' + (electronRequestDeclarations.toString()
+                .replace(/declare const main:.*;/g, '')
+                .replace(/export \{.*};/g, ''))
+            + '\n}\n\nconst httpRequest: (requestURL: string, options?: ElectronRequest.Options) => Promise<ElectronRequest.Response>;',
+            filePath: 'electron-request.ts'
+        },
         {
             content: configDeclarationsUsable + `
 declare const config: Configuration;
 const common: object;
 const memory: object;
-const DefinedTranslators: DefinedTranslators;
-const httpRequest: (requestURL: string, options?: Options) => Promise<Response>;
+const Translators: DefinedTranslators;
 const queryString: any;
 `.trimEnd() + (isCommon ? '' : `
 

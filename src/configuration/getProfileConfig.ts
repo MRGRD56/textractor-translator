@@ -1,13 +1,30 @@
 import indexArrayBy from '../utils/indexArrayBy';
 import {COMMON_PROFILE_ID} from '../windows/settings/profiles/constants';
 import getConfiguration from './getConfiguration';
-import type Store from 'electron-store';
 import {Configuration} from './Configuration';
 import initializeSavedProfiles from './initializeSavedProfiles';
 import {StoreKeys} from '../constants/store-keys';
 import SavedProfiles from '../windows/settings/profiles/SavedProfiles';
+import ref from '../utils/ref';
+import electronStore from '../electron-store/electronStore';
+import store from '../electron-store/store';
 
-const getProfileConfig = (store: Store, profileId?: string): Configuration => {
+const configurationCache = ref<Configuration>();
+
+store.onDidChange(StoreKeys.SAVED_PROFILES, () => {
+    configurationCache.current = undefined;
+});
+
+electronStore.onDidChange(StoreKeys.SAVED_PROFILES, () => {
+    configurationCache.current = undefined;
+});
+
+const getProfileConfig = (profileId?: string): Configuration => {
+    const cache = configurationCache.current;
+    if (cache) {
+        return cache;
+    }
+
     const savedProfiles = store.get(StoreKeys.SAVED_PROFILES) as (SavedProfiles | undefined) ?? initializeSavedProfiles(store);
     const savedProfilesMap = indexArrayBy(savedProfiles.profiles, 'id');
 
@@ -15,7 +32,9 @@ const getProfileConfig = (store: Store, profileId?: string): Configuration => {
     const activeProfileId = profileId ?? savedProfiles.activeProfileId;
     const activeProfile = activeProfileId ? savedProfilesMap.get(activeProfileId) : undefined;
 
-    return getConfiguration(commonProfile?.configSource, activeProfile?.configSource);
+    const result = getConfiguration(commonProfile?.configSource, activeProfile?.configSource);
+    configurationCache.current = result;
+    return result;
 };
 
 export default getProfileConfig;

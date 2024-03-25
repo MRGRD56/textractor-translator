@@ -1,7 +1,7 @@
 {
   "name": "textractor-translator",
   "productName": "TextractorTranslator",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Textractor Translator",
   "main": ".webpack/main",
   "scripts": {

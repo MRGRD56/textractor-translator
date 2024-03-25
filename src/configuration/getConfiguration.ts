@@ -3,18 +3,22 @@ import safeEval from 'safe-eval';
 import transformOriginal from '../transformation/transformOriginal';
 import transformTranslated from '../transformation/transformTranslated';
 import nodeConsole from '../utils/nodeConsole';
-import {DefinedTranslatorsImpl} from '../translation/DefinedTranslators';
 import httpRequest from '../utils/httpRequest';
 import * as queryString from 'query-string';
+import {DefinedTranslatorsImpl} from '../translation/DefinedTranslators';
+import * as net from 'net';
 
 interface CommonConfigContext {
     config: Configuration;
     common: object;
     memory: object;
-    DefinedTranslators: DefinedTranslators;
+    Translators: DefinedTranslators;
     httpRequest: typeof httpRequest;
     queryString: typeof queryString
     console: Console;
+    URL: typeof URL,
+    URLSearchParams: typeof URLSearchParams,
+    net: typeof net
 }
 
 interface CustomConfigContext extends CommonConfigContext {
@@ -35,9 +39,11 @@ const safeEvalVoid = (code: string, context?: Record<string, any>): void => {
 const memory = {};
 
 const getCommonConfiguration = (configSourceCode: string | undefined): CommonConfigContext => {
+    const definedTranslators = new DefinedTranslatorsImpl();
+
     const context: CommonConfigContext = {
         config: {
-            translator: DefinedTranslatorsImpl.INSTANCE.GOOGLE_TRANSLATE,
+            translator: definedTranslators.GoogleTranslate(),
             languages: {
                 source: 'auto',
                 target: 'en'
@@ -47,10 +53,13 @@ const getCommonConfiguration = (configSourceCode: string | undefined): CommonCon
         },
         common: {},
         memory,
-        DefinedTranslators: DefinedTranslatorsImpl.INSTANCE,
+        Translators: definedTranslators,
         httpRequest,
         queryString,
-        console
+        console,
+        URL,
+        URLSearchParams,
+        net
     };
 
     if (configSourceCode != null) {
@@ -72,14 +81,9 @@ const getConfiguration = (commonConfigSourceCode: string | undefined, configSour
         }
 
         const context: CustomConfigContext = {
-            common: commonConfigContext.common,
+            ...commonConfigContext,
             commonConfig: commonConfigContext.config,
             config: {...commonConfigContext.config},
-            memory,
-            DefinedTranslators: DefinedTranslatorsImpl.INSTANCE,
-            httpRequest,
-            queryString,
-            console
         };
 
         safeEvalVoid(configSourceCode, context);

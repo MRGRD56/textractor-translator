@@ -1,31 +1,34 @@
-import {DefinedTranslators, Translator} from '../configuration/Configuration';
+import {DefinedTranslators, LibreTranslatorConfig} from '../configuration/Configuration';
 import GoogleTranslator from './translators/GoogleTranslator';
-
-class IdentityTranslator implements Translator {
-    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
-        return Promise.resolve(text);
-    }
-}
-
-class NoneTranslator implements Translator {
-    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
-        return undefined as any;
-    }
-}
-
-class InfiniteTranslator implements Translator {
-    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
-        return new Promise<string>(() => {});
-    }
-}
+import IdentityTranslator from './translators/utility/IdentityTranslator';
+import InfiniteTranslator from './translators/utility/InfiniteTranslator';
+import NoneTranslator from './translators/utility/NoneTranslator';
+import LibreTranslator from './translators/LibreTranslator';
 
 export class DefinedTranslatorsImpl implements DefinedTranslators {
-    GOOGLE_TRANSLATE = new GoogleTranslator();
-    X_IDENTITY = new IdentityTranslator();
-    X_NONE = new NoneTranslator();
-    X_INFINITE = new InfiniteTranslator();
+    constructor() {
+        Object.keys(this).forEach((keyName) => {
+            const key = keyName as keyof DefinedTranslatorsImpl;
+            Object.defineProperty(this, key, {
+                value: this[key],
+                writable: false,
+                configurable: false,
+                enumerable: true
+            });
+        });
+    }
 
-    public static INSTANCE: DefinedTranslators = new DefinedTranslatorsImpl();
+    GoogleTranslate = () => {
+        return new GoogleTranslator();
+    };
 
-    private constructor() {}
+    LibreTranslate = (config?: LibreTranslatorConfig) => {
+        return new LibreTranslator(config || {});
+    };
+
+    debug = Object.freeze({
+        Identity: () => new IdentityTranslator(),
+        Infinite: () => new InfiniteTranslator(),
+        None: () => new NoneTranslator()
+    });
 }
