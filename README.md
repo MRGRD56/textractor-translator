@@ -3,8 +3,8 @@
 <img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="600">
 
 Lets you translate visual novels in real time, while reading.  
-It requires [Textractor](https://github.com/Artikash/Textractor) to work. I don't have anything to do with the original software (Textractor) developers.
-Also it required `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions The app will not work without this extension installed. It can be automatically installed right in the app settings. You might need to restart Textractor for the extension to start working.
+It requires [Textractor](https://github.com/Artikash/Textractor) to work. I don't have anything to do with the original software (Textractor) developers.  
+It also requires `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions The app will not work without this extension installed. It can be automatically installed right in the app settings. You might need to restart Textractor for the extension to start working.
 
 It's in early stage of development and not every visual novel can be translated using it.  
 You need some JavaScript knowledge to configure and use this application.
