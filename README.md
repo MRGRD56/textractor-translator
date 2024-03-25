@@ -66,21 +66,30 @@ config.languages = {
     target: 'ru'
 };
 
+const googleTranslate = Translators.GoogleTranslate();
+// const libreTranslate = Translators.LibreTranslate({
+//     host: 'https://libretranslate.example.com'
+// });
+
 // implements caching translations of not really long sentences
 // also optimizes translation if there are no English letters in text when translating from English - this kind of text returns as is
-config.translator = {
+Translators.Custom = {};
+/**
+ * @returns {Translator}
+ */
+Translators.Custom.MainTranslator = () => ({
     translate: async (text, sourceLanguage, targetLanguage) => {
-        const googleTranslate = () => DefinedTranslators.GOOGLE_TRANSLATE.translate(text, sourceLanguage, targetLanguage);
+        const doTranslate = () => googleTranslate.translate(text, sourceLanguage, targetLanguage);
 
         if (sourceLanguage === 'en' && !/[a-z]+/i.test(text)) {
             return text;
         }
 
-        if (text.length <= 50) {
+        if (text.length <= 200) {
             const translatedCache = memory.translatedCache ??= {};
             const cachedTranslation = translatedCache[text];
             if (cachedTranslation === undefined) {
-                const translation = await googleTranslate();
+                const translation = await doTranslate();
                 translatedCache[text] = translation;
                 return translation;
             } else {
@@ -88,9 +97,11 @@ config.translator = {
             }
         }
 
-        return googleTranslate();
+        return doTranslate();
     }
-};
+});
+
+config.translator = Translators.Custom.MainTranslator();
 
 config.transformOriginal = ({text, meta}) => {
     if (text.startsWith('Textractor:') || text.startsWith('vnreng:')) {
@@ -295,6 +306,45 @@ config.transformTranslated = (text) => {
         isHtml: false
     };
 };
+```
+
+##### Implementing a custom translator
+
+`net` (the node.js module), `httpRequest` ("electron-request" library), `queryString` ("query-string" library), `URL`, `URLSearchParams` variables can help you create your custom translators.
+
+```js
+/**
+ * @param config {{host?: string, format?: string, apiKey?: string}}
+ * @returns {Translator}
+ */
+Translators.LibreTranslateCustom = (config = {}) => ({
+    translate: async (text, sourceLanguage, targetLanguage) => {
+        const host = config.host || 'https://libretranslate.com';
+        const url = new URL('/translate', host).toString();
+
+        const responseData = await httpRequest(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                q: text,
+                source: sourceLanguage,
+                target: targetLanguage,
+                format: config.format,
+                api_key: config.apiKey
+            })
+        }).then((response) => response.json());
+
+        if (!responseData || responseData.translatedText == null) {
+            console.error('LibreTranslator unable to translate: ', responseData);
+            throw responseData;
+        }
+
+        console.log('custom translator response:', responseData);
+        return responseData.translatedText;
+    }
+});
 ```
 
 #### Ideas to be implemented in the future
