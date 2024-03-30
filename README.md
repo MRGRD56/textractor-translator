@@ -18,6 +18,12 @@ The purpose of this software is to be able to fine-tune Textractor in terms of p
 
 <img src="https://github.com/MRGRD56/textractor-translator/assets/35491968/f1e83c22-7810-4eaf-9c45-4eff49963fda" width="800">
 
+### Version 0.5.0
+
+#### eden* PLUS+MOSAIC `en -> ru`
+
+![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/576e8d87-7bd1-439c-87c2-8ad5063861a5)
+
 ### Version 0.2.1
 
 #### Summer Pockets `en -> ru`
