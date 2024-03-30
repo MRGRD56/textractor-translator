@@ -289,7 +289,7 @@ config.transformOriginal = ({text, meta}) => {
         return;
     }
     
-    const plainText = text
+    text = text
         .replaceAll(/\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}/g, '')
         .replaceAll(/\S+\.(png|ogg|ani)/g, '')
         .replaceAll(/\\n/g, ' ')
@@ -300,15 +300,11 @@ config.transformOriginal = ({text, meta}) => {
         .replace(/^'(.+)'$/, '"$1"')
         .trim();
     
-    if (!plainText) {
+    if (!text) {
         return;
     }
 
-    return {
-        plain: plainText,
-        displayed: plainText,
-        isHtml: false
-    };
+    return text;
 };
 
 config.transformTranslated = (text) => {
@@ -316,11 +312,7 @@ config.transformTranslated = (text) => {
         .replace(/^— (.+)$/, '«$1»')
         .replace(/^["'](.+)["']$/, '«$1»');
 
-    return {
-        plain: text,
-        displayed: text,
-        isHtml: false
-    };
+    return text;
 };
 ```
 
