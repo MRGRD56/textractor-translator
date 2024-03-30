@@ -290,12 +290,14 @@ config.transformOriginal = ({text, meta}) => {
     }
     
     const plainText = text
+        .replaceAll(/\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}/g, '')
         .replaceAll(/\S+\.(png|ogg|ani)/g, '')
         .replaceAll(/\\n/g, ' ')
         .replaceAll(/\\\w/g, '')
         .replaceAll('�', '\'')
         .replaceAll('#4', '~')
         .replaceAll('#5', '♪')
+        .replace(/^'(.+)'$/, '"$1"')
         .trim();
     
     if (!plainText) {
@@ -310,6 +312,10 @@ config.transformOriginal = ({text, meta}) => {
 };
 
 config.transformTranslated = (text) => {
+    text = text
+        .replace(/^— (.+)$/, '«$1»')
+        .replace(/^["'](.+)["']$/, '«$1»');
+
     return {
         plain: text,
         displayed: text,
