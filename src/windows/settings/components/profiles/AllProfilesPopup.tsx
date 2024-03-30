@@ -8,6 +8,7 @@ import {NEW_PROFILE_NAME} from '../../profiles/constants';
 import {SettingsNodeApi} from '../../preload';
 import showOpenDialogSync from '../../utils/showOpenDialogSync';
 import {v4} from 'uuid';
+import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 
 interface Props {
     profiles: SavedProfiles;
@@ -18,7 +19,7 @@ interface Props {
 const {
     readFileAsync,
     parsePath
-} = (window as any).nodeApi as SettingsNodeApi;
+} = getSettingsNodeApi();
 
 const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -97,7 +98,7 @@ const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
             const newProfiles: SavedProfile[] = [];
 
             for (const filePath of filePaths) {
-                const profileName = parsePath(filePath)?.name || 'Exported profile';
+                const profileName = parsePath(filePath)?.name || 'Imported profile';
                 const profileContent = await readFileAsync(filePath);
 
                 newProfiles.push({

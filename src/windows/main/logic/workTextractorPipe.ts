@@ -2,6 +2,7 @@ import {listenToPipe} from '../../../textractorServer';
 import {Configuration, OptionalTransformedText, Sentence} from '../../../configuration/Configuration';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 import nodeConsole from '../../../utils/nodeConsole';
+import {isHistoryShownRef} from '../preload';
 
 const translateText = (originalText: string, config: Configuration): Promise<string> => {
     return config.translator?.translate(originalText, config.languages.source, config.languages.target);
@@ -21,14 +22,17 @@ const showSentence = (
 
     const sentenceOriginalElement = document.createElement('div');
     sentenceOriginalElement.classList.add('sentence-original');
+    const sentenceOriginalTextElement = document.createElement('div');
+    sentenceOriginalTextElement.classList.add('sentence-text');
     if (isHtml) {
-        sentenceOriginalElement.innerHTML = originalTextDisplayed as string;
+        sentenceOriginalTextElement.innerHTML = originalTextDisplayed as string;
     } else {
-        sentenceOriginalElement.textContent = originalTextDisplayed as string;
+        sentenceOriginalTextElement.textContent = originalTextDisplayed as string;
     }
+    sentenceOriginalElement.append(sentenceOriginalTextElement);
 
     const sentenceTranslatedElement = document.createElement('div');
-    sentenceTranslatedElement.classList.add('sentence-translated');
+    sentenceTranslatedElement.classList.add('sentence-translated', 'sentence-loading');
     sentenceTranslatedElement.innerHTML = '<div class="loading-horiz"><img src="../assets/loading-horiz.svg" alt="Translating..."></div>';
 
     if (translatedTextPromise) {
@@ -44,18 +48,28 @@ const showSentence = (
                 const translatedTextDisplayed = typeof transformedText === 'object' ? transformedText.displayed : transformedText;
                 const isHtml = typeof transformedText === 'object' && Boolean(transformedText.isHtml);
 
+                const sentenceTranslatedTextElement = document.createElement('div');
+                sentenceTranslatedTextElement.classList.add('sentence-text');
+
                 if (isHtml) {
-                    sentenceTranslatedElement.innerHTML = translatedTextDisplayed;
+                    sentenceTranslatedTextElement.innerHTML = translatedTextDisplayed;
                 } else {
-                    sentenceTranslatedElement.textContent = translatedTextDisplayed;
+                    sentenceTranslatedTextElement.textContent = translatedTextDisplayed;
                 }
+
+                sentenceTranslatedElement.classList.remove('sentence-loading');
+                sentenceTranslatedElement.innerHTML = '';
+                sentenceTranslatedElement.append(sentenceTranslatedTextElement);
             })
             .catch(error => {
                 console.error('An error occurred while translating', error)
+                sentenceTranslatedElement.classList.remove('sentence-loading');
                 sentenceTranslatedElement.textContent = 'Error while translating';
             })
             .finally(() => {
-                textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight); // todo check if the scroll is near to the bottom now
+                if (isHistoryShownRef.current) {
+                    textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight); // todo check if the scroll is near to the bottom now
+                }
             });
     }
 
@@ -69,7 +83,9 @@ const showSentence = (
     sampleTextContainer.classList.add('d-none');
     textContainer.append(sentenceElement);
 
-    textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+    if (isHistoryShownRef.current) {
+        textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+    }
 };
 
 const workTextractorPipe = () => {

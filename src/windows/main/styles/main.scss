@@ -56,9 +56,7 @@ body {
 
         .sentence {
             display: flex;
-            flex-direction: column;
             align-items: flex-start;
-            gap: 4px;
             max-width: 100%;
 
             .sentence-original {
@@ -67,6 +65,10 @@ body {
 
             .sentence-translated {
                 max-width: 100%;
+            }
+
+            .sentence-text {
+                display: inline;
             }
         }
     }

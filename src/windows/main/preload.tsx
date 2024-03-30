@@ -1,5 +1,5 @@
 import workTextractorPipe from './logic/workTextractorPipe';
-import {ipcRenderer} from 'electron';
+import {ipcRenderer, IpcRendererEvent} from 'electron';
 import ref from '../../utils/ref';
 import watchCtrl from './utils/watchCtrl';
 import readStoreStateLazy from '../../utils/readStoreStateLazy';
@@ -8,17 +8,28 @@ import {StoreKeys} from '../../constants/store-keys';
 import MainWindowAppearanceConfig, {
     defaultMainWindowAppearance,
     MainWindowDragMode,
+    TextOrder,
     TextOutlineType
 } from '../../configuration/appearance/MainWindowAppearanceConfig';
 import addColorAlpha from '../../utils/addColorAlpha';
 import initWindowDragger from './logic/initWindowDragger';
 import TextAppearanceConfig, {
     defaultOriginalTextAppearance,
-    defaultTranslatedTextAppearance
+    defaultTranslatedTextAppearance,
+    TextBackgroundType
 } from '../../configuration/appearance/TextAppearanceConfig';
 import {defaultSettingsTab, SettingsTab} from '../settings/types';
+import AppearanceConfig, {
+    defaultAppearanceConfig,
+    getAppearanceConfigKey
+} from '../../configuration/appearance/AppearanceConfig';
+import SavedProfiles from '../settings/profiles/SavedProfiles';
+import initializeAppearanceConfig from '../../configuration/appearance/initializeAppearanceConfig';
+import initializeSavedProfiles from '../../configuration/initializeSavedProfiles';
+import makeWindowFullyDraggable from '../../utils/makeWindowFullyDraggable';
+import MainWindowDragState from './logic/MainWindowDragState';
 
-const isHistoryShownRef = ref<boolean>(false);
+export const isHistoryShownRef = ref<boolean>(false);
 
 const setHistoryShown = (isShown: boolean) => {
     const textContainer = document.querySelector('.text-container')!;
@@ -129,6 +140,17 @@ const getTextOutlineCss = (config: MainWindowAppearanceConfig): string => {
         return `text-shadow: ${textShadow};`;
     }
 
+    if (textOutlineType === TextOutlineType.OUTER_SHADOW) {
+        const baseBorder = `0 0 ${textOutlineThickness}px ${textOutlineColor}`;
+
+        const textShadow = Array(Math.ceil(textOutlineThickness ** 3))
+            .fill(undefined)
+            .map(() => baseBorder)
+            .join(',');
+
+        return `text-shadow: ${textShadow}`;
+    }
+
     if (textOutlineType === TextOutlineType.INNER) {
         return `-webkit-text-stroke: ${textOutlineThickness}px ${textOutlineColor};`;
     }
@@ -145,8 +167,13 @@ const initAppearanceSettingsHandling = () => {
     const mainToolbar = document.querySelector<HTMLElement>('.main-toolbar')!;
     const moveButton = document.getElementById('move-mw-button')!;
 
-    readStoreStateLazy<MainWindowAppearanceConfig>(electronStore, StoreKeys.SETTINGS_APPEARANCE_MAIN_WINDOW, defaultMainWindowAppearance, (config) => {
-        mainWindowStyleElement.innerHTML = `            
+    const renderMainWindowAppearance = (config: MainWindowAppearanceConfig) => {
+        mainWindowStyleElement.innerHTML = `
+            .sentence {
+                flex-direction: ${config.textOrder === TextOrder.TRANSLATED_ORIGINAL ? 'column-reverse' : 'column'};
+                gap: ${config.sentenceGap ?? 4}px;
+            }
+                    
             .text-container-wrapper {
                 background-color: ${addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100)};
                 border-radius: ${config.borderRadius}px;
@@ -165,16 +192,6 @@ const initAppearanceSettingsHandling = () => {
             }
         `;
 
-        // container.style.backgroundColor = addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100);
-        // container.style.borderRadius = `${config.borderRadius}px`;
-        // mainToolbar.style.borderTopRightRadius = `${config.borderRadius}px`;
-        // container.style.borderWidth = `${config.borderThickness}px`;
-        // container.style.borderColor = addColorAlpha(config.borderColor, config.borderOpacity / 100);
-        // container.style.color = config.textColor;
-        // container.style.fontFamily = `"${config.fontFamily}", 'Roboto', sans-serif`;
-        // container.style.fontSize = `${config.fontSize ?? 20}px`;
-        // container.style.lineHeight = config.lineHeight ? `${config.lineHeight}%` : '';
-
         const isWindowDraggableItself = config.windowDragMode !== MainWindowDragMode.PANEL;
         document.body.setAttribute('data-mw-drag', String(isWindowDraggableItself));
 
@@ -184,12 +201,20 @@ const initAppearanceSettingsHandling = () => {
         } else {
             moveButton.classList.remove('d-none');
         }
-    });
+    };
 
-    const handleTextAppearanceChanges = (key: StoreKeys, defaultConfig: TextAppearanceConfig, styleElement: HTMLElement, styledSelector: string) => {
-        readStoreStateLazy(electronStore, key, defaultConfig, (config) => {
-            styleElement.innerHTML = `
-                ${styledSelector} {
+    const renderTextAppearance = (config: TextAppearanceConfig, styleElement: HTMLElement, styledSelector: string) => {
+        const textBackgroundCss = config.textBackgroundType && `
+                background-color: ${addColorAlpha(config.textBackgroundColor, config.textBackgroundOpacity / 100)};
+                outline-color: ${addColorAlpha(config.textBorderColor, config.textBorderOpacity / 100)};
+                outline-width: ${config.textBorderThickness ?? 0}px;
+                outline-offset: -${Math.ceil((config.textBorderThickness ?? 0) / 2)}px;
+                outline-style: solid;
+                border-radius: ${config.textBorderRadius ?? 0}px;
+            `;
+
+        styleElement.innerHTML = `
+                ${styledSelector}:not(.sentence-loading) {
                     ${config.isDisplayed === false ? 'display: none !important;' : ''}
                     color: ${config.textColor || 'inherit'};
                     opacity: ${config.textOpacity == null ? 'inherit' : (config.textOpacity / 100)};
@@ -201,17 +226,64 @@ const initAppearanceSettingsHandling = () => {
                     line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
                     
                     transition: opacity 0.12s ease-in;
+                    
+                    ${config.textBackgroundType === TextBackgroundType.BLOCK ? textBackgroundCss : ''}
                 }
                 
                 html:not(:hover) ${styledSelector} {
                     ${config.isDisplayedOnHoverOnly ? 'opacity: 0;' : ''}
                 }
+                
+                ${styledSelector}.sentence-loading, ${styledSelector}:not(.sentence-loading) > .sentence-text {
+                    padding-top: ${config.textPaddingTop ?? 0}px;
+                    padding-right: ${config.textPaddingRight ?? 0}px;
+                    padding-bottom: ${config.textPaddingBottom ?? 0}px;
+                    padding-left: ${config.textPaddingLeft ?? 0}px;
+                }
+                
+                ${styledSelector}:not(.sentence-loading) > .sentence-text {
+                    -webkit-box-decoration-break: clone;
+                    
+                    ${config.textBackgroundType === TextBackgroundType.INLINE ? textBackgroundCss : ''}
+                }
             `;
-        });
     };
 
-    handleTextAppearanceChanges(StoreKeys.SETTINGS_APPEARANCE_ORIGINAL_TEXT, defaultOriginalTextAppearance, originalTextStyleElement, '.sentence-original');
-    handleTextAppearanceChanges(StoreKeys.SETTINGS_APPEARANCE_TRANSLATED_TEXT, defaultTranslatedTextAppearance, translatedTextStyleElement, '.sentence-translated');
+    ipcRenderer.on('appearance-settings-changed', (event: IpcRendererEvent, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig]) => {
+        switch (appearanceKey) {
+        case 'mainWindow':
+            renderMainWindowAppearance(config as MainWindowAppearanceConfig);
+            break;
+        case 'originalText':
+            renderTextAppearance(config as TextAppearanceConfig, originalTextStyleElement, '.sentence-original');
+            break;
+        case 'translatedText':
+            renderTextAppearance(config as TextAppearanceConfig, translatedTextStyleElement, '.sentence-translated');
+            break;
+        }
+    });
+
+    ipcRenderer.on('active-profile-changed', async (event, activeProfileId: string | undefined) => {
+        const appearanceConfigKey = getAppearanceConfigKey(activeProfileId);
+        const appearanceConfig = await electronStore.get<AppearanceConfig>(appearanceConfigKey)
+            ?? await initializeAppearanceConfig(electronStore, appearanceConfigKey);
+
+        renderMainWindowAppearance(appearanceConfig.mainWindow);
+        renderTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
+        renderTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+    });
+
+    electronStore.get<SavedProfiles | undefined>(StoreKeys.SAVED_PROFILES).then(async (savedProfiles) => {
+        const activeProfileId = savedProfiles?.activeProfileId;
+
+        const appearanceConfigKey = getAppearanceConfigKey(activeProfileId);
+        const appearanceConfig = await electronStore.get<AppearanceConfig>(appearanceConfigKey, defaultAppearanceConfig)
+            ?? await initializeAppearanceConfig(electronStore, appearanceConfigKey);
+
+        renderMainWindowAppearance(appearanceConfig.mainWindow);
+        renderTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
+        renderTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+    });
 };
 
 const initSampleTextShowing = () => {
@@ -268,11 +340,65 @@ const initSampleTextShowing = () => {
     });
 };
 
+const listenProfilesUpdate = () => {
+    electronStore.onDidChange(StoreKeys.SAVED_PROFILES, async (newValue, oldValue) => {
+        if (!oldValue) {
+            return;
+        }
+
+        const oldProfiles = oldValue as SavedProfiles;
+        const newProfiles = newValue as SavedProfiles;
+
+        if (oldProfiles.activeProfileId !== newProfiles.activeProfileId) {
+            ipcRenderer.invoke('active-profile-changed', newProfiles.activeProfileId);
+        }
+
+        // risky optimization
+        if (oldProfiles.profiles.length === newProfiles.profiles.length) {
+            return;
+        }
+
+        const oldProfileIds = oldProfiles.profiles.map(profile => profile.id);
+        const newProfileIds = newProfiles.profiles.map(profile => profile.id);
+
+        const oldProfileIdsSet = new Set<string>(oldProfileIds);
+        const newProfileIdsSet = new Set<string>(newProfileIds);
+
+        const deleted = oldProfileIds.filter(id => !newProfileIdsSet.has(id));
+        const created = newProfileIds.filter(id => !oldProfileIdsSet.has(id));
+
+        for (const profileId of deleted) {
+            console.log('deleting config for profile', profileId);
+            electronStore.delete(getAppearanceConfigKey(profileId));
+        }
+
+        for (const profileId of created) {
+            const appearanceConfigKey = getAppearanceConfigKey(profileId);
+            electronStore.get(appearanceConfigKey).then(currentValue => {
+                if (!currentValue) {
+                    console.log('initializing config for profile', profileId);
+                    initializeAppearanceConfig(electronStore, appearanceConfigKey);
+                }
+            });
+        }
+    });
+};
+
+const initProfiles = () => {
+    electronStore.get(StoreKeys.SAVED_PROFILES).then(value => {
+        if (!value) {
+            initializeSavedProfiles(electronStore)
+        }
+    });
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     initToolbar();
     initWindowDragger();
     initAutoHistory();
     initAppearanceSettingsHandling();
     initSampleTextShowing();
+    listenProfilesUpdate();
+    initProfiles();
     workTextractorPipe();
 });

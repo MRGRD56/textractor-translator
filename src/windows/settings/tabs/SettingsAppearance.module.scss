@@ -1,0 +1,49 @@
+.profilesTabTitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.titleIconWrapper {
+    position: relative;
+    height: 15px;
+    width: 15px;
+}
+
+.titleIcon {
+    position: absolute;
+
+    top: -2px;
+
+    color: #a9aebe;
+    font-size: 18px;
+
+    font-variation-settings: 'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+
+    //:global(.ant-tabs-tab:hover:not(.ant-tabs-tab-active)) & {
+    //    color: #40a9ff;
+    //}
+
+    :global(.ant-tabs-tab-active) & {
+        color: var(--antd-wave-shadow-color);
+    }
+}
+
+.appearanceProfilesContainer {
+    .profilesSelects {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .appearanceProfilesForm {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+}

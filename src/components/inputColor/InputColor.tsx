@@ -1,8 +1,9 @@
-import React, {useCallback, useImperativeHandle, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import styles from './InputColor.module.scss';
 import {Input, InputProps, InputRef} from 'antd';
 import classNames from 'classnames';
 import {useDidMount} from 'rooks';
+import {isString} from 'lodash';
 
 export interface InputColorProps extends InputProps {
     placeholderColor?: string;
@@ -23,6 +24,12 @@ const InputColor = React.forwardRef<InputRef, InputColorProps>(({placeholderColo
 
         setActualValue(input.value);
     });
+
+    useEffect(() => {
+        if (isString(value)) {
+            setActualValue(value);
+        }
+    }, [value]);
 
     const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((event) => {
         setActualValue(event.currentTarget.value);

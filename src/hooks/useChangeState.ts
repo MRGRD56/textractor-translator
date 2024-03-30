@@ -6,7 +6,7 @@ const useChangeState = <S extends object>(setState: Dispatch<SetStateAction<S>>)
             ...state,
             [key]: value
         }));
-    }, []);
+    }, [setState]);
 };
 
 export default useChangeState;

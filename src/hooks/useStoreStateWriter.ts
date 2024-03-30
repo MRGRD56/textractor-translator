@@ -2,37 +2,73 @@ import React, {useCallback, useMemo, useState} from 'react';
 import type Store from 'electron-store';
 import type {ElectronStore} from '../electron-store/electronStoreShared';
 import {isFunction} from 'lodash';
-import {useDidMount} from 'rooks';
+import {useAsyncEffect} from 'rooks';
+import AppearanceConfig, {defaultAppearanceConfig} from '../configuration/appearance/AppearanceConfig';
+import SavedProfiles from '../windows/settings/profiles/SavedProfiles';
+import {StoreKeys} from '../constants/store-keys';
+import getSettingsNodeApi from '../windows/settings/utils/getSettingsNodeApi';
 
 type Result<T> = [T | undefined, React.Dispatch<React.SetStateAction<T>>];
 
-const useStoreStateWriter = <T>(store: Store | ElectronStore, key: string, initialState: T): Result<T> => {
-    const [value, _setValue] = useState<T>();
+const {ipcRenderer} = getSettingsNodeApi();
 
-    useDidMount(async () => {
-        const valueToSet = await (store as any).get(key, initialState);
+const useStoreStateWriter = <T extends AppearanceConfig[keyof AppearanceConfig]>(
+    store: Store | ElectronStore,
+    appearanceKey: keyof AppearanceConfig,
+    savedProfiles: SavedProfiles | undefined
+): Result<T> => {
+    const [value, _setValue] = useState<AppearanceConfig>();
+
+    const storeKey = useMemo<string | undefined>(() => {
+        if (!savedProfiles) {
+            return undefined;
+        }
+
+        const activeProfileId = savedProfiles.activeProfileId;
+
+        if (activeProfileId === undefined) {
+            return StoreKeys.APPEARANCE_CONFIG + '.common';
+        }
+
+        return StoreKeys.APPEARANCE_CONFIG + '.' + activeProfileId;
+    }, [savedProfiles === undefined, savedProfiles?.activeProfileId]);
+
+    useAsyncEffect(async () => {
+        if (storeKey === undefined) {
+            return;
+        }
+
+        const valueToSet: AppearanceConfig = await (store as any).get(storeKey, defaultAppearanceConfig);
         _setValue(valueToSet);
-    });
+    }, [storeKey]);
 
     const setValue = useCallback<React.Dispatch<React.SetStateAction<T>>>((value) => {
+        if (storeKey === undefined) {
+            throw new Error('storeKey is undefined');
+        }
+
         _setValue(currentValue => {
             if (currentValue === undefined) {
                 return;
             }
 
             const newValue = isFunction(value)
-                ? value(currentValue)
+                ? value(currentValue[appearanceKey] as T)
                 : value;
 
-            store.set(key, newValue);
+            const newAppearance = {
+                ...currentValue,
+                [appearanceKey]: newValue
+            };
 
-            return newValue;
+            store.set(storeKey, newAppearance);
+            ipcRenderer.invoke('appearance-settings-changed', appearanceKey, newValue);
+
+            return newAppearance;
         });
-    }, [store, key]);
+    }, [store, storeKey]);
 
-    const result = [value, setValue] as Result<T>;
-
-    return useMemo(() => result, result);
+    return useMemo(() => [value?.[appearanceKey], setValue] as Result<T>, [value, appearanceKey, setValue]);
 };
 
 export default useStoreStateWriter;

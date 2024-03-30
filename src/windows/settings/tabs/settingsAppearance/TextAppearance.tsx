@@ -1,15 +1,25 @@
 import React, {FC} from 'react';
 import {ChangeStateHandler} from '../../../../hooks/useChangeStateHandler';
-import TextAppearanceConfig from '../../../../configuration/appearance/TextAppearanceConfig';
+import TextAppearanceConfig, {TextBackgroundType} from '../../../../configuration/appearance/TextAppearanceConfig';
 import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 import useInstalledFontsOptions from '../../../../hooks/useInstalledFontsOptions';
-import {Checkbox, Select, SelectProps} from 'antd';
-import {percentageFormatter} from '../utils/formatters';
-import {ItalicOutlined, UnderlineOutlined} from '@ant-design/icons';
+import {Checkbox, InputNumber, Select, SelectProps, Tooltip} from 'antd';
+import {percentageFormatter, pxFormatter} from '../utils/formatters';
+import {
+    DownOutlined,
+    ItalicOutlined,
+    LeftOutlined,
+    RightOutlined,
+    UnderlineOutlined,
+    UpOutlined
+} from '@ant-design/icons';
 import CheckboxButton from '../../../../components/checkboxButton/CheckboxButton';
 import InputColorExtended from '../../../../components/inputColor/InputColorExtended';
-import MainWindowAppearanceConfig from '../../../../configuration/appearance/MainWindowAppearanceConfig';
+import MainWindowAppearanceConfig, {
+    TextOutlineType
+} from '../../../../configuration/appearance/MainWindowAppearanceConfig';
 import ValueSlider from '../../../../components/valueSlider/ValueSlider';
+import InputColor from '../../../../components/inputColor/InputColor';
 
 const {ipcRenderer} = getSettingsNodeApi();
 
@@ -65,13 +75,15 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
     return (
         <div className="settings-appearance-tab">
             <div>
-                <Checkbox checked={appearance.isDisplayed} onChange={e => onAppearanceChange('isDisplayed')(e.target.checked)}>
+                <Checkbox checked={appearance.isDisplayed}
+                          onChange={e => onAppearanceChange('isDisplayed')(e.target.checked)}>
                     {type === 'original' ? 'Original text' : type === 'translated' ? 'Translated text' : 'Text'}{' '}visibility
                 </Checkbox>
             </div>
 
             <div>
-                <Checkbox disabled={!appearance.isDisplayed} checked={appearance.isDisplayedOnHoverOnly} onChange={e => onAppearanceChange('isDisplayedOnHoverOnly')(e.target.checked)}>
+                <Checkbox disabled={!appearance.isDisplayed} checked={appearance.isDisplayedOnHoverOnly}
+                          onChange={e => onAppearanceChange('isDisplayedOnHoverOnly')(e.target.checked)}>
                     Show only on hover
                 </Checkbox>
             </div>
@@ -86,7 +98,8 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
 
             <label>
                 <span>Text opacity</span>
-                <ValueSlider min={0} max={100} value={appearance.textOpacity} onChange={onAppearanceChange('textOpacity')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={0} max={100} value={appearance.textOpacity}
+                             onChange={onAppearanceChange('textOpacity')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
@@ -103,12 +116,14 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
 
             <label>
                 <span>Font size</span>
-                <ValueSlider min={10} max={200} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={10} max={200} value={appearance.fontSize} onChange={onAppearanceChange('fontSize')}
+                             tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
                 <span>Text line height</span>
-                <ValueSlider min={10} max={200} value={appearance.lineHeight} onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
+                <ValueSlider min={10} max={200} value={appearance.lineHeight}
+                             onChange={onAppearanceChange('lineHeight')} tipFormatter={percentageFormatter}/>
             </label>
 
             <label>
@@ -121,10 +136,105 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
                         className="flex-row-100-child"
                     />
 
-                    <CheckboxButton icon={<ItalicOutlined/>} checked={appearance.isItalic} onCheckedChange={onAppearanceChange('isItalic')}/>
-                    <CheckboxButton icon={<UnderlineOutlined/>} checked={appearance.isUnderlined} onCheckedChange={onAppearanceChange('isUnderlined')}/>
+                    <CheckboxButton icon={<ItalicOutlined/>} checked={appearance.isItalic}
+                                    onCheckedChange={onAppearanceChange('isItalic')}/>
+                    <CheckboxButton icon={<UnderlineOutlined/>} checked={appearance.isUnderlined}
+                                    onCheckedChange={onAppearanceChange('isUnderlined')}/>
                 </div>
             </label>
+
+            <div className="label">
+                <span title="Padding">Inner indents</span>
+                <div className="flex-row-100 mwa__arrow-inputs">
+                    <Tooltip placement="bottom" title="Top indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <UpOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input"
+                                         value={appearance.textPaddingTop ?? 0}
+                                         onChange={value => onAppearanceChange('textPaddingTop')(value ?? 0)} min={0}/>
+                        </div>
+                    </Tooltip>
+                    <Tooltip placement="bottom" title="Bottom indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <DownOutlined className="mwa__arrow-icon mwa__arrow-icon-vertical"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input"
+                                         value={appearance.textPaddingBottom ?? 0}
+                                         onChange={value => onAppearanceChange('textPaddingBottom')(value ?? 0)}
+                                         min={0}/>
+                        </div>
+                    </Tooltip>
+                    <Tooltip placement="bottom" title="Left indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <LeftOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input"
+                                         value={appearance.textPaddingLeft ?? 0}
+                                         onChange={value => onAppearanceChange('textPaddingLeft')(value ?? 0)} min={0}/>
+                        </div>
+                    </Tooltip>
+                    <Tooltip placement="bottom" title="Right indent">
+                        <div className="flex-row-100-child flex-row-100">
+                            <RightOutlined className="mwa__arrow-icon mwa__arrow-icon-horizontal"/>
+                            <InputNumber className="flex-row-100-child mwa__arrow-input"
+                                         value={appearance.textPaddingRight ?? 0}
+                                         onChange={value => onAppearanceChange('textPaddingRight')(value ?? 0)}
+                                         min={0}/>
+                        </div>
+                    </Tooltip>
+                </div>
+            </div>
+
+            <label>
+                <span>Background type</span>
+                <Select
+                    value={appearance.textBackgroundType}
+                    onChange={onAppearanceChange('textBackgroundType')}
+                    placeholder="None"
+                >
+                    <Select.Option key={undefined}>None</Select.Option>
+                    <Select.Option key={TextBackgroundType.BLOCK}>Block</Select.Option>
+                    <Select.Option key={TextBackgroundType.INLINE}>Inline</Select.Option>
+                </Select>
+            </label>
+
+            {appearance.textBackgroundType ? (
+                <>
+                    <label>
+                        <span>Background color</span>
+                        <InputColor value={appearance.textBackgroundColor}
+                                    onChange={onAppearanceChange('textBackgroundColor')}/>
+                    </label>
+
+                    <label>
+                        <span>Background opacity</span>
+                        <ValueSlider min={0} max={100} value={appearance.textBackgroundOpacity}
+                                     onChange={onAppearanceChange('textBackgroundOpacity')}
+                                     tipFormatter={percentageFormatter}/>
+                    </label>
+
+                    <label>
+                        <span>Border color</span>
+                        <InputColor value={appearance.textBorderColor} onChange={onAppearanceChange('textBorderColor')}/>
+                    </label>
+
+                    <label>
+                        <span>Border opacity</span>
+                        <ValueSlider min={0} max={100} value={appearance.textBorderOpacity}
+                                     onChange={onAppearanceChange('textBorderOpacity')} tipFormatter={percentageFormatter}/>
+                    </label>
+
+                    <label>
+                        <span>Border width</span>
+                        <ValueSlider min={0} max={20} value={appearance.textBorderThickness}
+                                     onChange={onAppearanceChange('textBorderThickness')} tipFormatter={pxFormatter}/>
+                    </label>
+
+                    <label>
+                        <span>Border roundness</span>
+                        <ValueSlider min={0} max={30} value={appearance.textBorderRadius}
+                                     onChange={onAppearanceChange('textBorderRadius')} tipFormatter={pxFormatter}/>
+                    </label>
+                </>
+            ) : null}
         </div>
     );
 };

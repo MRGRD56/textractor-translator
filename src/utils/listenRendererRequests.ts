@@ -1,8 +1,10 @@
-import {dialog, ipcMain, OpenDialogSyncOptions} from 'electron';
+import {BrowserWindow, dialog, ipcMain, OpenDialogSyncOptions} from 'electron';
 import {createSettingsWindow} from '../windows/settings/initSettings';
 import MainWindowDragState from '../windows/main/logic/MainWindowDragState';
 import {getFonts, IOptions} from 'font-list';
 import * as child_process from 'child_process';
+import AppearanceConfig from '../configuration/appearance/AppearanceConfig';
+import nodeEventEmitter from '../nodeEventEmitter';
 
 const listenRendererRequests = (): void => {
     ipcMain.handle('open-settings-window', () => {
@@ -47,6 +49,20 @@ const listenRendererRequests = (): void => {
 
     ipcMain.handle('child-process.exec-file', (event, path: string) => {
         child_process.execFile(path);
+    });
+
+    ipcMain.handle('active-profile-changed', (event, activeProfileId: string | undefined) => {
+        BrowserWindow.getAllWindows().forEach(window => {
+            window.webContents.send('active-profile-changed', activeProfileId);
+        });
+        nodeEventEmitter.emit('active-profile-changed', activeProfileId);
+    });
+
+    ipcMain.handle('appearance-settings-changed', (event, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig]) => {
+        BrowserWindow.getAllWindows().forEach(window => {
+            window.webContents.send('appearance-settings-changed', appearanceKey, config);
+        });
+        nodeEventEmitter.emit('appearance-settings-changed', appearanceKey, config);
     });
 };
 

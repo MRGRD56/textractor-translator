@@ -1,3 +1,8 @@
+export enum TextBackgroundType {
+    BLOCK = 'BLOCK',
+    INLINE = 'INLINE'
+}
+
 interface TextAppearanceConfig {
     isDisplayed: boolean;
     isDisplayedOnHoverOnly: boolean;
@@ -10,6 +15,17 @@ interface TextAppearanceConfig {
     isItalic: boolean;
     isUnderlined: boolean;
     lineHeight: number;
+    textPaddingTop: number;
+    textPaddingRight: number;
+    textPaddingBottom: number;
+    textPaddingLeft: number;
+    textBackgroundType?: TextBackgroundType;
+    textBackgroundColor: string;
+    textBackgroundOpacity: number;
+    textBorderColor: string;
+    textBorderOpacity: number;
+    textBorderThickness: number;
+    textBorderRadius: number;
 }
 
 export default TextAppearanceConfig;
@@ -24,7 +40,18 @@ export const defaultOriginalTextAppearance: TextAppearanceConfig = {
     fontWeight: 300,
     isItalic: false,
     isUnderlined: false,
-    lineHeight: 120
+    lineHeight: 120,
+    textBackgroundType: undefined,
+    textBackgroundColor: '#000000',
+    textBackgroundOpacity: 100,
+    textPaddingTop: 0,
+    textPaddingRight: 0,
+    textPaddingBottom: 0,
+    textPaddingLeft: 0,
+    textBorderColor: '#C8C8C8',
+    textBorderOpacity: 15,
+    textBorderThickness: 1,
+    textBorderRadius: 4
 };
 
 export const defaultTranslatedTextAppearance: TextAppearanceConfig = {

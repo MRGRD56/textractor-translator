@@ -4,21 +4,24 @@ import ProfileSourceEditor from '../components/ProfileSourceEditor';
 import SavedProfiles from '../profiles/SavedProfiles';
 import tabsCore, {ProfileTabs, TabsApi, TabsChange, TabsChangeCause} from '../../../utils/tabsCore';
 import SavedProfile from '../profiles/SavedProfile';
-import {useDidMount} from 'rooks';
+import {useDidMount, useWillUnmount} from 'rooks';
 import {StoreKeys} from '../../../constants/store-keys';
 import {savedProfilesToTabs, tabsToSavedProfiles} from '../profiles/profileTabConversions';
-import {COMMON_PROFILE_ID, NEW_PROFILE_NAME} from '../profiles/constants';
+import {NEW_PROFILE_NAME} from '../profiles/constants';
 import {deleteProfile} from '../utils/profiles';
-import {v4} from 'uuid';
-import {ElectronStore} from '../../../electron-store/electronStoreShared';
 import initializeSavedProfiles from '../../../configuration/initializeSavedProfiles';
+import {ActiveProfileChangedEvent} from '../../../types/custom-events';
+import useAutoRef from '../../../utils/useAutoRef';
+import getSettingsNodeApi from '../utils/getSettingsNodeApi';
 
-
-const store: ElectronStore = (window as any).nodeApi.store;
+const {store, ipcRenderer} = getSettingsNodeApi();
 
 const SettingsProfiles: FC = () => {
     const [savedProfiles, setSavedProfiles] = useState<SavedProfiles>();
     const [tabsApi, setTabsApi] = useState<TabsApi>();
+
+    const savedProfilesRef = useAutoRef(savedProfiles);
+    const tabsApiRef = useAutoRef(tabsApi);
 
     const activeProfileTab = useMemo<SavedProfile | undefined>(() => {
         return savedProfiles?.profiles.find(profile => {
@@ -26,12 +29,42 @@ const SettingsProfiles: FC = () => {
         });
     }, [savedProfiles]);
 
+    const profileChangedCallback = useCallback((event: ActiveProfileChangedEvent) => {
+        console.log('settingsProfiles: profileChanged', event)
+
+        const activeProfileId = event.detail.activeProfileId;
+
+        const savedProfiles = savedProfilesRef.current;
+
+        if (!savedProfiles) {
+            throw new Error('savedProfiles is undefined');
+        }
+
+        if (savedProfiles.activeProfileId === activeProfileId) {
+            return;
+        }
+
+        const newSavedProfiles: SavedProfiles = ({
+            ...savedProfiles,
+            activeProfileId
+        });
+
+        setSavedProfiles(newSavedProfiles);
+        tabsApiRef.current!.setTabsObject(savedProfilesToTabs(newSavedProfiles));
+        console.log('settingsProfiles: profileChanged savedProfiles, tabsApi', {newSavedProfiles, tabsApi})
+    }, []);
+
     useDidMount(async () => {
         const loadedSavedProfiles: SavedProfiles = await store.get(StoreKeys.SAVED_PROFILES) ?? initializeSavedProfiles(store);
         const loadedTabs = savedProfilesToTabs(loadedSavedProfiles);
         const loadedTabsApi = tabsCore(loadedTabs)
         setSavedProfiles(loadedSavedProfiles);
         setTabsApi(loadedTabsApi);
+        window.addEventListener('active-profile-changed', profileChangedCallback);
+    });
+
+    useWillUnmount(() => {
+        window.removeEventListener('active-profile-changed', profileChangedCallback);
     });
 
     const handleTabsChange = useCallback((tabs: ProfileTabs, changes: TabsChange[]) => {
@@ -66,7 +99,7 @@ const SettingsProfiles: FC = () => {
 
     const handleProfileActivate = useCallback((profileId: string) => {
         if (!savedProfiles) {
-            return savedProfiles;
+            return;
         }
 
         const newSavedProfiles = {
@@ -80,6 +113,10 @@ const SettingsProfiles: FC = () => {
         store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles)
         console.log('set SAVED_PROFILES handleProfileActivate', {newSavedProfiles})
         tabsApi?.setTabsObject(savedProfilesToTabs(newSavedProfiles));
+
+        window.dispatchEvent(new ActiveProfileChangedEvent({
+            activeProfileId: newSavedProfiles.activeProfileId
+        }));
     }, [savedProfiles, tabsApi]);
 
     const handleActiveProfileSourceChange = useCallback((profileId: string, profileSource: string) => {

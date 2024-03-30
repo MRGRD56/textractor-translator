@@ -5,9 +5,9 @@ import {TextractorStatus} from './settingsTextractor/types';
 import {TextractorPath, TTBridge} from '../types';
 import {useDidMount} from 'rooks';
 import {StoreKeys} from '../../../constants/store-keys';
-import type {SettingsNodeApi} from '../preload';
 import TextractorStatusIcon from '../components/TextractorStatusIcon';
 import {TextractorType} from '../../../configuration';
+import getSettingsNodeApi from '../utils/getSettingsNodeApi';
 
 const {
     store,
@@ -16,7 +16,7 @@ const {
     exec,
     checkTTBridgeStatus,
     installTTBridge
-} = (window as any).nodeApi as SettingsNodeApi;
+} = getSettingsNodeApi();
 
 const checkTTBridgeByPath = (textractor: TextractorPath | undefined): TTBridge => {
     if (textractor?.status !== TextractorStatus.SUCCESS) {

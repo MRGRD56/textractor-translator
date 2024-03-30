@@ -17,7 +17,7 @@ config.languages = {
     target: 'en'
 };
 
-config.translator = DefinedTranslators.GOOGLE_TRANSLATE;
+config.translator = Translators.GoogleTranslate();
 `.trim()
             },
             {

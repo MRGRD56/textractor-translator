@@ -4,7 +4,6 @@ import {TabsApi} from '../../../../utils/tabsCore';
 import classNames from 'classnames';
 import {profileToTab} from '../../profiles/profileTabConversions';
 import {Popconfirm} from 'antd';
-import {noop} from 'lodash';
 
 interface Props {
     tabsApi: TabsApi;
@@ -70,14 +69,16 @@ const PopupProfile: FC<Props> = ({tabsApi, profile, active: isActive, open: isOp
                     onOpenChange={setIsDeletePopupOpen}
                     overlayClassName="settings-profiles-popup-part"
                 >
-                    <div className="profiles-popup-item-delete" onClickCapture={e => {
-                        e.stopPropagation();
-                        setIsDeletePopupOpen(true);
-                    }}>
-                        <span className="material-symbols-rounded">
-                            close
-                        </span>
-                    </div>
+                    {!profile.isPredefined && (
+                        <div className="profiles-popup-item-delete" onClickCapture={e => {
+                            e.stopPropagation();
+                            setIsDeletePopupOpen(true);
+                        }}>
+                            <span className="material-symbols-rounded">
+                                close
+                            </span>
+                        </div>
+                    )}
                 </Popconfirm>
             </div>
         </button>

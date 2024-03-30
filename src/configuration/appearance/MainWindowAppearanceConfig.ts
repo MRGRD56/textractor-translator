@@ -8,7 +8,13 @@ export enum MainWindowDragMode {
 
 export enum TextOutlineType {
     OUTER = 'OUTER',
+    OUTER_SHADOW = 'OUTER_SHADOW',
     INNER = 'INNER'
+}
+
+export enum TextOrder {
+    ORIGINAL_TRANSLATED = 'ORIGINAL_TRANSLATED',
+    TRANSLATED_ORIGINAL = 'TRANSLATED_ORIGINAL'
 }
 
 interface MainWindowAppearanceConfig {
@@ -33,6 +39,8 @@ interface MainWindowAppearanceConfig {
     textOutlineType: TextOutlineType | undefined;
     textOutlineColor: string;
     textOutlineThickness: number;
+    textOrder: TextOrder;
+    sentenceGap: number;
 }
 
 export default MainWindowAppearanceConfig;
@@ -58,5 +66,7 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     paddingLeft: 10,
     textOutlineType: undefined,
     textOutlineColor: '#000000',
-    textOutlineThickness: 1.2
+    textOutlineThickness: 1.2,
+    textOrder: TextOrder.ORIGINAL_TRANSLATED,
+    sentenceGap: 4
 };
