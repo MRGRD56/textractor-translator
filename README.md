@@ -368,7 +368,7 @@ Translators.LibreTranslateCustom = (config = {}) => ({
 - ⏬ Maybe add "export history" feature
 - ⏬ Maybe save history to the storage and also add "clear history" button
 - ⏬ Add a switch to disable automatic translation of each phrase, phrases would be translated by clicking on the button
-- ⏬ Add more appearance settings: text shadows, outline (✅), text only background, vertical and horizontal text alignment
+- ⏬ Add more appearance settings: text shadows (✅), outline (✅), text only background (✅), vertical and horizontal text alignment
 - Add a dictionary of words, you can add words there while reading and learn them later
 - Add DeepL translator, improve custom translator creating feature
 - Maybe move languages and translator settings somewhere from profiles code
