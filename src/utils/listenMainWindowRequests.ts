@@ -1,5 +1,4 @@
 import {BrowserWindow, ipcMain} from 'electron';
-import type Interact from 'interactjs';
 
 const listenMainWindowRequests = (mainWindow: BrowserWindow) => {
     ipcMain.handle('main-window.close', () => {

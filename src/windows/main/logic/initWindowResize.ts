@@ -1,8 +1,8 @@
-import type Interact from 'interactjs';
-import interact from 'interactjs';
-import {ipcRenderer} from 'electron';
+// import type Interact from 'interactjs';
+// import interact from 'interactjs';
+// import {ipcRenderer} from 'electron';
 
-const initWindowResize = () => {
+// const initWindowResize = () => {
     // interact('#main-window-resize-frame')
     //     .resizable({
     //         edges: {top: true, right: true, bottom: true, left: true},
@@ -28,6 +28,6 @@ const initWindowResize = () => {
     //             })
     //         ]
     //     });
-};
-
-export default initWindowResize;
+// };
+//
+// export default initWindowResize;

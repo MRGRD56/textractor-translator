@@ -31,10 +31,30 @@ export interface DefinedTranslators {
     }
 }
 
+export enum ExtraHtmlPlace {
+    BEFORE = 'BEFORE',
+    AFTER = 'AFTER'
+}
+
+export interface ExtraHtml {
+    html: string;
+    place: ExtraHtmlPlace;
+}
+
 export interface DisplayedTransformedText {
     plain: string;
     displayed: string;
     isHtml?: boolean;
+    extraCss?: {
+        sentenceContainer?: string;
+        textContainer?: string;
+        text?: string;
+    },
+    extraHtml?: {
+        sentenceContainer?: ExtraHtml[];
+        textContainer?: ExtraHtml[];
+        text?: ExtraHtml[];
+    }
 }
 
 export type OptionalTransformedText = TransformedText | undefined;

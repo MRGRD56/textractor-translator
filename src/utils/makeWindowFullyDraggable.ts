@@ -17,6 +17,7 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow | AcrylicBrowserW
     let dragging = false;
 
     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
+        // console.log('drag-WM_LBUTTONUP')
         dragging = false;
 
         // const currentBounds = browserWindow.getBounds();
@@ -29,6 +30,7 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow | AcrylicBrowserW
         // });
     });
     browserWindow.hookWindowMessage(WM_MOUSEMOVE, (wParam: Buffer, lParam: Buffer) => {
+        // console.log('drag-WM_MOUSEMOVE')
         if (!dragging && !isDraggable()) return;
 
         if (!browserWindow) {

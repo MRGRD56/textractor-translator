@@ -1,5 +1,5 @@
 import workTextractorPipe from './logic/workTextractorPipe';
-import {BrowserWindow, ipcRenderer, IpcRendererEvent} from 'electron';
+import {ipcRenderer, IpcRendererEvent} from 'electron';
 import ref from '../../utils/ref';
 import watchCtrl from './utils/watchCtrl';
 import readStoreStateLazy from '../../utils/readStoreStateLazy';
@@ -24,7 +24,6 @@ import AppearanceConfig, {
 import SavedProfiles from '../settings/profiles/SavedProfiles';
 import initializeAppearanceConfig from '../../configuration/appearance/initializeAppearanceConfig';
 import initializeSavedProfiles from '../../configuration/initializeSavedProfiles';
-import initWindowResize from './logic/initWindowResize';
 
 export const isHistoryShownRef = ref<boolean>(false);
 
@@ -115,7 +114,11 @@ const initToolbar = () => {
     }, 2000);
 };
 
-const getTextOutlineCss = (config: {textOutlineType?: TextOutlineType, textOutlineThickness: number, textOutlineColor: string}): string => {
+const getTextOutlineCss = (config: {
+    textOutlineType?: TextOutlineType,
+    textOutlineThickness: number,
+    textOutlineColor: string
+}): string => {
     const {textOutlineType} = config;
     if (!textOutlineType) {
         return '';
@@ -134,7 +137,7 @@ const getTextOutlineCss = (config: {textOutlineType?: TextOutlineType, textOutli
             -${textOutlineThickness}px  ${textOutlineThickness}px 0 ${textOutlineColor},
             -${textOutlineThickness}px  0                         0 ${textOutlineColor}`;
 
-        return `text-shadow: ${textShadow};`;
+        return `text-shadow: ${textShadow}; -webkit-text-stroke: none;`;
     }
 
     if (textOutlineType === TextOutlineType.OUTER_SHADOW) {
@@ -145,11 +148,11 @@ const getTextOutlineCss = (config: {textOutlineType?: TextOutlineType, textOutli
             .map(() => baseBorder)
             .join(',');
 
-        return `text-shadow: ${textShadow}`;
+        return `text-shadow: ${textShadow}; -webkit-text-stroke: none;`;
     }
 
     if (textOutlineType === TextOutlineType.INNER) {
-        return `-webkit-text-stroke: ${textOutlineThickness}px ${textOutlineColor};`;
+        return `text-shadow: none; -webkit-text-stroke: ${textOutlineThickness}px ${textOutlineColor};`;
     }
 
     return '';
@@ -426,7 +429,7 @@ const initProfiles = () => {
 window.addEventListener('DOMContentLoaded', () => {
     initToolbar();
     initWindowDragger();
-    initWindowResize();
+    // initWindowResize();
     initAutoHistory();
     initAppearanceSettingsHandling();
     initSampleTextShowing();

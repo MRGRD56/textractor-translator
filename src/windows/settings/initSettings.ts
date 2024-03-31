@@ -16,13 +16,13 @@ export function createSettingsWindow(): void {
 
     settingsWindow = new BrowserWindow({
         height: 850,
-        width: 1000,
+        width: 900,
         webPreferences: {
             preload: SETTINGS_WINDOW_PRELOAD_WEBPACK_ENTRY,
             sandbox: false,
             nodeIntegration: true
         },
-        alwaysOnTop: true
+        // alwaysOnTop: true
     });
 
     settingsWindow.on('close', () => {

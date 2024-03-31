@@ -5,93 +5,202 @@ const WM_LBUTTONUP = 0x0202;  // https://learn.microsoft.com/en-us/windows/win32
 
 const MK_LBUTTON = 0x0001;
 
-const makeWindowResizable = (browserWindow: BrowserWindow, edgeWidth: number) => {
-    let resizing = false;
-    let resizeDirection = '';
+// const makeWindowResizable = (browserWindow: BrowserWindow, edgeWidth: number) => {
+//     let resizeDirection: string | undefined = undefined;
+//
+//     const initialPos = {
+//         x: 0,
+//         y: 0,
+//         height: 0,
+//         width: 0,
+//     };
+//
+//     const getCursorEdgePosition = (x: number, y: number): string | undefined => {
+//         const bounds = browserWindow.getBounds();
+//         if (x < bounds.x + edgeWidth) {
+//             if (y < bounds.y + edgeWidth) return 'top-left';
+//             else if (y > bounds.y + bounds.height - edgeWidth) return 'bottom-left';
+//             else return 'left';
+//         } else if (x > bounds.x + bounds.width - edgeWidth) {
+//             if (y < bounds.y + edgeWidth) return 'top-right';
+//             else if (y > bounds.y + bounds.height - edgeWidth) return 'bottom-right';
+//             else return 'right';
+//         } else if (y < bounds.y + edgeWidth) {
+//             return 'top';
+//         } else if (y > bounds.y + bounds.height - edgeWidth) {
+//             return 'bottom';
+//         }
+//         return undefined;
+//     };
+//
+//     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
+//         resizeDirection = undefined;
+//     });
+//
+//     browserWindow.hookWindowMessage(WM_MOUSEMOVE, (wParam: Buffer, lParam: Buffer) => {
+//         if (!resizeDirection) {
+//             const wParamNumber = wParam.readInt16LE(0);
+//             if (!(wParamNumber & MK_LBUTTON)) {
+//                 return;
+//             }
+//
+//             const screenX = lParam.readInt16LE(0);
+//             const screenY = lParam.readInt16LE(2);
+//             resizeDirection = getCursorEdgePosition(screenX, screenY);
+//             if (resizeDirection) {
+//                 resizing = true;
+//                 initialClickPosition = { x: screenX, y: screenY }; // Запоминаем позицию начала изменения размера
+//                 const {x, y} = browserWindow.getBounds();
+//                 initialClickPosition.x -= x; // Преобразуем глобальные координаты в локальные
+//                 initialClickPosition.y -= y;
+//             }
+//         }
+//
+//         if (resizeDirection) {
+//             const screenX = lParam.readInt16LE(0);
+//             const screenY = lParam.readInt16LE(2);
+//             const {x, y, width, height} = browserWindow.getBounds();
+//
+//             const dx = screenX - x - initialClickPosition.x; // Вычисляем изменение координаты X
+//             const dy = screenY - y - initialClickPosition.y; // Вычисляем изменение координаты Y
+//
+//             switch (resizeDirection) {
+//             // case 'top-left':
+//             //     browserWindow.setBounds({x: screenX, y: screenY, width: width - dx, height: height - dy});
+//             //     break;
+//             case 'top':
+//                 browserWindow.setBounds({y: screenY, height: height - dy});
+//                 break;
+//             // case 'top-right':
+//             //     browserWindow.setBounds({width: width + dx, height: height - dy});
+//             //     break;
+//             case 'right':
+//                 browserWindow.setBounds({width: width + dx});
+//                 break;
+//             // case 'bottom-right':
+//             //     browserWindow.setBounds({width: width + dx, height: height + dy});
+//             //     break;
+//             case 'bottom':
+//                 browserWindow.setBounds({height: height + dy});
+//                 break;
+//             // case 'bottom-left':
+//             //     browserWindow.setBounds({x: screenX, width: width - dx, height: height + dy});
+//             //     break;
+//             case 'left':
+//                 browserWindow.setBounds({x: screenX, width: width - dx});
+//                 break;
+//             }
+//         }
+//     });
+// };
 
-    browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
-        resizing = false;
-        resizeDirection = '';
-    });
-
-    const getCursorEdgePosition = (x: number, y: number) => {
-        const bounds = browserWindow.getBounds();
-        if (x < bounds.x + edgeWidth) {
-            if (y < bounds.y + edgeWidth) return 'top-left';
-            else if (y > bounds.y + bounds.height - edgeWidth) return 'bottom-left';
-            else return 'left';
-        } else if (x > bounds.x + bounds.width - edgeWidth) {
-            if (y < bounds.y + edgeWidth) return 'top-right';
-            else if (y > bounds.y + bounds.height - edgeWidth) return 'bottom-right';
-            else return 'right';
-        } else if (y < bounds.y + edgeWidth) {
-            return 'top';
-        } else if (y > bounds.y + bounds.height - edgeWidth) {
-            return 'bottom';
-        }
-        return '';
+const makeWindowResizable = (browserWindow: BrowserWindow, edgeWidth: number): void => {
+    const initialPos = {
+        x: 0,
+        y: 0
+    };
+    let initialBounds: Electron.Rectangle = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
     };
 
+    let resizeDirection: string | undefined = undefined;
+
+    const getCursorEdgePosition = (bounds: Electron.Rectangle, x: number, y: number): string | undefined => {
+        if (x <= edgeWidth) {
+            if (y <= edgeWidth) return 'top-left';
+            else if (y >= bounds.height - edgeWidth) return 'bottom-left';
+            else return 'left';
+        } else if (x >= bounds.width - edgeWidth) {
+            if (y <= edgeWidth) return 'top-right';
+            else if (y >= bounds.height - edgeWidth) return 'bottom-right';
+            else return 'right';
+        } else if (y <= edgeWidth) {
+            return 'top';
+        } else if (y >= bounds.height - edgeWidth) {
+            return 'bottom';
+        }
+        return undefined;
+    };
+
+    browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
+        resizeDirection = undefined;
+    });
     browserWindow.hookWindowMessage(WM_MOUSEMOVE, (wParam: Buffer, lParam: Buffer) => {
-        if (resizeDirection === '' && !resizing) {
-            const wParamNumber: number = wParam.readInt16LE(0);
-            // if left mouse button is not being pressed
-            if (!(wParamNumber & MK_LBUTTON)) {
-                return;
-            }
-
-            const screenX = lParam.readInt16LE(0);
-            const screenY = lParam.readInt16LE(2);
-            const [windowX, windowY] = browserWindow.getPosition();
-
-            const x = screenX - windowX;
-            const y = screenY - windowY;
-
-            resizeDirection = getCursorEdgePosition(x, y);
-            if (resizeDirection) {
-                resizing = true;
-            }
+        if (!browserWindow) {
+            return;
         }
 
-        if (resizing) {
-            const screenX = lParam.readInt16LE(0);
-            const screenY = lParam.readInt16LE(2);
-            // const [windowX, windowY] = browserWindow.getPosition();
+        const wParamNumber: number = wParam.readInt16LE(0);
 
-            // const relativeX = screenX - windowX;
-            // const relativeY = screenY - windowY;
+        if (!(wParamNumber & MK_LBUTTON)) {
+            return;
+        }
 
-            const {x, y, width, height} = browserWindow.getBounds();
+        const bounds = browserWindow.getBounds();
 
-            switch (resizeDirection) {
-            case 'top-left':
-                browserWindow.setBounds({x: screenX, y: screenY, width: width + x - screenX, height: height + y - screenY});
-                break;
-            case 'top':
-                browserWindow.setBounds({y: screenY, height: height + y - screenY});
-                break;
-            case 'top-right':
-                browserWindow.setBounds({y: screenY, width: screenX - x, height: height + y - screenY});
-                break;
-            case 'right':
-                browserWindow.setBounds({width: screenX - x});
-                break;
-            case 'bottom-right':
-                browserWindow.setBounds({width: screenX - x, height: screenY - y});
-                break;
-            case 'bottom':
-                browserWindow.setBounds({height: screenY - y});
-                break;
-            case 'bottom-left':
-                browserWindow.setBounds({x: screenX, width: width + x - screenX, height: screenY - y});
-                break;
-            case 'left':
-                browserWindow.setBounds({x: screenX, width: width + x - screenX});
-                break;
+        console.log({bounds, position: browserWindow.getPosition(), size: browserWindow.getSize()})
+
+        const relativeX = lParam.readInt16LE(0);
+        const relativeY = lParam.readInt16LE(2);
+
+        const absoluteX = bounds.x + relativeX;
+        const absoluteY = bounds.y + relativeY;
+
+        if (!resizeDirection) {
+            console.log('getCursorEdgePosition ->', {bounds, absoluteX, absoluteY, relativeX, relativeY, edgeWidth});
+            resizeDirection = getCursorEdgePosition(bounds, relativeX, relativeY);
+            console.log('getCursorEdgePosition <-', {resizeDirection});
+            if (resizeDirection) {
+                initialPos.x = absoluteX;
+                initialPos.y = absoluteY;
+                initialBounds = bounds;
             }
+            return;
+        }
+
+        const dx = absoluteX - initialPos.x; // Вычисляем изменение координаты X
+        const dy = absoluteY - initialPos.y; // Вычисляем изменение координаты Y
+
+        console.log('makeWindowResizable', {x: absoluteX, y: absoluteY, dx, dy, initialPos, resizeDirection})
+
+        switch (resizeDirection) {
+            // case 'top-left':
+            //     browserWindow.setBounds({x: screenX, y: screenY, width: width - dx, height: height - dy});
+            //     break;
+        case 'top':
+            browserWindow.setBounds({y: initialBounds.y + dy, height: initialBounds.height - dy});
+            break;
+            // case 'top-right':
+            //     browserWindow.setBounds({width: width + dx, height: height - dy});
+            //     break;
+        case 'right':
+            browserWindow.setBounds({width: initialBounds.width + dx});
+            break;
+            // case 'bottom-right':
+            //     browserWindow.setBounds({width: width + dx, height: height + dy});
+            //     break;
+        case 'bottom':
+            browserWindow.setBounds({height: initialBounds.height + dy});
+            break;
+            // case 'bottom-left':
+            //     browserWindow.setBounds({x: screenX, width: width - dx, height: height + dy});
+            //     break;
+        case 'left':
+            browserWindow.setBounds({x: initialBounds.x + dx, width: initialBounds.width - dx});
+            break;
         }
     });
-};
+}
+
+    // browserWindow.setBounds({
+    //     x: x + browserWindow.getPosition()[0] - initialPos.x,
+    //     y: y + browserWindow.getPosition()[1] - initialPos.y,
+    //     height: initialPos.height,
+    //     width: initialPos.width,
+    // });
 
 
 export default makeWindowResizable;
