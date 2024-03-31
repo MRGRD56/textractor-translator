@@ -41,6 +41,9 @@ interface MainWindowAppearanceConfig {
     textOutlineThickness: number;
     textOrder: TextOrder;
     sentenceGap: number;
+    isHoverOnlyBackgroundSettings: boolean;
+    hoverOnlyBackgroundOpacity: number;
+    hoverOnlyBorderOpacity: number;
 }
 
 export default MainWindowAppearanceConfig;
@@ -68,5 +71,8 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     textOutlineColor: '#000000',
     textOutlineThickness: 1.2,
     textOrder: TextOrder.ORIGINAL_TRANSLATED,
-    sentenceGap: 4
+    sentenceGap: 4,
+    isHoverOnlyBackgroundSettings: false,
+    hoverOnlyBackgroundOpacity: 100,
+    hoverOnlyBorderOpacity: 100
 };

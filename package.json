@@ -45,6 +45,7 @@
     "eslint-plugin-import": "^2.25.0",
     "file-loader": "^6.2.0",
     "fork-ts-checker-webpack-plugin": "^7.2.13",
+    "node-gyp": "^9.3.1",
     "node-loader": "^2.0.0",
     "raw-loader": "^4.0.2",
     "sass": "^1.56.1",
@@ -52,8 +53,7 @@
     "style-loader": "^3.0.0",
     "ts-loader": "^9.2.2",
     "ts-node": "^10.0.0",
-    "typescript": "~4.5.4",
-    "node-gyp": "^9.3.1"
+    "typescript": "~4.5.4"
   },
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
@@ -68,6 +68,7 @@
     "express": "^4.18.2",
     "follow-redirects": "^1.15.2",
     "font-list": "^1.4.5",
+    "interactjs": "^1.10.27",
     "lodash": "^4.17.21",
     "material-symbols": "^0.4.1",
     "monaco-editor": "^0.34.1",

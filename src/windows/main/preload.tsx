@@ -1,12 +1,11 @@
 import workTextractorPipe from './logic/workTextractorPipe';
-import {ipcRenderer, IpcRendererEvent} from 'electron';
+import {BrowserWindow, ipcRenderer, IpcRendererEvent} from 'electron';
 import ref from '../../utils/ref';
 import watchCtrl from './utils/watchCtrl';
 import readStoreStateLazy from '../../utils/readStoreStateLazy';
 import electronStore from '../../electron-store/electronStore';
 import {StoreKeys} from '../../constants/store-keys';
 import MainWindowAppearanceConfig, {
-    defaultMainWindowAppearance,
     MainWindowDragMode,
     TextOrder,
     TextOutlineType
@@ -14,8 +13,7 @@ import MainWindowAppearanceConfig, {
 import addColorAlpha from '../../utils/addColorAlpha';
 import initWindowDragger from './logic/initWindowDragger';
 import TextAppearanceConfig, {
-    defaultOriginalTextAppearance,
-    defaultTranslatedTextAppearance,
+    TextAppearanceOverrideType,
     TextBackgroundType
 } from '../../configuration/appearance/TextAppearanceConfig';
 import {defaultSettingsTab, SettingsTab} from '../settings/types';
@@ -26,8 +24,7 @@ import AppearanceConfig, {
 import SavedProfiles from '../settings/profiles/SavedProfiles';
 import initializeAppearanceConfig from '../../configuration/appearance/initializeAppearanceConfig';
 import initializeSavedProfiles from '../../configuration/initializeSavedProfiles';
-import makeWindowFullyDraggable from '../../utils/makeWindowFullyDraggable';
-import MainWindowDragState from './logic/MainWindowDragState';
+import initWindowResize from './logic/initWindowResize';
 
 export const isHistoryShownRef = ref<boolean>(false);
 
@@ -118,7 +115,7 @@ const initToolbar = () => {
     }, 2000);
 };
 
-const getTextOutlineCss = (config: MainWindowAppearanceConfig): string => {
+const getTextOutlineCss = (config: {textOutlineType?: TextOutlineType, textOutlineThickness: number, textOutlineColor: string}): string => {
     const {textOutlineType} = config;
     if (!textOutlineType) {
         return '';
@@ -168,6 +165,13 @@ const initAppearanceSettingsHandling = () => {
     const moveButton = document.getElementById('move-mw-button')!;
 
     const renderMainWindowAppearance = (config: MainWindowAppearanceConfig) => {
+        const hoverOnlyCss = config.isHoverOnlyBackgroundSettings ? `
+            html:hover .text-container-wrapper {
+                background-color: ${addColorAlpha(config.backgroundColor, config.hoverOnlyBackgroundOpacity / 100)};
+                border-color: ${addColorAlpha(config.borderColor, config.hoverOnlyBorderOpacity / 100)};
+            }
+        ` : '';
+
         mainWindowStyleElement.innerHTML = `
             .sentence {
                 flex-direction: ${config.textOrder === TextOrder.TRANSLATED_ORIGINAL ? 'column-reverse' : 'column'};
@@ -175,6 +179,10 @@ const initAppearanceSettingsHandling = () => {
             }
                     
             .text-container-wrapper {
+                transition-property: background-color, border-color;
+                transition-duration: 0.12s;
+                transition-function: ease-in;
+            
                 background-color: ${addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100)};
                 border-radius: ${config.borderRadius}px;
                 border-width: ${config.borderThickness}px;
@@ -186,6 +194,8 @@ const initAppearanceSettingsHandling = () => {
                 padding: ${config.paddingTop ?? 8}px ${config.paddingRight ?? 10}px ${config.paddingBottom ?? 8}px ${config.paddingLeft ?? 10}px;
                 ${getTextOutlineCss(config)}
             }
+            
+            ${hoverOnlyCss}
             
             .main-toolbar {
                 border-radius: 0 ${config.borderRadius ?? 4}px 0 ${Math.min(config.borderRadius ?? 4, 8)}px;
@@ -213,6 +223,25 @@ const initAppearanceSettingsHandling = () => {
                 border-radius: ${config.textBorderRadius ?? 0}px;
             `;
 
+        const outlineCss: string = (() => {
+            if (config.textOutlineType === TextAppearanceOverrideType.INHERIT) {
+                return '';
+            }
+
+            if (!config.textOutlineType) {
+                return `
+                    text-shadow: none;
+                    -webkit-text-stroke: none;
+                `;
+            }
+
+            return getTextOutlineCss({
+                textOutlineType: config.textOutlineType,
+                textOutlineColor: config.textOutlineColor,
+                textOutlineThickness: config.textOutlineThickness
+            });
+        })();
+
         styleElement.innerHTML = `
                 ${styledSelector}:not(.sentence-loading) {
                     ${config.isDisplayed === false ? 'display: none !important;' : ''}
@@ -228,6 +257,8 @@ const initAppearanceSettingsHandling = () => {
                     transition: opacity 0.12s ease-in;
                     
                     ${config.textBackgroundType === TextBackgroundType.BLOCK ? textBackgroundCss : ''}
+                    
+                    ${outlineCss}
                 }
                 
                 html:not(:hover) ${styledSelector} {
@@ -395,6 +426,7 @@ const initProfiles = () => {
 window.addEventListener('DOMContentLoaded', () => {
     initToolbar();
     initWindowDragger();
+    initWindowResize();
     initAutoHistory();
     initAppearanceSettingsHandling();
     initSampleTextShowing();

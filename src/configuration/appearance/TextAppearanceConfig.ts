@@ -1,6 +1,12 @@
+import {TextOutlineType} from './MainWindowAppearanceConfig';
+
 export enum TextBackgroundType {
     BLOCK = 'BLOCK',
     INLINE = 'INLINE'
+}
+
+export enum TextAppearanceOverrideType {
+    INHERIT = 'INHERIT'
 }
 
 interface TextAppearanceConfig {
@@ -26,6 +32,9 @@ interface TextAppearanceConfig {
     textBorderOpacity: number;
     textBorderThickness: number;
     textBorderRadius: number;
+    textOutlineType: TextOutlineType | TextAppearanceOverrideType | undefined;
+    textOutlineColor: string;
+    textOutlineThickness: number;
 }
 
 export default TextAppearanceConfig;
@@ -51,7 +60,10 @@ export const defaultOriginalTextAppearance: TextAppearanceConfig = {
     textBorderColor: '#C8C8C8',
     textBorderOpacity: 15,
     textBorderThickness: 1,
-    textBorderRadius: 4
+    textBorderRadius: 4,
+    textOutlineType: TextAppearanceOverrideType.INHERIT,
+    textOutlineColor: '#000000',
+    textOutlineThickness: 1.2,
 };
 
 export const defaultTranslatedTextAppearance: TextAppearanceConfig = {
