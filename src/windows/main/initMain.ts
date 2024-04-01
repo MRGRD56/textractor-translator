@@ -81,6 +81,10 @@ export function createMainWindow(store: Store): BrowserWindow {
         }
     }
 
+    mainWindow.hookWindowMessage(0x0200, () => {
+        console.log('WM_MOUSEMOVE');
+    });
+
     // trackWindowHover(mainWindow, isHover => {
     //     nodeConsole.log('isHover', isHover);
     // });
