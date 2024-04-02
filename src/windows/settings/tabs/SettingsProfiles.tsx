@@ -71,25 +71,25 @@ const SettingsProfiles: FC = () => {
         store.get<SavedProfiles>(StoreKeys.SAVED_PROFILES).then((savedProfiles) => {
             savedProfiles ??= initializeSavedProfiles(store);
 
-            const closedEmptyTabIds = changes
-                .map(change => {
-                    if (change.cause !== TabsChangeCause.TAB_CLOSED) {
-                        return;
-                    }
+            // const closedEmptyTabIds = changes
+            //     .map(change => {
+            //         if (change.cause !== TabsChangeCause.TAB_CLOSED) {
+            //             return;
+            //         }
+            //
+            //         if (change.tab.name === NEW_PROFILE_NAME && !change.tab.isActivated) {
+            //             const profile = savedProfiles.profiles.find(profile => profile.id === change.tab.id);
+            //             if (profile && !profile.configSource?.trim()) {
+            //                 return change.tab.id;
+            //             }
+            //         }
+            //     })
+            //     .filter(Boolean) as string[];
 
-                    if (change.tab.name === NEW_PROFILE_NAME && !change.tab.isActivated) {
-                        const profile = savedProfiles.profiles.find(profile => profile.id === change.tab.id);
-                        if (profile && !profile.configSource?.trim()) {
-                            return change.tab.id;
-                        }
-                    }
-                })
-                .filter(Boolean) as string[];
-
-            let newSavedProfiles = tabsToSavedProfiles(savedProfiles, tabs);
-            if (closedEmptyTabIds.length) {
-                newSavedProfiles = deleteProfile(newSavedProfiles, closedEmptyTabIds)
-            }
+            const newSavedProfiles = tabsToSavedProfiles(savedProfiles, tabs);
+            // if (closedEmptyTabIds.length) {
+            //     newSavedProfiles = deleteProfile(newSavedProfiles, closedEmptyTabIds)
+            // }
 
             store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles);
             console.log('set SAVED_PROFILES handleTabsChange', {newSavedProfiles})

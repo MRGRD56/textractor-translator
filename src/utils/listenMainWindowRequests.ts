@@ -21,6 +21,20 @@ const listenMainWindowRequests = (mainWindow: BrowserWindow) => {
 
         mainWindow.webContents.devToolsWebContents?.focus();
     });
+    // ipcMain.handle('main-window.resize', (event, rect: Interact.FullRect) => {
+    //     const bounds = mainWindow.getBounds();
+    //
+    //     const newBounds: Electron.Rectangle = {
+    //         x: bounds.x + rect.left,
+    //         y: bounds.y + rect.top,
+    //         width: bounds.width + rect.width,
+    //         height: bounds.height + rect.height
+    //     };
+    //
+    //     console.log('handling mw resize', {rect, newBounds});
+    //
+    //     mainWindow.setBounds(newBounds);
+    // });
 };
 
 export default listenMainWindowRequests;

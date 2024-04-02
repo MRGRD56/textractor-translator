@@ -1,4 +1,4 @@
-import type {VibrancyEffect, VibrancyTheme} from 'electron-acrylic-window';
+// import type {VibrancyEffect, VibrancyTheme} from 'electron-acrylic-window';
 
 export enum MainWindowDragMode {
     ENTIRE_WINDOW = 'ENTIRE_WINDOW',
@@ -26,8 +26,8 @@ interface MainWindowAppearanceConfig {
     borderThickness: number;
     borderRadius: number;
     isBackgroundBlurEnabled: boolean;
-    backgroundBlurTheme: VibrancyTheme;
-    backgroundBlurEffect: VibrancyEffect;
+    // backgroundBlurTheme: VibrancyTheme;
+    // backgroundBlurEffect: VibrancyEffect;
     fontFamily: string;
     fontSize: number;
     lineHeight: number;
@@ -41,6 +41,9 @@ interface MainWindowAppearanceConfig {
     textOutlineThickness: number;
     textOrder: TextOrder;
     sentenceGap: number;
+    isHoverOnlyBackgroundSettings: boolean;
+    hoverOnlyBackgroundOpacity: number;
+    hoverOnlyBorderOpacity: number;
 }
 
 export default MainWindowAppearanceConfig;
@@ -54,8 +57,8 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     borderRadius: 4,
     windowDragMode: MainWindowDragMode.BACKGROUND,
     isBackgroundBlurEnabled: false,
-    backgroundBlurTheme: 'dark',
-    backgroundBlurEffect: 'acrylic',
+    // backgroundBlurTheme: 'dark',
+    // backgroundBlurEffect: 'acrylic',
     fontFamily: 'Roboto',
     fontSize: 20,
     lineHeight: 120,
@@ -68,5 +71,8 @@ export const defaultMainWindowAppearance: MainWindowAppearanceConfig = {
     textOutlineColor: '#000000',
     textOutlineThickness: 1.2,
     textOrder: TextOrder.ORIGINAL_TRANSLATED,
-    sentenceGap: 4
+    sentenceGap: 4,
+    isHoverOnlyBackgroundSettings: false,
+    hoverOnlyBackgroundOpacity: 100,
+    hoverOnlyBorderOpacity: 100
 };

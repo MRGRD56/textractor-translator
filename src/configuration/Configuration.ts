@@ -31,10 +31,27 @@ export interface DefinedTranslators {
     }
 }
 
+export interface ExtraHtml {
+    html: string;
+    position: InsertPosition;
+}
+
 export interface DisplayedTransformedText {
     plain: string;
     displayed: string;
     isHtml?: boolean;
+    extraCss?: {
+        sentenceContainer?: string[];
+        sentence?: string[];
+        textContainer?: string[];
+        text?: string[];
+    },
+    extraHtml?: {
+        sentenceContainer?: ExtraHtml[];
+        sentence?: ExtraHtml[];
+        textContainer?: ExtraHtml[];
+        text?: ExtraHtml[];
+    }
 }
 
 export type OptionalTransformedText = TransformedText | undefined;

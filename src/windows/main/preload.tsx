@@ -6,7 +6,6 @@ import readStoreStateLazy from '../../utils/readStoreStateLazy';
 import electronStore from '../../electron-store/electronStore';
 import {StoreKeys} from '../../constants/store-keys';
 import MainWindowAppearanceConfig, {
-    defaultMainWindowAppearance,
     MainWindowDragMode,
     TextOrder,
     TextOutlineType
@@ -14,8 +13,7 @@ import MainWindowAppearanceConfig, {
 import addColorAlpha from '../../utils/addColorAlpha';
 import initWindowDragger from './logic/initWindowDragger';
 import TextAppearanceConfig, {
-    defaultOriginalTextAppearance,
-    defaultTranslatedTextAppearance,
+    TextAppearanceOverrideType,
     TextBackgroundType
 } from '../../configuration/appearance/TextAppearanceConfig';
 import {defaultSettingsTab, SettingsTab} from '../settings/types';
@@ -26,8 +24,6 @@ import AppearanceConfig, {
 import SavedProfiles from '../settings/profiles/SavedProfiles';
 import initializeAppearanceConfig from '../../configuration/appearance/initializeAppearanceConfig';
 import initializeSavedProfiles from '../../configuration/initializeSavedProfiles';
-import makeWindowFullyDraggable from '../../utils/makeWindowFullyDraggable';
-import MainWindowDragState from './logic/MainWindowDragState';
 
 export const isHistoryShownRef = ref<boolean>(false);
 
@@ -115,10 +111,14 @@ const initToolbar = () => {
     mainToolbar.classList.add('force-visible');
     setTimeout(() => {
         mainToolbar.classList.remove('force-visible');
-    }, 2000);
+    }, 2500);
 };
 
-const getTextOutlineCss = (config: MainWindowAppearanceConfig): string => {
+const getTextOutlineCss = (config: {
+    textOutlineType?: TextOutlineType,
+    textOutlineThickness: number,
+    textOutlineColor: string
+}): string => {
     const {textOutlineType} = config;
     if (!textOutlineType) {
         return '';
@@ -137,7 +137,13 @@ const getTextOutlineCss = (config: MainWindowAppearanceConfig): string => {
             -${textOutlineThickness}px  ${textOutlineThickness}px 0 ${textOutlineColor},
             -${textOutlineThickness}px  0                         0 ${textOutlineColor}`;
 
-        return `text-shadow: ${textShadow};`;
+        return `
+            --txx-text-shadow: ${textShadow};
+            text-shadow: var(--txx-text-shadow);
+            
+            --txx--webkit-text-stroke: none;
+            -webkit-text-stroke: var(--txx--webkit-text-stroke);
+        `;
     }
 
     if (textOutlineType === TextOutlineType.OUTER_SHADOW) {
@@ -148,11 +154,23 @@ const getTextOutlineCss = (config: MainWindowAppearanceConfig): string => {
             .map(() => baseBorder)
             .join(',');
 
-        return `text-shadow: ${textShadow}`;
+        return `
+            --txx-text-shadow: ${textShadow};
+            text-shadow: var(--txx-text-shadow);
+            
+            --txx--webkit-text-stroke: none;
+            -webkit-text-stroke: var(--txx--webkit-text-stroke);
+        `;
     }
 
     if (textOutlineType === TextOutlineType.INNER) {
-        return `-webkit-text-stroke: ${textOutlineThickness}px ${textOutlineColor};`;
+        return `
+            --txx-text-shadow: none;
+            text-shadow: var(--txx-text-shadow);
+            
+            --txx--webkit-text-stroke: ${textOutlineThickness}px ${textOutlineColor};
+            -webkit-text-stroke: var(--txx--webkit-text-stroke);
+        `;
     }
 
     return '';
@@ -168,24 +186,77 @@ const initAppearanceSettingsHandling = () => {
     const moveButton = document.getElementById('move-mw-button')!;
 
     const renderMainWindowAppearance = (config: MainWindowAppearanceConfig) => {
-        mainWindowStyleElement.innerHTML = `
-            .sentence {
-                flex-direction: ${config.textOrder === TextOrder.TRANSLATED_ORIGINAL ? 'column-reverse' : 'column'};
-                gap: ${config.sentenceGap ?? 4}px;
+        const hoverOnlyCss = config.isHoverOnlyBackgroundSettings ? `
+            html:is(:hover, [data-window-hover=true]) .text-container-wrapper {
+                --txx-background-color: ${addColorAlpha(config.backgroundColor, config.hoverOnlyBackgroundOpacity / 100)};
+                background-color: var(--txx-background-color);
+                
+                --txx-border-color: ${addColorAlpha(config.borderColor, config.hoverOnlyBorderOpacity / 100)};
+                border-color: var(--txx-border-color);
             }
-                    
+        ` : '';
+
+        mainWindowStyleElement.innerHTML = `
             .text-container-wrapper {
-                background-color: ${addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100)};
-                border-radius: ${config.borderRadius}px;
-                border-width: ${config.borderThickness}px;
-                border-color: ${addColorAlpha(config.borderColor, config.borderOpacity / 100)};
-                color: ${config.textColor};
-                font-family: "${config.fontFamily || 'Roboto'}", sans-serif;
-                font-size: ${config.fontSize ?? 20}px;
-                line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
-                padding: ${config.paddingTop ?? 8}px ${config.paddingRight ?? 10}px ${config.paddingBottom ?? 8}px ${config.paddingLeft ?? 10}px;
+                --txx-transition-property: background-color, border-color;
+                transition-property: var(--txx-transition-property);
+                
+                --txx-transition-duration: 0.12s;
+                transition-duration: var(--txx-transition-duration);
+                
+                --txx-transition-function: ease-in;
+                transition-timing-function: var(--txx-transition-function);
+                
+                --txx-background-color: ${addColorAlpha(config.backgroundColor, config.backgroundOpacity / 100)};
+                background-color: var(--txx-background-color);
+                
+                --txx-border-radius: ${config.borderRadius}px;
+                border-radius: var(--txx-border-radius);
+                
+                --txx-border-width: ${config.borderThickness}px;
+                border-width: var(--txx-border-width);
+                
+                --txx-border-color: ${addColorAlpha(config.borderColor, config.borderOpacity / 100)};
+                border-color: var(--txx-border-color);
+                
+                --txx-color: ${config.textColor};
+                color: var(--txx-color);
+                
+                --txx-font-family: "${config.fontFamily || 'Roboto'}", sans-serif;
+                font-family: var(--txx-font-family);
+                
+                --txx-font-size: ${config.fontSize ?? 20}px;
+                font-size: var(--txx-font-size);
+                
+                --txx-line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+                line-height: var(--txx-line-height);
+                
+                --txx-padding-top: ${config.paddingTop ?? 8}px;
+                --txx-padding-right: ${config.paddingRight ?? 10}px;
+                --txx-padding-bottom: ${config.paddingBottom ?? 8}px;
+                --txx-padding-left: ${config.paddingLeft ?? 10}px;
+                padding: var(--txx-padding-top) var(--txx-padding-right) var(--txx-padding-bottom) var(--txx-padding-left);
+                
                 ${getTextOutlineCss(config)}
             }
+        
+            .sentence {
+                --txx-sentence-original-order: ${config.textOrder === TextOrder.TRANSLATED_ORIGINAL ? '1' : '0'};
+                --txx-sentence-translated-order: ${config.textOrder === TextOrder.ORIGINAL_TRANSLATED ? '1' : '0'};
+                
+                --txx-sentence-gap: ${config.sentenceGap ?? 4}px;
+                gap: var(--txx-sentence-gap);
+            }
+            
+            .sentence-original, .sentence-original-ordered {
+                order: var(--txx-sentence-original-order);
+            }
+            
+            .sentence-translated, .sentence-translated-ordered {
+                order: var(--txx-sentence-translated-order);
+            }
+            
+            ${hoverOnlyCss}
             
             .main-toolbar {
                 border-radius: 0 ${config.borderRadius ?? 4}px 0 ${Math.min(config.borderRadius ?? 4, 8)}px;
@@ -205,40 +276,101 @@ const initAppearanceSettingsHandling = () => {
 
     const renderTextAppearance = (config: TextAppearanceConfig, styleElement: HTMLElement, styledSelector: string) => {
         const textBackgroundCss = config.textBackgroundType && `
-                background-color: ${addColorAlpha(config.textBackgroundColor, config.textBackgroundOpacity / 100)};
-                outline-color: ${addColorAlpha(config.textBorderColor, config.textBorderOpacity / 100)};
-                outline-width: ${config.textBorderThickness ?? 0}px;
-                outline-offset: -${Math.ceil((config.textBorderThickness ?? 0) / 2)}px;
-                outline-style: solid;
-                border-radius: ${config.textBorderRadius ?? 0}px;
+                --txx-background-color: ${addColorAlpha(config.textBackgroundColor, config.textBackgroundOpacity / 100)};
+                background-color: var(--txx-background-color);
+                
+                --txx-outline-color: ${addColorAlpha(config.textBorderColor, config.textBorderOpacity / 100)};
+                outline-color: var(--txx-outline-color);
+                
+                --txx-outline-width: ${config.textBorderThickness ?? 0}px;
+                outline-width: var(--txx-outline-width);
+                
+                --txx-outline-offset: -${Math.ceil((config.textBorderThickness ?? 0) / 2)}px;
+                outline-offset: var(--txx-outline-offset);
+                
+                --txx-outline-style: solid;
+                outline-style: var(--txx-outline-style);
+                
+                --txx-border-radius: ${config.textBorderRadius ?? 0}px;
+                border-radius: var(--txx-border-radius);
             `;
+
+        const outlineCss: string = (() => {
+            if (config.textOutlineType === TextAppearanceOverrideType.INHERIT) {
+                return '';
+            }
+
+            if (!config.textOutlineType) {
+                return `
+                    --txx-text-shadow: none;
+                    text-shadow: var(--txx-text-shadow);
+                    --txx--webkit-text-stroke: none;
+                    -webkit-text-stroke: var(--txx--webkit-text-stroke);
+                `;
+            }
+
+            return getTextOutlineCss({
+                textOutlineType: config.textOutlineType,
+                textOutlineColor: config.textOutlineColor,
+                textOutlineThickness: config.textOutlineThickness
+            });
+        })();
 
         styleElement.innerHTML = `
                 ${styledSelector}:not(.sentence-loading) {
                     ${config.isDisplayed === false ? 'display: none !important;' : ''}
-                    color: ${config.textColor || 'inherit'};
-                    opacity: ${config.textOpacity == null ? 'inherit' : (config.textOpacity / 100)};
-                    font-size: ${config.fontSize == null ? 'inherit' : config.fontSize + '%'};
-                    font-family: ${config.fontFamily ? `"${config.fontFamily}"` : 'inherit'};
-                    font-weight: ${config.fontWeight ?? 'inherit'};
-                    font-style: ${config.isItalic ? 'italic' : 'normal'};
-                    text-decoration: ${config.isUnderlined ? 'underline' : 'none'};
-                    line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+                    --txx-color: ${config.textColor || 'inherit'};
+                    color: var(--txx-color);
                     
-                    transition: opacity 0.12s ease-in;
+                    --txx-opacity: ${config.textOpacity == null ? 'inherit' : (config.textOpacity / 100)};
+                    opacity: var(--txx-opacity);
+                    
+                    --txx-font-size: ${config.fontSize == null ? 'inherit' : config.fontSize + '%'};
+                    font-size: var(--txx-font-size);
+                    
+                    --txx-font-family: ${config.fontFamily ? `"${config.fontFamily}"` : 'inherit'};
+                    font-family: var(--txx-font-family);
+                    
+                    --txx-font-weight: ${config.fontWeight ?? 'inherit'};
+                    font-weight: var(--txx-font-weight);
+                    
+                    --txx-font-style: ${config.isItalic ? 'italic' : 'normal'};
+                    font-style: var(--txx-font-style);
+                    
+                    --txx-text-decoration: ${config.isUnderlined ? 'underline' : 'none'};
+                    text-decoration: var(--txx-text-decoration);
+                    
+                    --txx-line-height: ${config.lineHeight == null ? 'normal' : (config.lineHeight + '%')};
+                    line-height: var(--txx-line-height);
+                    
+                    --txx-transition-property: opacity;
+                    --txx-transition-duration: 0.12s;
+                    --txx-transition-function: ease-in;
+                    transition-property: var(--txx-transition-property);
+                    transition-duration: var(--txx-transition-duration);
+                    transition-timing-function: var(--txx-transition-function);
                     
                     ${config.textBackgroundType === TextBackgroundType.BLOCK ? textBackgroundCss : ''}
+                    
+                    ${outlineCss}
                 }
                 
-                html:not(:hover) ${styledSelector} {
+                html:not(:hover):not([data-window-hover=true]) ${styledSelector} {
                     ${config.isDisplayedOnHoverOnly ? 'opacity: 0;' : ''}
                 }
                 
                 ${styledSelector}.sentence-loading, ${styledSelector}:not(.sentence-loading) > .sentence-text {
-                    padding-top: ${config.textPaddingTop ?? 0}px;
-                    padding-right: ${config.textPaddingRight ?? 0}px;
-                    padding-bottom: ${config.textPaddingBottom ?? 0}px;
-                    padding-left: ${config.textPaddingLeft ?? 0}px;
+                    --txx-padding-top: ${config.textPaddingTop ?? 0}px;
+                    padding-top: var(--txx-padding-top);
+                    
+                    --txx-padding-right: ${config.textPaddingRight ?? 0}px;
+                    padding-right: var(--txx-padding-right);
+                    
+                    --txx-padding-bottom: ${config.textPaddingBottom ?? 0}px;
+                    padding-bottom: var(--txx-padding-bottom);
+                    
+                    --txx-padding-left: ${config.textPaddingLeft ?? 0}px;
+                    padding-left: var(--txx-padding-left);
                 }
                 
                 ${styledSelector}:not(.sentence-loading) > .sentence-text {
@@ -392,9 +524,17 @@ const initProfiles = () => {
     });
 };
 
+const listenWindowHover = () => {
+    ipcRenderer.on('main-window.hover-change', (event, isHover: boolean) => {
+        window.document.documentElement.setAttribute('data-window-hover', String(isHover));
+    });
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     initToolbar();
     initWindowDragger();
+    // initWindowResize();
+    listenWindowHover();
     initAutoHistory();
     initAppearanceSettingsHandling();
     initSampleTextShowing();

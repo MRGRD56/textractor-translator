@@ -11,8 +11,8 @@
 .original-text-transformer-editor {
     height: calc(100% - 1px);
 
-    & > .monaco-editor {
-
+    & > .monaco-editor * {
+        transition: none;
     }
 }
 

@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {InputNumber, Radio, Select, Tooltip} from 'antd';
+import {Checkbox, InputNumber, Radio, Select, Tooltip} from 'antd';
 import MainWindowAppearanceConfig, {
     MainWindowDragMode, TextOrder,
     TextOutlineType
@@ -72,6 +72,30 @@ const MainWindowAppearance: FC<Props> = ({appearance, onAppearanceChange}) => {
                 <ValueSlider min={0} max={30} value={appearance.borderRadius}
                              onChange={onAppearanceChange('borderRadius')} tipFormatter={pxFormatter}/>
             </label>
+
+            <div>
+                <Checkbox checked={appearance.isHoverOnlyBackgroundSettings}
+                          onChange={e => onAppearanceChange('isHoverOnlyBackgroundSettings')(e.target.checked)}>
+                    Change on hover
+                </Checkbox>
+            </div>
+
+            {appearance.isHoverOnlyBackgroundSettings && (
+                <>
+                    <label>
+                        <span>Background on hover</span>
+                        <ValueSlider min={0} max={100} value={appearance.hoverOnlyBackgroundOpacity}
+                                     onChange={onAppearanceChange('hoverOnlyBackgroundOpacity')}
+                                     tipFormatter={percentageFormatter}/>
+                    </label>
+                    <label>
+                        <span>Border on hover</span>
+                        <ValueSlider min={0} max={100} value={appearance.hoverOnlyBorderOpacity}
+                                     onChange={onAppearanceChange('hoverOnlyBorderOpacity')}
+                                     tipFormatter={percentageFormatter}/>
+                    </label>
+                </>
+            )}
 
             <label>
                 <span>Text color</span>

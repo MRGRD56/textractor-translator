@@ -1,6 +1,9 @@
 import React, {FC} from 'react';
 import {ChangeStateHandler} from '../../../../hooks/useChangeStateHandler';
-import TextAppearanceConfig, {TextBackgroundType} from '../../../../configuration/appearance/TextAppearanceConfig';
+import TextAppearanceConfig, {
+    TextAppearanceOverrideType,
+    TextBackgroundType
+} from '../../../../configuration/appearance/TextAppearanceConfig';
 import getSettingsNodeApi from '../../utils/getSettingsNodeApi';
 import useInstalledFontsOptions from '../../../../hooks/useInstalledFontsOptions';
 import {Checkbox, InputNumber, Select, SelectProps, Tooltip} from 'antd';
@@ -213,13 +216,15 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
 
                     <label>
                         <span>Border color</span>
-                        <InputColor value={appearance.textBorderColor} onChange={onAppearanceChange('textBorderColor')}/>
+                        <InputColor value={appearance.textBorderColor}
+                                    onChange={onAppearanceChange('textBorderColor')}/>
                     </label>
 
                     <label>
                         <span>Border opacity</span>
                         <ValueSlider min={0} max={100} value={appearance.textBorderOpacity}
-                                     onChange={onAppearanceChange('textBorderOpacity')} tipFormatter={percentageFormatter}/>
+                                     onChange={onAppearanceChange('textBorderOpacity')}
+                                     tipFormatter={percentageFormatter}/>
                     </label>
 
                     <label>
@@ -232,6 +237,37 @@ const TextAppearance: FC<Props> = ({type, appearance, onAppearanceChange, mwAppe
                         <span>Border roundness</span>
                         <ValueSlider min={0} max={30} value={appearance.textBorderRadius}
                                      onChange={onAppearanceChange('textBorderRadius')} tipFormatter={pxFormatter}/>
+                    </label>
+                </>
+            ) : null}
+
+            <label>
+                <span>Text outline</span>
+                <Select
+                    value={appearance.textOutlineType}
+                    onChange={onAppearanceChange('textOutlineType')}
+                    placeholder="None"
+                >
+                    <Select.Option key={TextAppearanceOverrideType.INHERIT}>Inherit</Select.Option>
+                    <Select.Option key={undefined}>None</Select.Option>
+                    <Select.Option key={TextOutlineType.OUTER}>Outer</Select.Option>
+                    <Select.Option key={TextOutlineType.OUTER_SHADOW}>Outer Shadow</Select.Option>
+                    <Select.Option key={TextOutlineType.INNER}>Inner</Select.Option>
+                </Select>
+            </label>
+
+            {(appearance.textOutlineType && appearance.textOutlineType !== TextAppearanceOverrideType.INHERIT) ? (
+                <>
+                    <label>
+                        <span>Outline color</span>
+                        <InputColor value={appearance.textOutlineColor}
+                                    onChange={onAppearanceChange('textOutlineColor')}/>
+                    </label>
+
+                    <label>
+                        <span>Outline width</span>
+                        <ValueSlider min={0} max={10} step={0.1} value={appearance.textOutlineThickness}
+                                     onChange={onAppearanceChange('textOutlineThickness')} tipFormatter={pxFormatter}/>
                     </label>
                 </>
             ) : null}

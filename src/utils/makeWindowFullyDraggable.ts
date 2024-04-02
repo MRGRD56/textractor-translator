@@ -1,12 +1,12 @@
 import type {BrowserWindow} from 'electron';
-import type {BrowserWindow as AcrylicBrowserWindow} from 'electron-acrylic-window';
+// import type {BrowserWindow as AcrylicBrowserWindow} from 'electron-acrylic-window';
 
 const WM_MOUSEMOVE = 0x0200;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove
 const WM_LBUTTONUP = 0x0202;  // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
 
 const MK_LBUTTON = 0x0001;
 
-const makeWindowFullyDraggable = (browserWindow: BrowserWindow | AcrylicBrowserWindow, isDraggable: () => boolean): void => {
+const makeWindowFullyDraggable = (browserWindow: BrowserWindow, isDraggable: () => boolean): void => {
     const initialPos = {
         x: 0,
         y: 0,
@@ -17,6 +17,7 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow | AcrylicBrowserW
     let dragging = false;
 
     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
+        // console.log('WM_LBUTTONUP')
         dragging = false;
 
         // const currentBounds = browserWindow.getBounds();
@@ -29,6 +30,7 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow | AcrylicBrowserW
         // });
     });
     browserWindow.hookWindowMessage(WM_MOUSEMOVE, (wParam: Buffer, lParam: Buffer) => {
+        // console.log('WM_MOUSEMOVE')
         if (!dragging && !isDraggable()) return;
 
         if (!browserWindow) {
