@@ -50,25 +50,30 @@ body {
         gap: 16px;
         max-width: 100%;
 
-        &:not(.history-visible) .sentence:not(:last-child) {
+        &:not(.history-visible) .sentence-container:not(:last-child) {
             display: none;
         }
 
-        .sentence {
-            display: flex;
-            align-items: flex-start;
+        .sentence-container {
             max-width: 100%;
 
-            .sentence-original {
+            .sentence {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
                 max-width: 100%;
-            }
 
-            .sentence-translated {
-                max-width: 100%;
-            }
+                .sentence-original {
+                    max-width: 100%;
+                }
 
-            .sentence-text {
-                display: inline;
+                .sentence-translated {
+                    max-width: 100%;
+                }
+
+                .sentence-text {
+                    display: inline;
+                }
             }
         }
     }
@@ -184,6 +189,16 @@ body {
                 }
             }
         }
+    }
+}
+
+.window-hover-visible {
+    transition-property: opacity;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-in;
+
+    html:not(:hover):not([data-window-hover=true]) & {
+        opacity: 0;
     }
 }
 

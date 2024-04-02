@@ -17,7 +17,7 @@ const makeWindowFullyDraggable = (browserWindow: BrowserWindow, isDraggable: () 
     let dragging = false;
 
     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
-        console.log('WM_LBUTTONUP')
+        // console.log('WM_LBUTTONUP')
         dragging = false;
 
         // const currentBounds = browserWindow.getBounds();

@@ -31,14 +31,9 @@ export interface DefinedTranslators {
     }
 }
 
-export enum ExtraHtmlPlace {
-    BEFORE = 'BEFORE',
-    AFTER = 'AFTER'
-}
-
 export interface ExtraHtml {
     html: string;
-    place: ExtraHtmlPlace;
+    position: InsertPosition;
 }
 
 export interface DisplayedTransformedText {
@@ -46,12 +41,14 @@ export interface DisplayedTransformedText {
     displayed: string;
     isHtml?: boolean;
     extraCss?: {
-        sentenceContainer?: string;
-        textContainer?: string;
-        text?: string;
+        sentenceContainer?: string[];
+        sentence?: string[];
+        textContainer?: string[];
+        text?: string[];
     },
     extraHtml?: {
         sentenceContainer?: ExtraHtml[];
+        sentence?: ExtraHtml[];
         textContainer?: ExtraHtml[];
         text?: ExtraHtml[];
     }

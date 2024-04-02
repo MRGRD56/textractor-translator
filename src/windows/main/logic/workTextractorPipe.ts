@@ -1,27 +1,35 @@
 import {listenToPipe} from '../../../textractorServer';
-import {
-    Configuration,
-    ExtraHtml,
-    ExtraHtmlPlace,
-    OptionalTransformedText,
-    Sentence
-} from '../../../configuration/Configuration';
+import {Configuration, ExtraHtml, OptionalTransformedText, Sentence} from '../../../configuration/Configuration';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 import nodeConsole from '../../../utils/nodeConsole';
 import {isHistoryShownRef} from '../preload';
 
 const appendExtraHtml = (htmlToAppend: ExtraHtml, element: Element) => {
-    if (htmlToAppend.place === ExtraHtmlPlace.BEFORE) {
-        element.innerHTML = htmlToAppend.html + element.innerHTML;
-    } else if (htmlToAppend.place === ExtraHtmlPlace.AFTER) {
-        element.innerHTML = element.innerHTML + htmlToAppend.html;
-    }
+    element.insertAdjacentHTML(htmlToAppend.position, htmlToAppend.html);
 };
 
 const appendExtraHtmls = (htmlsToAppend: ExtraHtml[] | undefined, element: Element) => {
     if (htmlsToAppend) {
         for (const htmlToAppend of htmlsToAppend) {
-            appendExtraHtml(htmlToAppend, element);
+            if (htmlToAppend) {
+                appendExtraHtml(htmlToAppend, element);
+            }
+        }
+    }
+};
+
+const applyExtraCss = (cssToApply: string[] | undefined, element: Element) => {
+    if (cssToApply) {
+        for (const css of cssToApply) {
+            if (css) {
+                const existingStyle = element.getAttribute('style');
+                if (existingStyle) {
+                    const endsWithSemicolon = /;\s*$/.test(existingStyle);
+                    element.setAttribute('style', existingStyle + (endsWithSemicolon ? '' : '; ') + css);
+                } else {
+                    element.setAttribute('style', css);
+                }
+            }
         }
     }
 };
@@ -42,21 +50,14 @@ const showSentence = (
     const originalTextDisplayed = typeof originalText === 'object' ? (originalText.displayed ?? originalText.plain) : originalText;
     const isHtml = typeof originalText === 'object' && Boolean(originalText.isHtml);
     const extraCss = typeof originalText === 'object' ? originalText.extraCss : undefined;
-    const sentenceContainerCssOriginal = extraCss?.sentenceContainer;
-    const textContainerCss = extraCss?.textContainer;
-    const textCss = extraCss?.text;
     const extraHtml = typeof originalText === 'object' ? originalText.extraHtml : undefined;
 
     const sentenceOriginalElement = document.createElement('div');
     sentenceOriginalElement.classList.add('sentence-original');
-    if (textContainerCss) {
-        sentenceOriginalElement.setAttribute('style', textContainerCss);
-    }
+
     const sentenceOriginalTextElement = document.createElement('div');
     sentenceOriginalTextElement.classList.add('sentence-text');
-    if (textCss) {
-        sentenceOriginalTextElement.setAttribute('style', textCss);
-    }
+
     if (isHtml) {
         sentenceOriginalTextElement.innerHTML = originalTextDisplayed as string;
     } else {
@@ -68,30 +69,36 @@ const showSentence = (
     sentenceTranslatedElement.classList.add('sentence-translated', 'sentence-loading');
     sentenceTranslatedElement.innerHTML = '<div class="loading-horiz"><img src="../assets/loading-horiz.svg" alt="Translating..."></div>';
 
-
     const sentenceElement = document.createElement('div');
     sentenceElement.classList.add('sentence');
-    if (sentenceContainerCssOriginal) {
-        sentenceElement.setAttribute('style', sentenceContainerCssOriginal);
-    }
     sentenceElement.append(sentenceOriginalElement);
     if (translatedTextPromise) {
         sentenceElement.append(sentenceTranslatedElement);
     }
 
+    const sentenceContainerElement = document.createElement('div');
+    sentenceContainerElement.classList.add('sentence-container');
+    sentenceContainerElement.append(sentenceElement);
+
     sampleTextContainer.classList.add('d-none');
-    textContainer.append(sentenceElement);
+    textContainer.append(sentenceContainerElement);
 
     if (extraHtml) {
-        appendExtraHtmls(extraHtml.sentenceContainer, sentenceElement);
+        appendExtraHtmls(extraHtml.sentenceContainer, sentenceContainerElement);
+        appendExtraHtmls(extraHtml.sentence, sentenceElement);
         appendExtraHtmls(extraHtml.textContainer, sentenceOriginalElement);
         appendExtraHtmls(extraHtml.text, sentenceOriginalTextElement);
+    }
+    if (extraCss) {
+        applyExtraCss(extraCss.sentenceContainer, sentenceContainerElement);
+        applyExtraCss(extraCss.sentence, sentenceElement);
+        applyExtraCss(extraCss.textContainer, sentenceOriginalElement);
+        applyExtraCss(extraCss.text, sentenceOriginalTextElement);
     }
 
     if (isHistoryShownRef.current) {
         textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
     }
-
 
     if (translatedTextPromise) {
         translatedTextPromise
@@ -106,23 +113,10 @@ const showSentence = (
                 const translatedTextDisplayed = typeof transformedText === 'object' ? (transformedText.displayed ?? transformedText.plain) : transformedText;
                 const isHtml = typeof transformedText === 'object' && Boolean(transformedText.isHtml);
                 const extraCss = typeof transformedText === 'object' ? transformedText.extraCss : undefined;
-                const sentenceContainerCssTranslated = extraCss?.sentenceContainer;
-                const textContainerCss = extraCss?.textContainer;
-                const textCss = extraCss?.text;
-                const extraHtml = typeof transformedText === 'object' ? transformedText.extraHtml : {};
-
-                if (textContainerCss) {
-                    sentenceTranslatedElement.setAttribute('style', textContainerCss);
-                }
+                const extraHtml = typeof transformedText === 'object' ? transformedText.extraHtml : undefined;
 
                 const sentenceTranslatedTextElement = document.createElement('div');
                 sentenceTranslatedTextElement.classList.add('sentence-text');
-                if (textCss) {
-                    sentenceTranslatedTextElement.setAttribute('style', textCss);
-                }
-                if (sentenceContainerCssTranslated) {
-                    sentenceElement.setAttribute('style', (sentenceContainerCssOriginal ?? '') + sentenceContainerCssTranslated);
-                }
 
                 if (isHtml) {
                     sentenceTranslatedTextElement.innerHTML = translatedTextDisplayed;
@@ -135,9 +129,16 @@ const showSentence = (
                 sentenceTranslatedElement.append(sentenceTranslatedTextElement);
 
                 if (extraHtml) {
-                    appendExtraHtmls(extraHtml.sentenceContainer, sentenceElement);
+                    appendExtraHtmls(extraHtml.sentenceContainer, sentenceContainerElement);
+                    appendExtraHtmls(extraHtml.sentence, sentenceElement);
                     appendExtraHtmls(extraHtml.textContainer, sentenceOriginalElement);
                     appendExtraHtmls(extraHtml.text, sentenceOriginalTextElement);
+                }
+                if (extraCss) {
+                    applyExtraCss(extraCss.sentenceContainer, sentenceContainerElement);
+                    applyExtraCss(extraCss.sentence, sentenceElement);
+                    applyExtraCss(extraCss.textContainer, sentenceTranslatedElement);
+                    applyExtraCss(extraCss.text, sentenceTranslatedTextElement);
                 }
             })
             .catch(error => {

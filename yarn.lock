@@ -1063,41 +1063,6 @@
   resolved "https://registry.npmjs.org/@xtuc/long/-/long-4.2.2.tgz"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@yuuang/ffi-rs-darwin-arm64@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-darwin-arm64/-/ffi-rs-darwin-arm64-1.0.50.tgz#80adfe924f7c6ebc162bf99b557771ad94ea11ba"
-  integrity sha512-EHlwD3gpMfIXhyGfQkC0jlMRDxLgIyRNOsGeJW6cFR9nn55P+7eMsdOPu8UY1AMMfPT/SIxKH04EgLMdDVUoiw==
-
-"@yuuang/ffi-rs-darwin-x64@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-darwin-x64/-/ffi-rs-darwin-x64-1.0.50.tgz#a01830a7d2eaa3e33543300b039c00056a9450eb"
-  integrity sha512-Z66XomK630jUXuUsXXLaHPjWiJV2ox2koa+hubVXoJGeyrG56qDgVDH0C8p/TTTnW8SoXP6W2YV5GCw8/VXtDg==
-
-"@yuuang/ffi-rs-linux-arm64-gnu@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-linux-arm64-gnu/-/ffi-rs-linux-arm64-gnu-1.0.50.tgz#db83b9db864dc84730866d2996f3a3e395b6ab01"
-  integrity sha512-UnYawVky91/laQoh1hiOHXHE74fiyFy8dVik/RXGsKFWNOqbjZznfkRN/aIATpCufNqWPOOvhX3X8c/aI3P0Kw==
-
-"@yuuang/ffi-rs-linux-arm64-musl@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-linux-arm64-musl/-/ffi-rs-linux-arm64-musl-1.0.50.tgz#2467e27b8392ffebbad0af540875e242af6e85ec"
-  integrity sha512-S3LFBiwIt66SptvcLmK1G9w/9OuhubUyf3wKxiFX8qekSpWxfpioN3t3wxjfYHbiQ6C0hN4cTW3y2McbmzTAmw==
-
-"@yuuang/ffi-rs-linux-x64-gnu@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-linux-x64-gnu/-/ffi-rs-linux-x64-gnu-1.0.50.tgz#2c3906b1f4f4a9ed035734c748d587a4758b4834"
-  integrity sha512-lTjcY1dBgPVvE1y1yG+lEUzfVaiKeORxQeI99a4NdR1Z4c90/xNcPwDjfrmBwO6vONNeipOt7qxLUrib20Me7w==
-
-"@yuuang/ffi-rs-win32-ia32-msvc@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-win32-ia32-msvc/-/ffi-rs-win32-ia32-msvc-1.0.50.tgz#e466a63a08a92b45bd04e94d8ab7c2ed479628ec"
-  integrity sha512-ImHP3JOmmuWrRJ57aHthyyQRA/FklmfkIr50trm0AwZ+aBaSEZMYM6Apq/DIjAfJ5hXwrHveA8BHjfRiYEpA5A==
-
-"@yuuang/ffi-rs-win32-x64-msvc@^1.0.0":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@yuuang/ffi-rs-win32-x64-msvc/-/ffi-rs-win32-x64-msvc-1.0.50.tgz#da260c417eb7e5b76da3e4341118f2f2b938dbcc"
-  integrity sha512-IOtmE3m2hrdEzSobXVRtFIyojFe6LTTOIum0rEOMRqP19Ji2ME/ev/o3JYJ5a51ReAVoGQ/JMdZpKOEFGZICSQ==
-
 abbrev@^1.0.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/abbrev/-/abbrev-1.1.1.tgz"
@@ -2850,19 +2815,6 @@ fd-slicer@~1.1.0:
   integrity sha512-cE1qsB/VwyQozZ+q1dGxR8LBYNZeofhEdUNGSMbQD3Gw2lAzX9Zb3uIU6Ebc/Fmyjo9AWWfnn0AUCHqtevs/8g==
   dependencies:
     pend "~1.2.0"
-
-ffi-rs@^1.0.50:
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/ffi-rs/-/ffi-rs-1.0.50.tgz#8986ff184a0fc04f26ea39439bd35b0af31357d6"
-  integrity sha512-rs5exhSpcJQKgFKQ/rlNxYwSlh3DAAOTUlDQ+sisuvR6FDv8OWHAw6qjmveYlxJqQ5gYdlFE+Py7vOrjexMpJg==
-  optionalDependencies:
-    "@yuuang/ffi-rs-darwin-arm64" "^1.0.0"
-    "@yuuang/ffi-rs-darwin-x64" "^1.0.0"
-    "@yuuang/ffi-rs-linux-arm64-gnu" "^1.0.0"
-    "@yuuang/ffi-rs-linux-arm64-musl" "^1.0.0"
-    "@yuuang/ffi-rs-linux-x64-gnu" "^1.0.0"
-    "@yuuang/ffi-rs-win32-ia32-msvc" "^1.0.0"
-    "@yuuang/ffi-rs-win32-x64-msvc" "^1.0.0"
 
 file-entry-cache@^6.0.1:
   version "6.0.1"

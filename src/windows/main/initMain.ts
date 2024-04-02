@@ -81,13 +81,14 @@ export function createMainWindow(store: Store): BrowserWindow {
         }
     }
 
-    mainWindow.hookWindowMessage(0x0200, () => {
-        console.log('WM_MOUSEMOVE');
-    });
-
-    // trackWindowHover(mainWindow, isHover => {
-    //     nodeConsole.log('isHover', isHover);
+    // mainWindow.hookWindowMessage(0x0200, () => {
+    //     console.log('WM_MOUSEMOVE');
     // });
+
+    trackWindowHover(mainWindow, isHover => {
+        // nodeConsole.log('isHover', isHover);
+        mainWindow.webContents.send('main-window.hover-change', isHover);
+    });
 
     makeWindowFullyDraggable(mainWindow, () => {
         const isFullyDraggable = mainWindowAppearanceConfig.current?.windowDragMode === MainWindowDragMode.ENTIRE_WINDOW;
