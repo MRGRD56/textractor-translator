@@ -69,6 +69,12 @@ Both versions can work with both `Textractor x86` and `Textractor x64`.
 <details>
 <summary>History of this app</summary>
 
+### Version 0.6.0
+
+#### Aokana `en -> ru`
+
+![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/d29c4f89-512b-4152-b8a5-af90e853a52a)
+
 ### Version 0.5.0
 
 #### eden* PLUS+MOSAIC `en -> ru`
