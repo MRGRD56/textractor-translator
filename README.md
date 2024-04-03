@@ -1,21 +1,44 @@
 # Textractor Translator
 
+**Translate visual novels in real time, while reading**  
+**Customize it however you wish**
+
 <img src="https://user-images.githubusercontent.com/35491968/210263578-b57cb7fd-c081-4cb9-9ebd-2e09b22f1f09.png" width="600">
 
-Lets you translate visual novels in real time, while reading.  
-It requires [Textractor](https://github.com/Artikash/Textractor) to work. I don't have anything to do with the original software (Textractor) developers.  
-It also requires `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions The app will not work without this extension installed. It can be automatically installed right in the app settings. You might need to restart Textractor for the extension to start working.
+It works with [Textractor](https://github.com/Artikash/Textractor) letting you **configure** it for **each separate game**: **transform** the extracted text using **JavaScript**, **translate** it using a pre-defined translator or write **your own**, **stylize** the text window to **blend in** with the game.  
 
-You need some JavaScript knowledge to configure and use this application.
+It allows you to configure the following things for each game:
+- Parsing and transforming the text extracted by Textractor, making it readable;
+- Translating the transformed text;
+- Transforming the translated text;
+- Stylizing the text using HTML & CSS;
+- The appearance of the text window.
 
-The purpose of this software is to be able to fine-tune Textractor in terms of parsing, modifying and translating texts for each separate game.
+> [!NOTE]
+> I don't have anything to do with the original software (Textractor) developers.
 
-### Demo: translating visual novels from Japanese to English
+## Demo
+
+![2024-04-03_22-44-40-ezgif com-optimize](https://github.com/MRGRD56/textractor-translator/assets/35491968/ed6daf3e-d76a-48d3-a813-7160b790066f)
+
+<details>
+<summary>View more</summary>
 
 <img src="https://user-images.githubusercontent.com/35491968/210839740-3f1b3801-1b06-4814-9dba-0a737b7890cd.gif" width=800>
 <!--![textractor-translator-v0 2 0-demo_3](https://user-images.githubusercontent.com/35491968/210839740-3f1b3801-1b06-4814-9dba-0a737b7890cd.gif)-->
-
+    
 <img src="https://github.com/MRGRD56/textractor-translator/assets/35491968/f1e83c22-7810-4eaf-9c45-4eff49963fda" width="800">
+
+<img src="https://github.com/MRGRD56/textractor-translator/assets/35491968/576e8d87-7bd1-439c-87c2-8ad5063861a5" width="800">
+
+<img src="https://user-images.githubusercontent.com/35491968/216782294-7ac22557-c6a8-40c1-968f-9ad88c8ec810.png" width="800">
+
+</details>
+
+<hr>
+
+<details>
+<summary>History of this app</summary>
 
 ### Version 0.5.0
 
@@ -57,6 +80,13 @@ The purpose of this software is to be able to fine-tune Textractor in terms of p
 
 ![image](https://user-images.githubusercontent.com/35491968/205514998-f00fcb94-93c9-4bfd-8b73-bbbce2f1ee15.png)  
 
+</details>
+
+It also requires `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions The app will not work without this extension installed. It can be automatically installed right in the app settings. You might need to restart Textractor for the extension to start working.
+
+You need some JavaScript knowledge to configure and use this application.
+
+The purpose of this software is to be able to fine-tune Textractor in terms of parsing, modifying and translating texts for each separate game.
 
 Requires `TextractorPipe.xdll` extension for Textractor: https://github.com/MRGRD56/textractor-integration-extensions
 The app will not work without this extension installed.
