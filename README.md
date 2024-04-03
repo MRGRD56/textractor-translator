@@ -59,7 +59,7 @@ Both versions can work with both `Textractor x86` and `Textractor x64`.
     ![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/733824e3-1bd8-4e23-b0aa-b8152d021dcc)
 12. After installing the extension, you can run Textractor by clicking one of the buttons:  
     ![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/1a053ddd-51fe-4666-9ae2-2e19a7366980)
-13. Now, text seen in Textractor should be displayed in Textractor Translator too.
+13. Now, text seen in Textractor should be displayed in Textractor Translator too.  
     ![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/c38cf2e4-8228-4a47-89aa-cd87f4706037)
 
 
