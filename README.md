@@ -51,7 +51,7 @@ Both versions can work with both `Textractor x86` and `Textractor x64`.
    ![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/ca35e748-4d0c-4212-835d-f3ec8cee367e)
 7. Ensure you have [Textractor](https://github.com/Artikash/Textractor) installed. If you don't, install it before you continue. Remember the directory where you'll have installed it.  
 8. Having Textractor installed, click a <img src="https://github.com/MRGRD56/textractor-translator/assets/35491968/cff85f4b-85e8-4fdc-89b4-da397347c4c3"></img> folder button to select the `Textractor.exe` binary of Textractor.
-9. When you select either Textractor x86 or Textractor x64 location, the other one will be selected automatically. If not, please, select it manually if you need it.
+9. When you select either `Textractor x86` or `Textractor x64` location, the other one will be selected automatically. If not, please, select it manually if you need it.
 10. It's recommended to check the `Autorun` checkbox for the Textractor you're planning to run with. It depends on the bitness of the game process. Usually it's `x86` for visual novels.
 11. After you have configured the path(s) to Textractor, you'll have to install the [TextractorPipe](https://github.com/MRGRD56/textractor-integration-extensions) extension. It can be done automatically by clicking the install button(s).  
     ![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/733824e3-1bd8-4e23-b0aa-b8152d021dcc)
