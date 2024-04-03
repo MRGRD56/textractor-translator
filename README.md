@@ -7,7 +7,9 @@
 
 It works with [Textractor](https://github.com/Artikash/Textractor) letting you **configure** it for **each separate game**: **transform** the extracted text using **JavaScript**, **translate** it using a pre-defined translator or write **your own**, **stylize** the text window to **blend in** with the game.  
 
-It allows you to configure the following things for each game:
+It can replace most of the built-in `xdll` extensions for Textractor.
+
+It allows you to perform and configure the following things for each game:
 - Parsing and transforming the text extracted by Textractor, making it readable;
 - Translating the transformed text;
 - Transforming the translated text;
