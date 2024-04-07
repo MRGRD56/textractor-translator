@@ -15,6 +15,7 @@ import getSettingsNodeApi from '../utils/getSettingsNodeApi';
 import AppearanceProfiles from './settingsAppearance/AppearanceProfiles';
 import styles from './SettingsAppearance.module.scss';
 import classNames from 'classnames';
+import CustomCssAppearance from './settingsAppearance/CustomCssAppearance';
 
 const {store} = getSettingsNodeApi();
 
@@ -63,6 +64,8 @@ const SettingsAppearance: FC = () => {
     const [translatedTextAppearance, setTranslatedTextAppearance] = useStoreStateWriter<TextAppearanceConfig>(store, 'translatedText', savedProfiles);
     const handleTranslatedTextAppearanceChange = useChangeStateHandler(setTranslatedTextAppearance);
 
+    const [customCssAppearance, setCustomCssAppearance] = useStoreStateWriter<string>(store, 'customCss', savedProfiles);
+
     const tabs = useMemo<TabsProps['items']>(() => {
         if (!mwAppearance || !originalTextAppearance || !translatedTextAppearance) {
             return;
@@ -88,6 +91,12 @@ const SettingsAppearance: FC = () => {
                 children: <TextAppearance type="translated" appearance={translatedTextAppearance}
                                           onAppearanceChange={handleTranslatedTextAppearanceChange}
                                           mwAppearance={mwAppearance}/>
+            },
+            {
+                key: 'CUSTOM_CSS',
+                label: 'Custom CSS',
+                children: <CustomCssAppearance customCss={customCssAppearance}
+                                               onCustomCssChange={setCustomCssAppearance} />
             },
             {
                 key: 'APPEARANCE_PROFILES',

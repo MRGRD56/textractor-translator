@@ -7,6 +7,7 @@ import AppearanceConfig, {defaultAppearanceConfig} from '../configuration/appear
 import SavedProfiles from '../windows/settings/profiles/SavedProfiles';
 import {StoreKeys} from '../constants/store-keys';
 import getSettingsNodeApi from '../windows/settings/utils/getSettingsNodeApi';
+import {COMMON_PROFILE_ID} from '../windows/settings/profiles/constants';
 
 type Result<T> = [T | undefined, React.Dispatch<React.SetStateAction<T>>];
 
@@ -24,12 +25,7 @@ const useStoreStateWriter = <T extends AppearanceConfig[keyof AppearanceConfig]>
             return undefined;
         }
 
-        const activeProfileId = savedProfiles.activeProfileId;
-
-        if (activeProfileId === undefined) {
-            return StoreKeys.APPEARANCE_CONFIG + '.common';
-        }
-
+        const activeProfileId = savedProfiles.activeProfileId ?? COMMON_PROFILE_ID;
         return StoreKeys.APPEARANCE_CONFIG + '.' + activeProfileId;
     }, [savedProfiles === undefined, savedProfiles?.activeProfileId]);
 

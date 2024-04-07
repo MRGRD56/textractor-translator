@@ -4,11 +4,11 @@
     flex-direction: column;
 }
 
-.settings-profile-editor-wrapper {
+.txx-monaco-editor-container-wrapper {
     height: 100%;
 }
 
-.original-text-transformer-editor {
+.txx-monaco-editor-container {
     height: calc(100% - 1px);
 
     & > .monaco-editor * {
