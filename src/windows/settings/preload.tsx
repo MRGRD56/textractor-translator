@@ -10,6 +10,7 @@ import downloadFile from '../../utils/downloadFile';
 import {v4} from 'uuid';
 import validateTextractorPath from '../../utils/logic/validateTextractorPath';
 import decompress = require('decompress');
+import {ActiveProfileChangedEvent} from '../../types/custom-events';
 
 const TTBRIDGE_EXTENSION_NAME = 'TextractorPipe';
 const TTBRIDGE_EXTENSION_FILENAME = `${TTBRIDGE_EXTENSION_NAME}.xdll`;
@@ -160,6 +161,12 @@ window.addEventListener('DOMContentLoaded', () => {
         } else {
             console.warn(`Trying to call an unsupported method '${method}' on console`);
         }
+    });
+
+    ipcRenderer.on('active-profile-changed', async (event, activeProfileId: string | undefined) => {
+        window.dispatchEvent(new ActiveProfileChangedEvent({
+            activeProfileId // TODO обновление настроек при переключении профиля
+        }));
     });
 });
 

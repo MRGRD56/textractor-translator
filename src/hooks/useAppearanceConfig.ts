@@ -8,17 +8,25 @@ import SavedProfiles from '../windows/settings/profiles/SavedProfiles';
 import {StoreKeys} from '../constants/store-keys';
 import getSettingsNodeApi from '../windows/settings/utils/getSettingsNodeApi';
 import {COMMON_PROFILE_ID} from '../windows/settings/profiles/constants';
+import {Ref} from '../utils/ref';
 
-type Result<T> = [T | undefined, React.Dispatch<React.SetStateAction<T>>];
+export type Wrapped<T> = Readonly<Ref<T>>;
+
+interface Result<T> {
+    value: T | undefined;
+    initialValue: Wrapped<T | undefined>;
+    setValue: React.Dispatch<React.SetStateAction<T>>;
+}
 
 const {ipcRenderer} = getSettingsNodeApi();
 
-const useStoreStateWriter = <T extends AppearanceConfig[keyof AppearanceConfig]>(
+const useAppearanceConfig = <T extends AppearanceConfig[keyof AppearanceConfig]>(
     store: Store | ElectronStore,
     appearanceKey: keyof AppearanceConfig,
     savedProfiles: SavedProfiles | undefined
 ): Result<T> => {
     const [value, _setValue] = useState<AppearanceConfig>();
+    const [initialValue, setInitialValue] = useState<Wrapped<T>>();
 
     const storeKey = useMemo<string | undefined>(() => {
         if (!savedProfiles) {
@@ -36,7 +44,8 @@ const useStoreStateWriter = <T extends AppearanceConfig[keyof AppearanceConfig]>
 
         const valueToSet: AppearanceConfig = await (store as any).get(storeKey, defaultAppearanceConfig);
         _setValue(valueToSet);
-    }, [storeKey]);
+        setInitialValue({current: valueToSet[appearanceKey] as T});
+    }, [storeKey, appearanceKey]);
 
     const setValue = useCallback<React.Dispatch<React.SetStateAction<T>>>((value) => {
         if (storeKey === undefined) {
@@ -64,7 +73,11 @@ const useStoreStateWriter = <T extends AppearanceConfig[keyof AppearanceConfig]>
         });
     }, [store, storeKey]);
 
-    return useMemo(() => [value?.[appearanceKey], setValue] as Result<T>, [value, appearanceKey, setValue]);
+    return useMemo(() => ({
+        value: value?.[appearanceKey],
+        initialValue,
+        setValue
+    } as Result<T>), [value, appearanceKey, initialValue, setValue]);
 };
 
-export default useStoreStateWriter;
+export default useAppearanceConfig;

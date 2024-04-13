@@ -1,51 +1,52 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {FC, useCallback, useEffect, useRef} from 'react';
 import styles from '../SettingsAppearance.module.scss';
 import * as monaco from 'monaco-editor';
-import {editor} from 'monaco-editor';
-import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
 import classNames from 'classnames';
 import {useWillUnmount} from 'rooks';
+import IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
+import {Wrapped} from '../../../../hooks/useAppearanceConfig';
+import useAutoRef from '../../../../utils/useAutoRef';
 
 interface Props {
-    customCss: string | undefined;
+    initialCustomCss: Wrapped<string | undefined>;
     onCustomCssChange: (customCss: string) => void;
 }
 
-const CustomCssAppearance: FC<Props> = ({customCss, onCustomCssChange}) => {
+const CustomCssAppearance: FC<Props> = ({initialCustomCss, onCustomCssChange}) => {
+    const onCustomCssChangeRef = useAutoRef(onCustomCssChange);
+
+    const editorRef = useRef<IStandaloneCodeEditor>();
     const editorElementRef = useRef<HTMLDivElement>(null);
-    const [editor, setEditor] = useState<IStandaloneCodeEditor>();
+
+    const createModelChangeHandler = useCallback(() => () => {
+        const editor = editorRef.current;
+        if (!editor) {
+            throw new Error('Editor is undefined');
+        }
+
+        const value = editor.getValue();
+        onCustomCssChangeRef.current(value);
+    }, []);
 
     useEffect(() => {
-        console.log('customCss-useEffect', {customCss});
-
-        if (editor) {
-            if (customCss != null) {
-                editor.setValue(customCss);
-            }
-
-            return;
-        }
+        editorRef.current?.dispose();
 
         const editorElement = editorElementRef.current!;
 
         const newEditor = monaco.editor.create(editorElement, {
-            value: customCss,
+            value: initialCustomCss.current,
             language: 'css',
             minimap: {enabled: false},
             automaticLayout: true
         });
 
-        setEditor(newEditor);
+        editorRef.current = newEditor;
 
-        newEditor.onDidChangeModelContent(e => {
-            const value = newEditor.getValue();
-            console.log('onDidChangeModelContent', {value});
-            onCustomCssChange(value);
-        });
-    }, [customCss, editor]);
+        newEditor.onDidChangeModelContent(createModelChangeHandler());
+    }, [initialCustomCss]);
 
     useWillUnmount(() => {
-        editor?.dispose();
+        editorRef.current?.dispose();
     });
 
     return (

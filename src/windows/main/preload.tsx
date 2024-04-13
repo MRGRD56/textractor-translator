@@ -411,6 +411,7 @@ const initAppearanceSettingsHandling = () => {
         applyMainWindowAppearance(appearanceConfig.mainWindow);
         applyTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
         applyTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+        applyCustomCss(appearanceConfig.customCss);
     });
 
     electronStore.get<SavedProfiles | undefined>(StoreKeys.SAVED_PROFILES).then(async (savedProfiles) => {
@@ -423,6 +424,7 @@ const initAppearanceSettingsHandling = () => {
         applyMainWindowAppearance(appearanceConfig.mainWindow);
         applyTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
         applyTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+        applyCustomCss(appearanceConfig.customCss);
     });
 };
 

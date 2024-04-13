@@ -22,6 +22,7 @@ const AppearanceProfiles: FC = () => {
     const [isMainWindowTransferred, setIsMainWindowTransferred] = useState<boolean>(true);
     const [isOriginalTextTransferred, setIsOriginalTextTransferred] = useState<boolean>(true);
     const [isTranslatedTextTransferred, setIsTranslatedTextTransferred] = useState<boolean>(true);
+    const [isCustomCssTransferred, setIsCustomCssTransferred] = useState<boolean>(true);
 
     const [isDoneTransferring, setIsDoneTransferring] = useState<boolean>(false);
 
@@ -54,24 +55,22 @@ const AppearanceProfiles: FC = () => {
         const mergedConfig: AppearanceConfig = {...destinationAppearanceConfig};
         if (isMainWindowTransferred) {
             mergedConfig.mainWindow = sourceAppearanceConfig.mainWindow;
-            if (isActiveProfileUpdated) {
-                ipcRenderer.invoke('appearance-settings-changed', 'mainWindow', mergedConfig.mainWindow);
-            }
         }
         if (isOriginalTextTransferred) {
             mergedConfig.originalText = sourceAppearanceConfig.originalText;
-            if (isActiveProfileUpdated) {
-                ipcRenderer.invoke('appearance-settings-changed', 'originalText', mergedConfig.originalText);
-            }
         }
         if (isTranslatedTextTransferred) {
             mergedConfig.translatedText = sourceAppearanceConfig.translatedText;
-            if (isActiveProfileUpdated) {
-                ipcRenderer.invoke('appearance-settings-changed', 'translatedText', mergedConfig.translatedText);
-            }
+        }
+        if (isCustomCssTransferred) {
+            mergedConfig.customCss = sourceAppearanceConfig.customCss;
         }
 
         store.set(destinationAppearanceKey, mergedConfig);
+
+        if (isActiveProfileUpdated) {
+            await ipcRenderer.invoke('active-profile-changed', savedProfiles.activeProfileId);
+        }
 
         setIsDoneTransferring(true);
     }, [savedProfiles, sourceProfileId, destinationProfileId, isMainWindowTransferred, isOriginalTextTransferred, isTranslatedTextTransferred]);
@@ -136,6 +135,15 @@ const AppearanceProfiles: FC = () => {
                             onChange={event => setIsTranslatedTextTransferred(event.target.checked)}
                         >
                             Translated Text
+                        </Checkbox>
+                    </div>
+
+                    <div>
+                        <Checkbox
+                            checked={isCustomCssTransferred}
+                            onChange={event => setIsCustomCssTransferred(event.target.checked)}
+                        >
+                            Custom CSS
                         </Checkbox>
                     </div>
                 </div>
