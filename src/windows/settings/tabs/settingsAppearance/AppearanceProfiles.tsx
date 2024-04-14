@@ -13,6 +13,10 @@ import AppearanceConfig, {getAppearanceConfigKey} from '../../../../configuratio
 
 const {store, ipcRenderer} = getSettingsNodeApi();
 
+const emitAppearanceSettingsChanged = (config: AppearanceConfig, key: keyof AppearanceConfig): Promise<void> => {
+    return ipcRenderer.invoke('appearance-settings-changed', key, config[key]);
+};
+
 const AppearanceProfiles: FC = () => {
     const savedProfiles = useStoreStateReader<SavedProfiles>(store, StoreKeys.SAVED_PROFILES, () => initializeSavedProfiles(store));
 
@@ -55,22 +59,30 @@ const AppearanceProfiles: FC = () => {
         const mergedConfig: AppearanceConfig = {...destinationAppearanceConfig};
         if (isMainWindowTransferred) {
             mergedConfig.mainWindow = sourceAppearanceConfig.mainWindow;
+            if (isActiveProfileUpdated) {
+                await emitAppearanceSettingsChanged(mergedConfig, 'mainWindow');
+            }
         }
         if (isOriginalTextTransferred) {
             mergedConfig.originalText = sourceAppearanceConfig.originalText;
+            if (isActiveProfileUpdated) {
+                await emitAppearanceSettingsChanged(mergedConfig, 'originalText');
+            }
         }
         if (isTranslatedTextTransferred) {
             mergedConfig.translatedText = sourceAppearanceConfig.translatedText;
+            if (isActiveProfileUpdated) {
+                await emitAppearanceSettingsChanged(mergedConfig, 'translatedText');
+            }
         }
         if (isCustomCssTransferred) {
             mergedConfig.customCss = sourceAppearanceConfig.customCss;
+            if (isActiveProfileUpdated) {
+                await emitAppearanceSettingsChanged(mergedConfig, 'customCss');
+            }
         }
 
         store.set(destinationAppearanceKey, mergedConfig);
-
-        if (isActiveProfileUpdated) {
-            await ipcRenderer.invoke('active-profile-changed', savedProfiles.activeProfileId);
-        }
 
         setIsDoneTransferring(true);
     }, [savedProfiles, sourceProfileId, destinationProfileId, isMainWindowTransferred, isOriginalTextTransferred, isTranslatedTextTransferred]);

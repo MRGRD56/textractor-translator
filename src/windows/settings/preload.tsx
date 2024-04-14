@@ -1,7 +1,7 @@
 // const store = new Store();
 
 import electronStore from '../../electron-store/electronStore';
-import {contextBridge, ipcRenderer} from 'electron';
+import {contextBridge, ipcRenderer, IpcRendererEvent} from 'electron';
 import {GetTextractorPaths, TextractorPath, TextractorPaths} from './types';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -10,7 +10,8 @@ import downloadFile from '../../utils/downloadFile';
 import {v4} from 'uuid';
 import validateTextractorPath from '../../utils/logic/validateTextractorPath';
 import decompress = require('decompress');
-import {ActiveProfileChangedEvent} from '../../types/custom-events';
+import {ActiveProfileChangedEvent, AppearanceSettingsChangedEvent} from '../../types/custom-events';
+import AppearanceConfig from '../../configuration/appearance/AppearanceConfig';
 
 const TTBRIDGE_EXTENSION_NAME = 'TextractorPipe';
 const TTBRIDGE_EXTENSION_FILENAME = `${TTBRIDGE_EXTENSION_NAME}.xdll`;
@@ -163,15 +164,19 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    ipcRenderer.on('active-profile-changed', async (event, activeProfileId: string | undefined) => {
+    ipcRenderer.on('active-profile-changed', (event, activeProfileId: string | undefined) => {
+        console.log('settings#ipcRenderer.on(\'active-profile-changed\')', activeProfileId);
+
         window.dispatchEvent(new ActiveProfileChangedEvent({
-            activeProfileId // TODO обновление настроек при переключении профиля
+            activeProfileId
+        }));
+    });
+
+    ipcRenderer.on('appearance-settings-changed', (event: IpcRendererEvent, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig]) => {
+        console.log('settings#ipcRenderer.on(\'appearance-settings-changed\')', {appearanceKey, config});
+
+        window.dispatchEvent(new AppearanceSettingsChangedEvent({
+            appearanceKey, config
         }));
     });
 });
-
-// (window as any).electron = {
-//     helloworld: () => {
-//         console.log('Hello world')
-//     }
-// };

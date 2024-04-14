@@ -2,7 +2,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import type Store from 'electron-store';
 import type {ElectronStore} from '../electron-store/electronStoreShared';
 import {isFunction} from 'lodash';
-import {useAsyncEffect} from 'rooks';
+import {useAsyncEffect, useDidMount} from 'rooks';
 import AppearanceConfig, {defaultAppearanceConfig} from '../configuration/appearance/AppearanceConfig';
 import SavedProfiles from '../windows/settings/profiles/SavedProfiles';
 import {StoreKeys} from '../constants/store-keys';
@@ -36,6 +36,25 @@ const useAppearanceConfig = <T extends AppearanceConfig[keyof AppearanceConfig]>
         const activeProfileId = savedProfiles.activeProfileId ?? COMMON_PROFILE_ID;
         return StoreKeys.APPEARANCE_CONFIG + '.' + activeProfileId;
     }, [savedProfiles === undefined, savedProfiles?.activeProfileId]);
+
+    useDidMount(() => {
+        window.addEventListener('appearance-settings-changed', event => {
+            if (!value) {
+                throw new Error('value is undefined');
+            }
+
+            const {appearanceKey, config: newValue} = event.detail;
+            const previousValue = value[appearanceKey];
+
+            if (newValue === previousValue) {
+                console.log('newValue equals to previousValue', previousValue);
+                return;
+            }
+
+            setValue(newValue as T);
+            setInitialValue({current: newValue as T});
+        });
+    });
 
     useAsyncEffect(async () => {
         if (storeKey === undefined) {

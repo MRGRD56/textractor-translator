@@ -1,11 +1,29 @@
-export class ActiveProfileChangedEvent extends CustomEvent<{activeProfileId: string | undefined}> {
-    constructor(detail: {activeProfileId: string | undefined}) {
+import AppearanceConfig from '../configuration/appearance/AppearanceConfig';
+
+export interface ActiveProfileChangedEventDetail {
+    activeProfileId: string | undefined;
+}
+
+export class ActiveProfileChangedEvent extends CustomEvent<ActiveProfileChangedEventDetail> {
+    constructor(detail: ActiveProfileChangedEventDetail) {
         super('active-profile-changed', {detail});
+    }
+}
+
+export interface AppearanceSettingsChangedEventDetail {
+    appearanceKey: keyof AppearanceConfig;
+    config: AppearanceConfig[keyof AppearanceConfig];
+}
+
+export class AppearanceSettingsChangedEvent extends CustomEvent<AppearanceSettingsChangedEventDetail> {
+    constructor(detail: AppearanceSettingsChangedEventDetail) {
+        super('appearance-settings-changed', {detail});
     }
 }
 
 interface CustomEventMap {
     'active-profile-changed': ActiveProfileChangedEvent;
+    'appearance-settings-changed': AppearanceSettingsChangedEvent;
 }
 
 declare global {
