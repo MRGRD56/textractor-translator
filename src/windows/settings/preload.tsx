@@ -172,11 +172,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }));
     });
 
-    ipcRenderer.on('appearance-settings-changed', (event: IpcRendererEvent, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig]) => {
+    ipcRenderer.on('appearance-settings-changed', (event: IpcRendererEvent, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig], sourceId?: string) => {
         console.log('settings#ipcRenderer.on(\'appearance-settings-changed\')', {appearanceKey, config});
 
         window.dispatchEvent(new AppearanceSettingsChangedEvent({
-            appearanceKey, config
+            appearanceKey, config, sourceId
         }));
     });
 });

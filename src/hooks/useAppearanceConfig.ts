@@ -1,14 +1,15 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type Store from 'electron-store';
 import type {ElectronStore} from '../electron-store/electronStoreShared';
 import {isFunction} from 'lodash';
-import {useAsyncEffect, useDidMount} from 'rooks';
+import {useAsyncEffect} from 'rooks';
 import AppearanceConfig, {defaultAppearanceConfig} from '../configuration/appearance/AppearanceConfig';
 import SavedProfiles from '../windows/settings/profiles/SavedProfiles';
 import {StoreKeys} from '../constants/store-keys';
 import getSettingsNodeApi from '../windows/settings/utils/getSettingsNodeApi';
 import {COMMON_PROFILE_ID} from '../windows/settings/profiles/constants';
 import {Ref} from '../utils/ref';
+import {AppearanceSettingsChangedEvent} from '../types/custom-events';
 
 export type Wrapped<T> = Readonly<Ref<T>>;
 
@@ -20,6 +21,7 @@ interface Result<T> {
 
 const {ipcRenderer} = getSettingsNodeApi();
 
+const SOURCE_ID = 'useAppearanceConfig';
 const useAppearanceConfig = <T extends AppearanceConfig[keyof AppearanceConfig]>(
     store: Store | ElectronStore,
     appearanceKey: keyof AppearanceConfig,
@@ -36,25 +38,6 @@ const useAppearanceConfig = <T extends AppearanceConfig[keyof AppearanceConfig]>
         const activeProfileId = savedProfiles.activeProfileId ?? COMMON_PROFILE_ID;
         return StoreKeys.APPEARANCE_CONFIG + '.' + activeProfileId;
     }, [savedProfiles === undefined, savedProfiles?.activeProfileId]);
-
-    useDidMount(() => {
-        window.addEventListener('appearance-settings-changed', event => {
-            if (!value) {
-                throw new Error('value is undefined');
-            }
-
-            const {appearanceKey, config: newValue} = event.detail;
-            const previousValue = value[appearanceKey];
-
-            if (newValue === previousValue) {
-                console.log('newValue equals to previousValue', previousValue);
-                return;
-            }
-
-            setValue(newValue as T);
-            setInitialValue({current: newValue as T});
-        });
-    });
 
     useAsyncEffect(async () => {
         if (storeKey === undefined) {
@@ -86,11 +69,48 @@ const useAppearanceConfig = <T extends AppearanceConfig[keyof AppearanceConfig]>
             };
 
             store.set(storeKey, newAppearance);
-            ipcRenderer.invoke('appearance-settings-changed', appearanceKey, newValue);
+            ipcRenderer.invoke('appearance-settings-changed', appearanceKey, newValue, SOURCE_ID);
 
             return newAppearance;
         });
     }, [store, storeKey]);
+
+    useEffect(() => {
+        const handler = (event: AppearanceSettingsChangedEvent) => {
+            if (!value) {
+                throw new Error('value is undefined');
+            }
+
+            const {appearanceKey: eventAppearanceKey, config: newValue, sourceId} = event.detail;
+
+            if (sourceId === SOURCE_ID) {
+                return;
+            }
+
+            if (eventAppearanceKey !== appearanceKey) {
+                // console.log('different appearance key', appearanceKey, 'when working with', eventAppearanceKey);
+                return;
+            }
+
+            const previousValue = value[appearanceKey];
+
+            if (newValue === previousValue) {
+                // console.log('newValue equals to previousValue', previousValue);
+                return;
+            }
+
+            // console.log('newValue is not equal to previousValue', {newValue, previousValue});
+
+            setValue(newValue as T);
+            setInitialValue({current: newValue as T});
+        };
+
+        window.addEventListener('appearance-settings-changed', handler);
+
+        return () => {
+            window.removeEventListener('appearance-settings-changed', handler);
+        };
+    }, [value, appearanceKey, setValue]);
 
     return useMemo(() => ({
         value: value?.[appearanceKey],

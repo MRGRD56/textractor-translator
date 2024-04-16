@@ -13,6 +13,7 @@ export class ActiveProfileChangedEvent extends CustomEvent<ActiveProfileChangedE
 export interface AppearanceSettingsChangedEventDetail {
     appearanceKey: keyof AppearanceConfig;
     config: AppearanceConfig[keyof AppearanceConfig];
+    sourceId?: string;
 }
 
 export class AppearanceSettingsChangedEvent extends CustomEvent<AppearanceSettingsChangedEventDetail> {

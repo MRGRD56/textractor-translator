@@ -43,7 +43,7 @@ const AllProfilesPopup: FC<Props> = ({tabsApi, profiles, onProfilesChange}) => {
         const handler = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const isInsidePopup = Boolean(target.closest('.settings-profiles-popup-wrapper, .settings-profiles-popup-part'));
-            console.log('HANDLER11', {event, target, isInsidePopup});
+            // console.log('HANDLER11', {event, target, isInsidePopup});
             if (!isInsidePopup) {
                 setIsOpen(false);
             }
