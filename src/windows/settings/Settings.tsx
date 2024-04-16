@@ -2,8 +2,7 @@ import React, {FC, useCallback, useState} from 'react';
 import {Select, Tabs, TabsProps} from 'antd';
 import SettingsProfiles from './tabs/SettingsProfiles';
 import SettingsTextractor from './tabs/SettingsTextractor';
-import {ElectronStore} from '../../electron-store/electronStoreShared';
-import {useDidMount, useWillUnmount} from 'rooks';
+import {useDidMount} from 'rooks';
 import {StoreKeys} from '../../constants/store-keys';
 import SettingsAppearance from './tabs/SettingsAppearance';
 import SettingsAbout from './tabs/SettingsAbout';
@@ -11,7 +10,6 @@ import {defaultSettingsTab, SettingsTab} from './types';
 import SavedProfiles from './profiles/SavedProfiles';
 import initializeSavedProfiles from '../../configuration/initializeSavedProfiles';
 import {COMMON_PROFILE_ID} from './profiles/constants';
-import {ActiveProfileChangedEvent} from '../../types/custom-events';
 import getSettingsNodeApi from './utils/getSettingsNodeApi';
 import useStoreStateReader from '../../hooks/useStoreStateReader';
 
@@ -74,9 +72,7 @@ const Settings: FC = () => {
 
         store.set(StoreKeys.SAVED_PROFILES, newSavedProfiles);
         console.log('set SAVED_PROFILES handleProfileActivate', {newSavedProfiles});
-        window.dispatchEvent(new ActiveProfileChangedEvent({
-            activeProfileId: newSavedProfiles.activeProfileId
-        }));
+        ipcRenderer.invoke('active-profile-changed', newSavedProfiles.activeProfileId);
     }, []);
 
     if (!isInitialized) {

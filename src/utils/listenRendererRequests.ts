@@ -58,11 +58,11 @@ const listenRendererRequests = (): void => {
         nodeEventEmitter.emit('active-profile-changed', activeProfileId);
     });
 
-    ipcMain.handle('appearance-settings-changed', (event, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig]) => {
+    ipcMain.handle('appearance-settings-changed', (event, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig], sourceId?: string) => {
         BrowserWindow.getAllWindows().forEach(window => {
-            window.webContents.send('appearance-settings-changed', appearanceKey, config);
+            window.webContents.send('appearance-settings-changed', appearanceKey, config, sourceId);
         });
-        nodeEventEmitter.emit('appearance-settings-changed', appearanceKey, config);
+        nodeEventEmitter.emit('appearance-settings-changed', appearanceKey, config, sourceId);
     });
 };
 

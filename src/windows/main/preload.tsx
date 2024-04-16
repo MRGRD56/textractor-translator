@@ -180,12 +180,17 @@ const initAppearanceSettingsHandling = () => {
     const mainWindowStyleElement = document.getElementById('customizable-styles__main-window')!;
     const originalTextStyleElement = document.getElementById('customizable-styles__original-text')!;
     const translatedTextStyleElement = document.getElementById('customizable-styles__translated-text')!;
+    const customCssElement = document.getElementById('customizable-styles__custom-css')!;
 
     const container = document.querySelector<HTMLElement>('.text-container-wrapper')!;
     const mainToolbar = document.querySelector<HTMLElement>('.main-toolbar')!;
     const moveButton = document.getElementById('move-mw-button')!;
 
-    const renderMainWindowAppearance = (config: MainWindowAppearanceConfig) => {
+    const applyCustomCss = (customCss: string) => {
+        customCssElement.innerHTML = customCss;
+    }
+
+    const applyMainWindowAppearance = (config: MainWindowAppearanceConfig) => {
         const hoverOnlyCss = config.isHoverOnlyBackgroundSettings ? `
             html:is(:hover, [data-window-hover=true]) .text-container-wrapper {
                 --txx-background-color: ${addColorAlpha(config.backgroundColor, config.hoverOnlyBackgroundOpacity / 100)};
@@ -274,7 +279,7 @@ const initAppearanceSettingsHandling = () => {
         }
     };
 
-    const renderTextAppearance = (config: TextAppearanceConfig, styleElement: HTMLElement, styledSelector: string) => {
+    const applyTextAppearance = (config: TextAppearanceConfig, styleElement: HTMLElement, styledSelector: string) => {
         const textBackgroundCss = config.textBackgroundType && `
                 --txx-background-color: ${addColorAlpha(config.textBackgroundColor, config.textBackgroundOpacity / 100)};
                 background-color: var(--txx-background-color);
@@ -384,13 +389,16 @@ const initAppearanceSettingsHandling = () => {
     ipcRenderer.on('appearance-settings-changed', (event: IpcRendererEvent, appearanceKey: keyof AppearanceConfig, config: AppearanceConfig[keyof AppearanceConfig]) => {
         switch (appearanceKey) {
         case 'mainWindow':
-            renderMainWindowAppearance(config as MainWindowAppearanceConfig);
+            applyMainWindowAppearance(config as MainWindowAppearanceConfig);
             break;
         case 'originalText':
-            renderTextAppearance(config as TextAppearanceConfig, originalTextStyleElement, '.sentence-original');
+            applyTextAppearance(config as TextAppearanceConfig, originalTextStyleElement, '.sentence-original');
             break;
         case 'translatedText':
-            renderTextAppearance(config as TextAppearanceConfig, translatedTextStyleElement, '.sentence-translated');
+            applyTextAppearance(config as TextAppearanceConfig, translatedTextStyleElement, '.sentence-translated');
+            break;
+        case 'customCss':
+            applyCustomCss(config as string);
             break;
         }
     });
@@ -400,9 +408,10 @@ const initAppearanceSettingsHandling = () => {
         const appearanceConfig = await electronStore.get<AppearanceConfig>(appearanceConfigKey)
             ?? await initializeAppearanceConfig(electronStore, appearanceConfigKey);
 
-        renderMainWindowAppearance(appearanceConfig.mainWindow);
-        renderTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
-        renderTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+        applyMainWindowAppearance(appearanceConfig.mainWindow);
+        applyTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
+        applyTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+        applyCustomCss(appearanceConfig.customCss);
     });
 
     electronStore.get<SavedProfiles | undefined>(StoreKeys.SAVED_PROFILES).then(async (savedProfiles) => {
@@ -412,9 +421,10 @@ const initAppearanceSettingsHandling = () => {
         const appearanceConfig = await electronStore.get<AppearanceConfig>(appearanceConfigKey, defaultAppearanceConfig)
             ?? await initializeAppearanceConfig(electronStore, appearanceConfigKey);
 
-        renderMainWindowAppearance(appearanceConfig.mainWindow);
-        renderTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
-        renderTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+        applyMainWindowAppearance(appearanceConfig.mainWindow);
+        applyTextAppearance(appearanceConfig.originalText, originalTextStyleElement, '.sentence-original');
+        applyTextAppearance(appearanceConfig.translatedText, translatedTextStyleElement, '.sentence-translated');
+        applyCustomCss(appearanceConfig.customCss);
     });
 };
 

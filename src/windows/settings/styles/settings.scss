@@ -4,11 +4,11 @@
     flex-direction: column;
 }
 
-.settings-profile-editor-wrapper {
+.txx-monaco-editor-container-wrapper {
     height: 100%;
 }
 
-.original-text-transformer-editor {
+.txx-monaco-editor-container {
     height: calc(100% - 1px);
 
     & > .monaco-editor * {
@@ -462,7 +462,6 @@
     }
 
     .ant-tabs-content {
-        padding: 2px 8px 8px 8px;
         height: 100%;
         overflow-y: auto;
     }
@@ -485,8 +484,7 @@
     }
 
     .settings-appearance-tab {
-        padding-top: 8px;
-        padding-bottom: 8px;
+        padding: 8px;
         display: flex;
         flex-direction: column;
         gap: 12px;

@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useEffect, useState} from 'react';
+import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import SavedProfiles from '../../profiles/SavedProfiles';
 import {StoreKeys} from '../../../../constants/store-keys';
 import initializeSavedProfiles from '../../../../configuration/initializeSavedProfiles';
@@ -10,10 +10,13 @@ import styles from '../SettingsAppearance.module.scss';
 import useStoreStateReader from '../../../../hooks/useStoreStateReader';
 import {CheckOutlined} from '@ant-design/icons';
 import AppearanceConfig, {getAppearanceConfigKey} from '../../../../configuration/appearance/AppearanceConfig';
+import {v4} from 'uuid';
+import readonly from '../../../../utils/readonly';
 
 const {store, ipcRenderer} = getSettingsNodeApi();
 
 const AppearanceProfiles: FC = () => {
+    const uuid = readonly(useRef(v4()));
     const savedProfiles = useStoreStateReader<SavedProfiles>(store, StoreKeys.SAVED_PROFILES, () => initializeSavedProfiles(store));
 
     const [sourceProfileId, setSourceProfileId] = useState<string>();
@@ -22,8 +25,13 @@ const AppearanceProfiles: FC = () => {
     const [isMainWindowTransferred, setIsMainWindowTransferred] = useState<boolean>(true);
     const [isOriginalTextTransferred, setIsOriginalTextTransferred] = useState<boolean>(true);
     const [isTranslatedTextTransferred, setIsTranslatedTextTransferred] = useState<boolean>(true);
+    const [isCustomCssTransferred, setIsCustomCssTransferred] = useState<boolean>(true);
 
     const [isDoneTransferring, setIsDoneTransferring] = useState<boolean>(false);
+
+    const emitAppearanceSettingsChanged = useCallback((config: AppearanceConfig, key: keyof AppearanceConfig): Promise<void> => {
+        return ipcRenderer.invoke('appearance-settings-changed', key, config[key], uuid.current);
+    }, []);
 
     useEffect(() => {
         if (!savedProfiles) {
@@ -55,33 +63,39 @@ const AppearanceProfiles: FC = () => {
         if (isMainWindowTransferred) {
             mergedConfig.mainWindow = sourceAppearanceConfig.mainWindow;
             if (isActiveProfileUpdated) {
-                ipcRenderer.invoke('appearance-settings-changed', 'mainWindow', mergedConfig.mainWindow);
+                await emitAppearanceSettingsChanged(mergedConfig, 'mainWindow');
             }
         }
         if (isOriginalTextTransferred) {
             mergedConfig.originalText = sourceAppearanceConfig.originalText;
             if (isActiveProfileUpdated) {
-                ipcRenderer.invoke('appearance-settings-changed', 'originalText', mergedConfig.originalText);
+                await emitAppearanceSettingsChanged(mergedConfig, 'originalText');
             }
         }
         if (isTranslatedTextTransferred) {
             mergedConfig.translatedText = sourceAppearanceConfig.translatedText;
             if (isActiveProfileUpdated) {
-                ipcRenderer.invoke('appearance-settings-changed', 'translatedText', mergedConfig.translatedText);
+                await emitAppearanceSettingsChanged(mergedConfig, 'translatedText');
+            }
+        }
+        if (isCustomCssTransferred) {
+            mergedConfig.customCss = sourceAppearanceConfig.customCss;
+            if (isActiveProfileUpdated) {
+                await emitAppearanceSettingsChanged(mergedConfig, 'customCss');
             }
         }
 
         store.set(destinationAppearanceKey, mergedConfig);
 
         setIsDoneTransferring(true);
-    }, [savedProfiles, sourceProfileId, destinationProfileId, isMainWindowTransferred, isOriginalTextTransferred, isTranslatedTextTransferred]);
+    }, [savedProfiles, sourceProfileId, destinationProfileId, isMainWindowTransferred, isOriginalTextTransferred, isTranslatedTextTransferred, isCustomCssTransferred]);
 
     if (!savedProfiles) {
         return null;
     }
 
     return (
-        <div className={styles.appearanceProfilesContainer}>
+        <div className={classNames(styles.appearanceProfilesContainer, 'settings-appearance-tab')}>
             <h2>Copy profile appearance settings</h2>
 
             <div className={styles.appearanceProfilesForm}>
@@ -136,6 +150,15 @@ const AppearanceProfiles: FC = () => {
                             onChange={event => setIsTranslatedTextTransferred(event.target.checked)}
                         >
                             Translated Text
+                        </Checkbox>
+                    </div>
+
+                    <div>
+                        <Checkbox
+                            checked={isCustomCssTransferred}
+                            onChange={event => setIsCustomCssTransferred(event.target.checked)}
+                        >
+                            Custom CSS
                         </Checkbox>
                     </div>
                 </div>

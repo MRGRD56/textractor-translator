@@ -2,13 +2,11 @@ import React, {FC, useCallback, useMemo, useState} from 'react';
 import TabsPanel from '../components/tabs/TabsPanel';
 import ProfileSourceEditor from '../components/ProfileSourceEditor';
 import SavedProfiles from '../profiles/SavedProfiles';
-import tabsCore, {ProfileTabs, TabsApi, TabsChange, TabsChangeCause} from '../../../utils/tabsCore';
+import tabsCore, {ProfileTabs, TabsApi, TabsChange} from '../../../utils/tabsCore';
 import SavedProfile from '../profiles/SavedProfile';
 import {useDidMount, useWillUnmount} from 'rooks';
 import {StoreKeys} from '../../../constants/store-keys';
 import {savedProfilesToTabs, tabsToSavedProfiles} from '../profiles/profileTabConversions';
-import {NEW_PROFILE_NAME} from '../profiles/constants';
-import {deleteProfile} from '../utils/profiles';
 import initializeSavedProfiles from '../../../configuration/initializeSavedProfiles';
 import {ActiveProfileChangedEvent} from '../../../types/custom-events';
 import useAutoRef from '../../../utils/useAutoRef';
@@ -114,9 +112,7 @@ const SettingsProfiles: FC = () => {
         console.log('set SAVED_PROFILES handleProfileActivate', {newSavedProfiles})
         tabsApi?.setTabsObject(savedProfilesToTabs(newSavedProfiles));
 
-        window.dispatchEvent(new ActiveProfileChangedEvent({
-            activeProfileId: newSavedProfiles.activeProfileId
-        }));
+        ipcRenderer.invoke('active-profile-changed', newSavedProfiles.activeProfileId);
     }, [savedProfiles, tabsApi]);
 
     const handleActiveProfileSourceChange = useCallback((profileId: string, profileSource: string) => {

@@ -1,6 +1,6 @@
 import React, {FC, useCallback, useMemo, useState} from 'react';
 import {Tabs, TabsProps} from 'antd';
-import useStoreStateWriter from '../../../hooks/useStoreStateWriter';
+import useAppearanceConfig from '../../../hooks/useAppearanceConfig';
 import {StoreKeys} from '../../../constants/store-keys';
 import MainWindowAppearanceConfig from '../../../configuration/appearance/MainWindowAppearanceConfig';
 import useChangeStateHandler from '../../../hooks/useChangeStateHandler';
@@ -15,6 +15,7 @@ import getSettingsNodeApi from '../utils/getSettingsNodeApi';
 import AppearanceProfiles from './settingsAppearance/AppearanceProfiles';
 import styles from './SettingsAppearance.module.scss';
 import classNames from 'classnames';
+import CustomCssAppearance from './settingsAppearance/CustomCssAppearance';
 
 const {store} = getSettingsNodeApi();
 
@@ -54,14 +55,28 @@ const SettingsAppearance: FC = () => {
         window.removeEventListener('active-profile-changed', activeProfileChangedCallback);
     });
 
-    const [mwAppearance, setMwAppearance] = useStoreStateWriter<MainWindowAppearanceConfig>(store, 'mainWindow', savedProfiles);
+    const {
+        value: mwAppearance,
+        setValue: setMwAppearance
+    } = useAppearanceConfig<MainWindowAppearanceConfig>(store, 'mainWindow', savedProfiles);
     const handleMwAppearanceChange = useChangeStateHandler(setMwAppearance);
 
-    const [originalTextAppearance, setOriginalTextAppearance] = useStoreStateWriter<TextAppearanceConfig>(store, 'originalText', savedProfiles);
+    const {
+        value: originalTextAppearance,
+        setValue: setOriginalTextAppearance
+    } = useAppearanceConfig<TextAppearanceConfig>(store, 'originalText', savedProfiles);
     const handleOriginalTextAppearanceChange = useChangeStateHandler(setOriginalTextAppearance);
 
-    const [translatedTextAppearance, setTranslatedTextAppearance] = useStoreStateWriter<TextAppearanceConfig>(store, 'translatedText', savedProfiles);
+    const {
+        value: translatedTextAppearance,
+        setValue: setTranslatedTextAppearance
+    } = useAppearanceConfig<TextAppearanceConfig>(store, 'translatedText', savedProfiles);
     const handleTranslatedTextAppearanceChange = useChangeStateHandler(setTranslatedTextAppearance);
+
+    const {
+        initialValue: initialCustomCssAppearance,
+        setValue: setCustomCssAppearance
+    } = useAppearanceConfig<string>(store, 'customCss', savedProfiles);
 
     const tabs = useMemo<TabsProps['items']>(() => {
         if (!mwAppearance || !originalTextAppearance || !translatedTextAppearance) {
@@ -90,6 +105,12 @@ const SettingsAppearance: FC = () => {
                                           mwAppearance={mwAppearance}/>
             },
             {
+                key: 'CUSTOM_CSS',
+                label: 'Custom CSS',
+                children: <CustomCssAppearance initialCustomCss={initialCustomCssAppearance}
+                                               onCustomCssChange={setCustomCssAppearance}/>
+            },
+            {
                 key: 'APPEARANCE_PROFILES',
                 label: (
                     <span className={styles.profilesTabTitle}>
@@ -104,7 +125,16 @@ const SettingsAppearance: FC = () => {
                 children: <AppearanceProfiles/>
             }
         ];
-    }, [mwAppearance, handleMwAppearanceChange, originalTextAppearance, handleOriginalTextAppearanceChange, translatedTextAppearance, handleTranslatedTextAppearanceChange]);
+    }, [
+        mwAppearance,
+        handleMwAppearanceChange,
+        originalTextAppearance,
+        handleOriginalTextAppearanceChange,
+        translatedTextAppearance,
+        handleTranslatedTextAppearanceChange,
+        initialCustomCssAppearance,
+        setCustomCssAppearance
+    ]);
 
     if (!mwAppearance || !isInitialized) {
         return null;

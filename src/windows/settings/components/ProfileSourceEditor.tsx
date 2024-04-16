@@ -99,8 +99,8 @@ const ProfileSourceEditor: FC<Props> = ({profile, onSourceChange}) => {
     }, [profile.id]);
 
     return (
-        <div className="settings-profile-editor-wrapper">
-            <div id="original-text-transformer-javascript" className="original-text-transformer-editor"/>
+        <div className="txx-monaco-editor-container-wrapper">
+            <div id="original-text-transformer-javascript" className="txx-monaco-editor-container"/>
         </div>
     );
 };

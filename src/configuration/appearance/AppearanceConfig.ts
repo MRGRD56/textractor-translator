@@ -10,6 +10,7 @@ interface AppearanceConfig {
     mainWindow: MainWindowAppearanceConfig;
     originalText: TextAppearanceConfig;
     translatedText: TextAppearanceConfig;
+    customCss: string;
 }
 
 export default AppearanceConfig;
@@ -25,5 +26,6 @@ export const getAppearanceConfigKey = (activeProfileId: string | undefined) => {
 export const defaultAppearanceConfig: AppearanceConfig = {
     mainWindow: defaultMainWindowAppearance,
     originalText: defaultOriginalTextAppearance,
-    translatedText: defaultTranslatedTextAppearance
+    translatedText: defaultTranslatedTextAppearance,
+    customCss: ''
 };
