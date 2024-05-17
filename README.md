@@ -64,7 +64,7 @@ Both versions can work with both `Textractor x86` and `Textractor x64`.
 
 <hr>
 
-### The following part of this README is being rewritten
+### The following part of this README is supposed to be rewritten
 
 <details>
 <summary>History of this app</summary>
