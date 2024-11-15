@@ -40,8 +40,8 @@ It allows you to perform and configure the following things for each game:
 ## Installation
 
 Currently, only Windows it supported.
-You can use either `ia32` or `x86` versions depending on your OS.
-Both versions can work with both `Textractor x86` and `Textractor x64`.
+You can use either `ia32` or `x64` versions depending on your OS.
+Both versions (at least the x64 one) can work with both `Textractor x86` and `Textractor x64`.
 
 1. Download the binaries for your operating system in the [Releases](https://github.com/MRGRD56/textractor-translator/releases) section ([x86](https://github.com/MRGRD56/textractor-translator/releases/latest/download/TextractorTranslator-win32-ia32.zip) [x64](https://github.com/MRGRD56/textractor-translator/releases/latest/download/TextractorTranslator-win32-x64.zip)).  
 2. Unzip the archive to the directory where the app will be stored.
