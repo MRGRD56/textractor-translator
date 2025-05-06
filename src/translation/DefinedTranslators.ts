@@ -1,9 +1,10 @@
-import {DefinedTranslators, LibreTranslatorConfig} from '../configuration/Configuration';
+import {DefinedTranslators, LibreTranslatorConfig, OpenAIChatCompletionsConfig} from '../configuration/Configuration';
 import GoogleTranslator from './translators/GoogleTranslator';
 import IdentityTranslator from './translators/utility/IdentityTranslator';
 import InfiniteTranslator from './translators/utility/InfiniteTranslator';
 import NoneTranslator from './translators/utility/NoneTranslator';
 import LibreTranslator from './translators/LibreTranslator';
+import OpenAIChatCompletions from './translators/OpenAIChatCompletions';
 
 export class DefinedTranslatorsImpl implements DefinedTranslators {
     constructor() {
@@ -25,6 +26,10 @@ export class DefinedTranslatorsImpl implements DefinedTranslators {
     LibreTranslate = (config?: LibreTranslatorConfig) => {
         return new LibreTranslator(config || {});
     };
+
+    OpenAIChatCompletions = (config: OpenAIChatCompletionsConfig) => {
+        return new OpenAIChatCompletions(config);
+    }
 
     debug = Object.freeze({
         Identity: () => new IdentityTranslator(),

@@ -1,8 +1,16 @@
 import {listenToPipe} from '../../../textractorServer';
-import {Configuration, ExtraHtml, OptionalTransformedText, Sentence} from '../../../configuration/Configuration';
+import {Configuration, ExtraHtml, OptionalTransformedText, Sentence,} from '../../../configuration/Configuration';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 import nodeConsole from '../../../utils/nodeConsole';
 import {isHistoryShownRef} from '../preload';
+import {isStreamingTranslator} from '../../../configuration/utils';
+
+/**
+ * Runtime‑type‑guard to detect an async generator.
+ */
+function isAsyncGenerator<T, R>(obj: any): obj is AsyncGenerator<T, R> {
+    return obj && typeof obj[Symbol.asyncIterator] === 'function';
+}
 
 const appendExtraHtml = (htmlToAppend: ExtraHtml, element: Element) => {
     element.insertAdjacentHTML(htmlToAppend.position, htmlToAppend.html);
@@ -34,8 +42,31 @@ const applyExtraCss = (cssToApply: string[] | undefined, element: Element) => {
     }
 };
 
-const translateText = (originalText: string, config: Configuration): Promise<string> => {
-    return config.translator?.translate(originalText, config.languages.source, config.languages.target);
+/**
+ * Returns either a Promise with a full translation **или** AsyncGenerator, если переводчик поддерживает стриминг.
+ */
+const translateText = (
+    originalText: string,
+    config: Configuration,
+): Promise<string> | AsyncGenerator<string, string> | undefined => {
+    const translator: any = config.translator;
+    if (!translator) return undefined;
+
+    // Если есть streamTranslate → пользуемся ею
+    if (isStreamingTranslator(translator)) {
+        return translator.translateStreaming(
+            originalText,
+            config.languages.source,
+            config.languages.target,
+        );
+    }
+
+    // Fallback на обычный translate()
+    return translator.translate(
+        originalText,
+        config.languages.source,
+        config.languages.target,
+    );
 };
 
 const showSentence = (
@@ -44,10 +75,11 @@ const showSentence = (
     textContainerWrapper: HTMLElement,
     sampleTextContainer: HTMLElement,
     originalText: OptionalTransformedText,
-    translatedTextPromise: Promise<string> | undefined,
-    originalSentence: Sentence
+    translatedTextHandle: Promise<string> | AsyncGenerator<string, string> | undefined,
+    originalSentence: Sentence,
 ): void => {
-    const originalTextDisplayed = typeof originalText === 'object' ? (originalText.displayed ?? originalText.plain) : originalText;
+    const originalTextDisplayed =
+        typeof originalText === 'object' ? originalText.displayed ?? originalText.plain : originalText;
     const isHtml = typeof originalText === 'object' && Boolean(originalText.isHtml);
     const extraCss = typeof originalText === 'object' ? originalText.extraCss : undefined;
     const extraHtml = typeof originalText === 'object' ? originalText.extraHtml : undefined;
@@ -72,7 +104,7 @@ const showSentence = (
     const sentenceElement = document.createElement('div');
     sentenceElement.classList.add('sentence');
     sentenceElement.append(sentenceOriginalElement);
-    if (translatedTextPromise) {
+    if (translatedTextHandle) {
         sentenceElement.append(sentenceTranslatedElement);
     }
 
@@ -100,9 +132,57 @@ const showSentence = (
         textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
     }
 
-    if (translatedTextPromise) {
-        translatedTextPromise
-            .then(translatedText => {
+    /**
+     * Обновление (или первый рендер) переведённого текста в DOM.
+     */
+    const renderTranslated = (translated: OptionalTransformedText) => {
+        const translatedTextDisplayed =
+            typeof translated === 'object' ? translated.displayed ?? translated.plain : translated;
+        const isHtmlTranslated = typeof translated === 'object' && Boolean(translated.isHtml);
+        const extraCssTr = typeof translated === 'object' ? translated.extraCss : undefined;
+        const extraHtmlTr = typeof translated === 'object' ? translated.extraHtml : undefined;
+
+        let sentenceTranslatedTextElement = sentenceTranslatedElement.querySelector('.sentence-text');
+        if (!sentenceTranslatedTextElement) {
+            sentenceTranslatedTextElement = document.createElement('div');
+            sentenceTranslatedTextElement.classList.add('sentence-text');
+            sentenceTranslatedElement.classList.remove('sentence-loading');
+            sentenceTranslatedElement.innerHTML = '';
+            sentenceTranslatedElement.append(sentenceTranslatedTextElement);
+        }
+
+        if (isHtmlTranslated) {
+            sentenceTranslatedTextElement.innerHTML = translatedTextDisplayed as string;
+        } else {
+            sentenceTranslatedTextElement.textContent = translatedTextDisplayed as string;
+        }
+
+        // extra html / css для перевода — применяем один раз, когда впервые получили контент
+        if (extraHtmlTr && !sentenceTranslatedElement.dataset.extraApplied) {
+            appendExtraHtmls(extraHtmlTr.sentenceContainer, sentenceContainerElement);
+            appendExtraHtmls(extraHtmlTr.sentence, sentenceElement);
+            appendExtraHtmls(extraHtmlTr.textContainer, sentenceOriginalElement);
+            appendExtraHtmls(extraHtmlTr.text, sentenceTranslatedElement);
+            sentenceTranslatedElement.dataset.extraApplied = '1';
+        }
+        if (extraCssTr && !sentenceTranslatedElement.dataset.extraCssApplied) {
+            applyExtraCss(extraCssTr.sentenceContainer, sentenceContainerElement);
+            applyExtraCss(extraCssTr.sentence, sentenceElement);
+            applyExtraCss(extraCssTr.textContainer, sentenceTranslatedElement);
+            applyExtraCss(extraCssTr.text, sentenceTranslatedElement.querySelector('.sentence-text')!);
+            sentenceTranslatedElement.dataset.extraCssApplied = '1';
+        }
+    };
+
+    if (!translatedTextHandle) {
+        // нет перевода — ничего не делаем
+        return;
+    }
+
+    // ---- PROMISE‑БАЗОВЫЙ ПЕРЕВОД ----
+    if (!isAsyncGenerator<string, string>(translatedTextHandle)) {
+        translatedTextHandle
+            .then((translatedText) => {
                 const transformedText = config.transformTranslated?.(translatedText, originalSentence);
 
                 if (transformedText === undefined) {
@@ -110,48 +190,42 @@ const showSentence = (
                     return;
                 }
 
-                const translatedTextDisplayed = typeof transformedText === 'object' ? (transformedText.displayed ?? transformedText.plain) : transformedText;
-                const isHtml = typeof transformedText === 'object' && Boolean(transformedText.isHtml);
-                const extraCss = typeof transformedText === 'object' ? transformedText.extraCss : undefined;
-                const extraHtml = typeof transformedText === 'object' ? transformedText.extraHtml : undefined;
-
-                const sentenceTranslatedTextElement = document.createElement('div');
-                sentenceTranslatedTextElement.classList.add('sentence-text');
-
-                if (isHtml) {
-                    sentenceTranslatedTextElement.innerHTML = translatedTextDisplayed;
-                } else {
-                    sentenceTranslatedTextElement.textContent = translatedTextDisplayed;
-                }
-
-                sentenceTranslatedElement.classList.remove('sentence-loading');
-                sentenceTranslatedElement.innerHTML = '';
-                sentenceTranslatedElement.append(sentenceTranslatedTextElement);
-
-                if (extraHtml) {
-                    appendExtraHtmls(extraHtml.sentenceContainer, sentenceContainerElement);
-                    appendExtraHtmls(extraHtml.sentence, sentenceElement);
-                    appendExtraHtmls(extraHtml.textContainer, sentenceOriginalElement);
-                    appendExtraHtmls(extraHtml.text, sentenceOriginalTextElement);
-                }
-                if (extraCss) {
-                    applyExtraCss(extraCss.sentenceContainer, sentenceContainerElement);
-                    applyExtraCss(extraCss.sentence, sentenceElement);
-                    applyExtraCss(extraCss.textContainer, sentenceTranslatedElement);
-                    applyExtraCss(extraCss.text, sentenceTranslatedTextElement);
-                }
+                renderTranslated(transformedText);
             })
-            .catch(error => {
-                console.error('An error occurred while translating', error)
+            .catch((error) => {
+                console.error('An error occurred while translating', error);
                 sentenceTranslatedElement.classList.remove('sentence-loading');
                 sentenceTranslatedElement.textContent = 'Error while translating';
             })
             .finally(() => {
                 if (isHistoryShownRef.current) {
-                    textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight); // todo check if the scroll is near to the bottom now
+                    textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
                 }
             });
+        return;
     }
+
+    // ---- СТРИМИНГ ----
+    (async () => {
+        let fullTranslation = '';
+        try {
+            for await (const chunk of translatedTextHandle) {
+                fullTranslation += chunk;
+                const transformed = config.transformTranslated?.(fullTranslation, originalSentence);
+                if (transformed !== undefined) {
+                    renderTranslated(transformed);
+                }
+            }
+        } catch (error) {
+            console.error('An error occurred while translating', error);
+            sentenceTranslatedElement.classList.remove('sentence-loading');
+            sentenceTranslatedElement.textContent = 'Error while translating';
+        } finally {
+            if (isHistoryShownRef.current) {
+                textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+            }
+        }
+    })();
 };
 
 const workTextractorPipe = () => {
@@ -165,13 +239,21 @@ const workTextractorPipe = () => {
             const multiTransformedText = config.transformOriginal?.(sentence);
             const transformedTexts = Array.isArray(multiTransformedText) ? multiTransformedText : [multiTransformedText];
 
-            console.log('New Sentence', {sentence, transformedTexts});
+            console.log('New Sentence', { sentence, transformedTexts });
 
             for (const transformedText of transformedTexts) {
                 if (transformedText !== undefined) {
                     const text = typeof transformedText === 'object' ? transformedText.plain : transformedText;
 
-                    showSentence(config, textContainer, textContainerWrapper, sampleTextContainer, transformedText, translateText(text, config), sentence);
+                    showSentence(
+                        config,
+                        textContainer,
+                        textContainerWrapper,
+                        sampleTextContainer,
+                        transformedText,
+                        translateText(text, config),
+                        sentence,
+                    );
                 }
             }
         } catch (e) {

@@ -382,7 +382,7 @@ config.transformTranslated = (text) => {
 
 ##### Implementing a custom translator
 
-`net` (the node.js module), `httpRequest` ("electron-request" library), `queryString` ("query-string" library), `URL`, `URLSearchParams` variables can help you create your custom translators.
+`net` (the node.js module), `httpRequest` ("node-fetch" library), `queryString` ("query-string" library), `URL`, `URLSearchParams` variables can help you create your custom translators.
 
 ###### LibreTranslate
 

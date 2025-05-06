@@ -4,9 +4,6 @@ import React, {FC, useEffect} from 'react';
 import configurationDeclarations from "!!raw-loader!../../../configuration/Configuration";
 // @ts-ignore
 // eslint-disable-next-line
-import electronRequestDeclarations from '!!raw-loader!electron-request/dist/index.d.ts'
-// @ts-ignore
-// eslint-disable-next-line
 import queryStringDeclarations from '!!raw-loader!query-string/index.d.ts'
 // @ts-ignore
 // eslint-disable-next-line
@@ -35,11 +32,8 @@ const initializeMonacoTypes = (isCommon: boolean) => {
             filePath: 'queryString.ts'
         },
         {
-            content: 'declare namespace ElectronRequest {\n' + (electronRequestDeclarations.toString()
-                .replace(/declare const main:.*;/g, '')
-                .replace(/export \{.*};/g, ''))
-            + '\n}\n\nconst httpRequest: (requestURL: string, options?: ElectronRequest.Options) => Promise<ElectronRequest.Response>;',
-            filePath: 'electron-request.ts'
+            content: 'const httpRequest: typeof window.fetch;',
+            filePath: 'node-fetch.ts'
         },
         {
             content: configDeclarationsUsable + `
