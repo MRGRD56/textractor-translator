@@ -421,7 +421,7 @@ Translators.LibreTranslateCustom = (config = {}) => ({
 });
 ```
 
-###### OpenAI-compatible chat/completions (no streaming)
+###### OpenAI-compatible chat/completions (no streaming) + context
 
 ```js
 const LANGUAGES_MAP = {
@@ -432,65 +432,95 @@ const LANGUAGES_MAP = {
 };
 
 /**
- * @param config {{baseUri?: string, token?: string, requestBodyParams?: object, getMessages?: function}}
+ * @param config {{baseUri?: string, token?: string, requestBodyParams?: object, createMessages?: function, previousSentencesKept?: number}}
  * @returns {Translator}
  */
-Translators.Custom.OpenAIChatCompletions = (config = {}) => ({
-    translate: async (text, sourceLanguage, targetLanguage) => {
-        const baseUri = config.baseUri;
-        const token = config.token;
-        const requestBodyParams = config.requestBodyParams;
-        const createMessages = config.createMessages ?? ((text, sourceLanguage, targetLanguage) => ([
-            {
-                "role": "system",
-                "content": "You are a paid translation service. You get text in one language and translate it into another, in plain text, without giving any comments. You only output the translation. Make sure to maintain quality. In your response output the translation right away without any comments, or any extra tags (do not output the \"text_to_translate\" tag itself)."
-            },
-            {
-                "role": "user",
-                "content": "Translate the text inside this tag " + (sourceLanguage ? `from ${sourceLanguage} ` : "") + "into " + targetLanguage + ": <text_to_translate>" + text + "</text_to_translate> Translation:"
-            }
-        ]));
-
-        if (!baseUri) {
-            throw new Error('OpenAIChatCompletions translator requires a baseUri in config.');
+Translators.Custom.OpenAIChatCompletions = (config = {}) => {
+    const baseUri = config.baseUri;
+    const token = config.token;
+    const requestBodyParams = config.requestBodyParams;
+    const createMessages = config.createMessages ?? ((text, sourceLanguage, targetLanguage, previousMessages) => ([
+        {
+            "role": "system",
+            "content": "You are a real time translation service. You are translating a visual novel. You get any text from this visual novel in one language and translate it to another, in plain text, without giving any comments. You only output the translation. Make sure to maintain the quality and the context of the story. In your response, output the translation of the text inside the text_to_translate tag right away without any comments, or any extra tags (do not output the \"text_to_translate\" tag itself)."
+        },
+        ...previousMessages,
+        {
+            "role": "user",
+            "content": "Translate this " + (sourceLanguage ? `from ${sourceLanguage} ` : "") + "into " + targetLanguage + ": <text_to_translate>" + text + "</text_to_translate> Translation:"
         }
+    ]));
 
-        const url = new URL(baseUri + '/chat/completions').toString();
-
-        sourceLanguage = sourceLanguage && LANGUAGES_MAP[sourceLanguage];
-        targetLanguage = targetLanguage && LANGUAGES_MAP[targetLanguage];
-
-        if (!targetLanguage) {
-            throw new Error('OpenAIChatCompletions translator requires targetLanguage.');
-        }
-
-        const requestBody = {
-            messages: createMessages(text, sourceLanguage, targetLanguage),
-            stream: false,
-            ...requestBodyParams,
-        };
-
-        console.log(`Translating using OpenAIChatCompletions: POST ${url}`, requestBody);
-
-        const responseData = await httpRequest(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(requestBody)
-        }).then(res => res.json());
-
-        const result = responseData?.choices[0].message.content;
-
-        if (!result) {
-            console.error('OpenAIChatCompletions translator failed: ', responseData);
-            throw new Error('Translation failed');
-        }
-
-        return result;
+    if (!baseUri) {
+        throw new Error('OpenAIChatCompletions translator requires a baseUri URL in config.');
     }
-});
+
+    const url = new URL(baseUri + '/chat/completions');
+
+    const previousSentencesKept = config.previousSentencesKept ?? 10;
+    const messagesHistoryLimit = previousSentencesKept * 2;
+
+    const messagesHistory = [];
+
+    const putSentenceToHistory = (userMessage, translation) => {
+        if (previousSentencesKept === 0) {
+            return;
+        }
+
+        messagesHistory.push(
+            userMessage,
+            {
+                "role": "assistant",
+                "content": translation
+            }
+        );
+
+        if (messagesHistory.length > messagesHistoryLimit) {
+            messagesHistory.splice(0, messagesHistory.length - messagesHistoryLimit);
+        }
+    };
+
+    return {
+        translate: async (text, sourceLanguage, targetLanguage) => {
+            sourceLanguage = sourceLanguage && LANGUAGES_MAP[sourceLanguage];
+            targetLanguage = targetLanguage && LANGUAGES_MAP[targetLanguage];
+
+            if (!targetLanguage) {
+                throw new Error('OpenAIChatCompletions translator requires targetLanguage.');
+            }
+
+            const messages = createMessages(text, sourceLanguage, targetLanguage, messagesHistory);
+
+            const requestBody = {
+                messages,
+                stream: false,
+                ...requestBodyParams,
+            };
+
+            console.log(`Translating using OpenAIChatCompletions: POST ${url.toString()}`, requestBody);
+
+            const responseData = await httpRequest(url.toString(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(requestBody)
+            }).then(res => res.json());
+
+            const result = responseData?.choices[0].message.content;
+
+            if (!result) {
+                console.error('OpenAIChatCompletions translator failed: ', responseData);
+                throw new Error('Translation failed');
+            }
+
+            putSentenceToHistory(messages[messages.length - 1], result);
+
+            return result;
+        }
+    };
+};
 
 const openAITranslator = Translators.Custom.OpenAIChatCompletions({
     baseUri: 'https://your-openai-base-uri/v1',
