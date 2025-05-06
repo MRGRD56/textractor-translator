@@ -544,6 +544,58 @@ const openAITranslator = Translators.Custom.OpenAIChatCompletions({
 });
 ```
 
+###### A translator attempting to use a list of translators, with retries and caching
+
+```js
+/**
+ * @param baseTranslators {Translator[]}
+ * @returns {Translator}
+ */
+Translators.Custom.MainTranslator = (baseTranslators) => ({
+    translate: async (text, sourceLanguage, targetLanguage) => {
+        const tryTranslate = async () => {
+            let lastError;
+            for (const translator of baseTranslators) {
+                const translatorName = translator.__name__ ?? 'Unknown Translator';
+                try {
+                    const translation = await translator.translate(text, sourceLanguage, targetLanguage);
+                    console.log(`${translatorName} translation result:`, translation);
+                    return translation;
+                } catch (err) {
+                    console.error(`${translatorName} translation error:`, err);
+                    lastError = err;
+                }
+            }
+            throw lastError;
+        };
+
+        if (sourceLanguage === 'en' && !/[a-z]+/i.test(text)) {
+            console.log('Used original text:', text);
+            return text;
+        }
+
+        if (text.length <= 200) {
+            const translatedCache = memory.translatedCache ??= {};
+            const cachedTranslation = translatedCache[text];
+            if (cachedTranslation === undefined) {
+                const translation = await tryTranslate();
+                translatedCache[text] = translation;
+                return translation;
+            } else {
+                console.log('Used cached translation:', cachedTranslation);
+                return cachedTranslation;
+            }
+        }
+
+        return tryTranslate();
+    }
+});
+
+config.translator = Translators.Custom.MainTranslator([
+    openAITranslatorAtPC, openAITranslatorAtSrv, googleTranslate, googleTranslate
+]);
+```
+
 #### Ideas to be implemented in the future
 
 - ⚠️ Add a "retry" button if an error occurred while translating, also add auto retries (since v0.3.0 auto retries can be implemented by creating an own translator by extending the existing, in theory)
