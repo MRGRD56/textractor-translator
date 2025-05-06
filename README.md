@@ -384,6 +384,8 @@ config.transformTranslated = (text) => {
 
 `net` (the node.js module), `httpRequest` ("electron-request" library), `queryString` ("query-string" library), `URL`, `URLSearchParams` variables can help you create your custom translators.
 
+###### LibreTranslate
+
 ```js
 /**
  * @param config {{host?: string, format?: string, apiKey?: string}}
@@ -415,6 +417,99 @@ Translators.LibreTranslateCustom = (config = {}) => ({
 
         console.log('custom translator response:', responseData);
         return responseData.translatedText;
+    }
+});
+```
+
+###### OpenAI-compatible chat/completions (no streaming)
+
+```js
+const LANGUAGES_MAP = {
+    auto: undefined,
+    ru: 'Russian',
+    en: 'English',
+    ja: 'Japanese'
+};
+
+/**
+ * @param config {{baseUri?: string, token?: string, requestBodyParams?: object, getMessages?: function}}
+ * @returns {Translator}
+ */
+Translators.Custom.OpenAIChatCompletions = (config = {}) => ({
+    translate: async (text, sourceLanguage, targetLanguage) => {
+        const baseUri = config.baseUri;
+        const token = config.token;
+        const requestBodyParams = config.requestBodyParams;
+        const createMessages = config.createMessages ?? ((text, sourceLanguage, targetLanguage) => ([
+            {
+                "role": "system",
+                "content": "You are a paid translation service. You get text in one language and translate it into another, in plain text, without giving any comments. You only output the translation. Make sure to maintain quality. In your response output the translation right away without any comments, or any extra tags (do not output the \"text_to_translate\" tag itself)."
+            },
+            {
+                "role": "user",
+                "content": "Translate the text inside this tag " + (sourceLanguage ? `from ${sourceLanguage} ` : "") + "into " + targetLanguage + ": <text_to_translate>" + text + "</text_to_translate> Translation:"
+            }
+        ]));
+
+        if (!baseUri) {
+            throw new Error('OpenAIChatCompletions translator requires a baseUri in config.');
+        }
+
+        const url = new URL(baseUri + '/chat/completions').toString();
+
+        sourceLanguage = sourceLanguage && LANGUAGES_MAP[sourceLanguage];
+        targetLanguage = targetLanguage && LANGUAGES_MAP[targetLanguage];
+
+        if (!targetLanguage) {
+            throw new Error('OpenAIChatCompletions translator requires targetLanguage.');
+        }
+
+        const requestBody = {
+            messages: createMessages(text, sourceLanguage, targetLanguage),
+            stream: false,
+            ...requestBodyParams,
+        };
+
+        console.log(`Translating using OpenAIChatCompletions: POST ${url}`, requestBody);
+
+        const responseData = await httpRequest(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(requestBody)
+        }).then(res => res.json());
+
+        const result = responseData?.choices[0].message.content;
+
+        if (!result) {
+            console.error('OpenAIChatCompletions translator failed: ', responseData);
+            throw new Error('Translation failed');
+        }
+
+        return result;
+    }
+});
+
+const openAITranslator = Translators.Custom.OpenAIChatCompletions({
+    baseUri: 'https://your-openai-base-uri/v1',
+    token: '...',
+    requestBodyParams: {
+        "model": "koboldcpp/Qwen3-30B-A3B-Q5_K_M",
+        "temperature": 0.0,
+        // "min_p": 0.0,
+        // "top_p": 0.8,
+        // "top_k": 20,
+        "stream": false,
+        "adapter": { // for koboldcpp, Qwen 3 non-thinking mode
+            "system_start": "<|im_start|>system\n",
+            "system_end": "<|im_end|>\n",
+            "user_start": "<|im_start|>user\n",
+            "user_end": "<|im_end|>\n",
+            "assistant_start": "<|im_start|>assistant\n<think>\n\n</think>\n\n",
+            "assistant_end": "<|im_end|>\n"
+        }
     }
 });
 ```
