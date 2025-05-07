@@ -14,10 +14,12 @@ It allows you to perform and configure the following things for each game:
 - Translating the transformed text;
 - Transforming the translated text;
 - Stylizing the text using HTML & CSS;
-- The appearance of the text window.
+- The appearance of the text window;
+- Using custom translators, besides the built-in ones;
+- Using LLMs for translations, with streaming.
 
 > [!NOTE]
-> I don't have anything to do with the original software (Textractor) developers.
+> This project is not associated with the original Textractor developers.
 
 ## Demo
 
@@ -208,6 +210,55 @@ common.htmlifyTextJa = (text) => {
 common.style = (text, css) => {
     return `<span style="${css}">${text}</span>`;
 };
+```
+
+##### Using LLM with OpenAI-compatible `/v1/chat/completions`
+
+```js
+const openAITranslatorWA2 = Translators.OpenAIChatCompletions({
+    baseURL: 'http://localhost:15846/v1',
+    apiKey: '...',
+    requestBodyParams: { // everything in the request body except `messages`, which is set by `createMessages`
+        "model": "koboldcpp/gemma-3-12b-it-q4_0",
+        "temperature": 0.0,
+        "min_p": 0.0,
+        "top_p": 0.8,
+        "top_k": 20,
+        "stream": true, // streaming is enabled by default but can also be disabled
+        "adapter": { // additional property for koboldcpp
+            "system_start": "<start_of_turn>user\n",
+            "system_end": "<end_of_turn>\n",
+            "user_start": "<start_of_turn>user\n",
+            "user_end": "<end_of_turn>\n",
+            "assistant_start": "<start_of_turn>model\n",
+            "assistant_end": "<end_of_turn>\n"
+        }
+    },
+    keptPreviousMessagesLimit: 75, // 10 by default. can be set to 0 if needed
+    // `createMessages` is optional, but you can override the default logic like this
+    createMessages: (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
+        const sourceLanguageName = getLanguageName(sourceLanguage);
+        const targetLanguageName = getLanguageName(targetLanguage)
+
+        return [
+            {
+                role: 'system',
+                content: `You are a real-time translation engine. You receive input wrapped in a <text_to_translate> tag and must output only the translated text — without any extra comments or tags.
+
+Your job is to preserve the meaning, tone, and context of the original content as accurately as possible. Do not explain anything. Do not repeat the input or the translation. Never include the <text_to_translate> tags or mention them in any way.
+
+Translation field: You're translating a visual novel - White Album 2, which is a Japanese one, but the user has its English version.
+
+Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}, and output only the translated result.`
+            },
+            ...previousMessages,
+            {
+                role: 'user',
+                content: `Translate <text_to_translate>${text}</text_to_translate> Translation:`,
+            }
+        ];
+    }
+});
 ```
 
 ##### Siglus Engine
