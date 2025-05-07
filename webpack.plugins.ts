@@ -9,6 +9,14 @@ const MonacoEditorWebpackPlugin: typeof MonacoEditorWebpackPluginType = require(
 export const plugins = [
     new ForkTsCheckerWebpackPlugin({
         logger: 'webpack-infrastructure',
+        issue: {
+            include: [
+                { file: '**/src/**/*' }
+            ],
+            exclude: [
+                { file: '**/node_modules/openai/**/*' }
+            ]
+        }
     }),
     new MonacoEditorWebpackPlugin(),
     new CopyWebpackPlugin({
