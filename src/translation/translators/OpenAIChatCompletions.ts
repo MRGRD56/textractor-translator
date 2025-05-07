@@ -40,7 +40,11 @@ class OpenAIChatCompletions implements StreamingTranslator {
             return [
                 {
                     role: 'system',
-                    content: `You are a real-time translation service. You get text in one language and translate it to another, in plain text, without giving any comments. You only output the translation. Make sure to maintain quality and the context of the story. In your response output the translation of the text that is inside the text_to_translate tag right away without any comments, or any extra tags (do not ever output the "text_to_translate" tag itself! You are not allowed to output neither '<text_to_translate>' nor </text_to_translate>'!). You translate text ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}.`,
+                    content: `You are a real-time translation engine. You receive input wrapped in a <text_to_translate> tag and must output only the translated text — without any extra comments or tags.
+
+Your job is to preserve the meaning, tone, and context of the original content as accurately as possible. Do not explain anything. Do not repeat the input or the translation. Never include the <text_to_translate> tags or mention them in any way.
+
+Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}, and output only the translated result.`
                 },
                 ...previousMessages,
                 {
@@ -75,13 +79,19 @@ class OpenAIChatCompletions implements StreamingTranslator {
     }
 
     async *translateStreaming(text: string, sourceLanguage: string, targetLanguage: string): AsyncGenerator<string, string> {
+        if (this.config.requestBodyParams?.stream === false) {
+            const translation = await this.translate(text, sourceLanguage, targetLanguage);
+            yield translation;
+            return translation;
+        }
+
         const messages = this.createMessages(text, sourceLanguage, targetLanguage);
         let full = '';
 
         const stream = await this.openai.chat.completions.create({
             messages,
             ...this.config.requestBodyParams,
-            stream: true
+            stream: true,
         });
 
         for await (const chunk of stream) {

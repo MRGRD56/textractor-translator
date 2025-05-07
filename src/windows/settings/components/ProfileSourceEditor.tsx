@@ -16,7 +16,8 @@ const initializeMonacoTypes = (isCommon: boolean) => {
     const configDeclarationsUsable = configurationDeclarations
         .replace(/export default \w+;?/, '')
         .replace(/export \{.*};/g, '')
-        .replace(/export ([a-z]+) /g, '$1 ');
+        .replace(/export ([a-z]+) /g, '$1 ')
+        .replace(/import .+;/g, '');
 
     monaco.languages.typescript.javascriptDefaults.setExtraLibs([
         {
@@ -32,16 +33,13 @@ const initializeMonacoTypes = (isCommon: boolean) => {
             filePath: 'queryString.ts'
         },
         {
-            content: 'const httpRequest: typeof window.fetch;',
-            filePath: 'node-fetch.ts'
-        },
-        {
             content: configDeclarationsUsable + `
 declare const config: Configuration;
 const common: object;
 const memory: object;
 const Translators: DefinedTranslators;
 const queryString: any;
+const httpRequest: typeof window.fetch;
 `.trimEnd() + (isCommon ? '' : `
 
 declare const commonConfig: Configuration;
