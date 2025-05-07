@@ -1,6 +1,6 @@
-import electronRequest from 'electron-request';
+import nodeFetch from 'node-fetch';
 // import type electronRequestDefault from 'electron-request';
 
-const httpRequest = electronRequest;// as unknown as typeof electronRequestDefault;
+const httpRequest = nodeFetch;// as unknown as typeof electronRequestDefault;
 
 export default httpRequest;

@@ -1,3 +1,6 @@
+import {ChatCompletionMessageParam} from 'openai/resources';
+import {ChatCompletionCreateParamsBase} from 'openai/src/resources/chat/completions/completions';
+
 export interface Sentence {
     text: string;
     meta?: SentenceMeta;
@@ -12,7 +15,19 @@ export interface SentenceMeta {
 }
 
 export interface Translator {
-    translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string>;
+    translate(
+        text: string,
+        sourceLanguage: string,
+        targetLanguage: string
+    ): Promise<string>;
+}
+
+export interface StreamingTranslator extends Translator {
+    translateStreaming(
+        text: string,
+        sourceLanguage: string,
+        targetLanguage: string
+    ): AsyncGenerator<string, string>;
 }
 
 export interface LibreTranslatorConfig {
@@ -21,9 +36,19 @@ export interface LibreTranslatorConfig {
     format?: 'text' | 'html';
 }
 
+export interface OpenAIChatCompletionsConfig {
+    baseURL?: string;
+    apiKey?: string;
+    requestBodyParams: Omit<ChatCompletionCreateParamsBase, 'messages'>;
+    systemPrompt?: object;
+    createMessages?: (text: string, sourceLanguage: string, targetLanguage: string, previousMessages: ChatCompletionMessageParam[], getLanguageName: (languageCode: string | undefined) => string | undefined) => ChatCompletionMessageParam[];
+    keptPreviousMessagesLimit?: number;
+}
+
 export interface DefinedTranslators {
     GoogleTranslate: () => Translator,
     LibreTranslate: (config?: LibreTranslatorConfig) => Translator;
+    OpenAIChatCompletions: (config: OpenAIChatCompletionsConfig) => StreamingTranslator;
     debug: {
         Identity: () => Translator;
         Infinite: () => Translator;

@@ -382,7 +382,7 @@ config.transformTranslated = (text) => {
 
 ##### Implementing a custom translator
 
-`net` (the node.js module), `httpRequest` ("electron-request" library), `queryString` ("query-string" library), `URL`, `URLSearchParams` variables can help you create your custom translators.
+`net` (the node.js module), `httpRequest` ("node-fetch"), `queryString` ("query-string" library), `URL`, `URLSearchParams`, `OpenAI` ("openai" library), `langs` ("langs" library), `languagesCodeToNameMap` (ISO language code to its name like `{"en": "English", "ja": "Japanese"}`) variables can help you create your custom translators.
 
 ###### LibreTranslate
 
@@ -421,7 +421,7 @@ Translators.LibreTranslateCustom = (config = {}) => ({
 });
 ```
 
-###### OpenAI-compatible chat/completions (no streaming) + context
+###### OpenAI-compatible chat/completions (no streaming) + context `[OBSOLETE]`
 
 ```js
 const LANGUAGES_MAP = {
@@ -544,7 +544,158 @@ const openAITranslator = Translators.Custom.OpenAIChatCompletions({
 });
 ```
 
-###### A translator attempting to use a list of translators, with retries and caching
+###### Creating a custom streaming translator using the `OpenAI` library (FYI there is already built-in `Translators.OpenAIChatCompletions` for `/v1/chat/completions`)
+
+```js
+class OpenAIChatCompletions {
+    constructor(config) {
+        this.config = config;
+        this.openai = new OpenAI({
+            baseURL: config.baseURL,
+            apiKey: config.apiKey ?? process.env['OPENAI_API_KEY'],
+            fetch: httpRequest,
+            dangerouslyAllowBrowser: true
+        });
+
+        config.keptPreviousMessagesLimit ??= 10;
+        this.messagesHistory = [];
+        this.messagesHistoryLimit = config.keptPreviousMessagesLimit * 2;
+    }
+
+    putSentenceToHistory(userMessage, translation) {
+        if (!this.config.keptPreviousMessagesLimit) return;
+
+        this.messagesHistory.push(userMessage);
+        this.messagesHistory.push({ role: 'assistant', content: translation });
+
+        if (this.messagesHistory.length > this.messagesHistoryLimit) {
+            this.messagesHistory.splice(0, this.messagesHistory.length - this.messagesHistoryLimit);
+        }
+    }
+
+    createMessages(text, sourceLanguage, targetLanguage) {
+        const fallbackCreate = (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
+            const sourceLanguageName = getLanguageName(sourceLanguage);
+            const targetLanguageName = getLanguageName(targetLanguage);
+
+            return [
+                {
+                    role: 'system',
+                    content: `You are a real-time translation engine. You receive input wrapped in a <text_to_translate> tag and must output only the translated text — without any extra comments or tags.
+
+Your job is to preserve the meaning, tone, and context of the original content as accurately as possible. Do not explain anything. Do not repeat the input or the translation. Never include the <text_to_translate> tags or mention them in any way.
+
+Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}, and output only the translated result.`
+                },
+                ...previousMessages,
+                {
+                    role: 'user',
+                    content: `Translate <text_to_translate>${text}</text_to_translate> Translation:`,
+                }
+            ];
+        };
+
+        const create = this.config.createMessages ?? fallbackCreate;
+        return create(text, sourceLanguage, targetLanguage, this.messagesHistory, getLanguageName);
+    }
+
+    async translate(text, sourceLanguage, targetLanguage) {
+        const messages = this.createMessages(text, sourceLanguage, targetLanguage);
+
+        const response = await this.openai.chat.completions.create({
+            messages,
+            ...this.config.requestBodyParams,
+            stream: false
+        });
+
+        const result = response.choices[0]?.message?.content ?? '';
+        this.putSentenceToHistory(messages[messages.length - 1], result);
+
+        return result;
+    }
+
+    async *translateStreaming(text, sourceLanguage, targetLanguage) {
+        if (this.config.requestBodyParams?.stream === false) {
+            const translation = await this.translate(text, sourceLanguage, targetLanguage);
+            yield translation;
+            return translation;
+        }
+
+        const messages = this.createMessages(text, sourceLanguage, targetLanguage);
+        let full = '';
+
+        const stream = await this.openai.chat.completions.create({
+            messages,
+            ...this.config.requestBodyParams,
+            stream: true,
+        });
+
+        for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+                full += content;
+                yield content;
+            }
+        }
+
+        this.putSentenceToHistory(messages[messages.length - 1], full);
+        return full;
+    }
+}
+
+const getLanguageName = (languageCode) => {
+    if (!languageCode || languageCode === 'auto') {
+        return undefined;
+    }
+
+    return languagesCodeToNameMap[languageCode];
+};
+
+config.translator = new OpenAIChatCompletions({
+    baseURL: 'https://your-openai-base-uri/v1',
+    apiKey: '...',
+    requestBodyParams: {
+        "model": "koboldcpp/Qwen3-30B-A3B-Q5_K_M",
+        "temperature": 0.0,
+        "min_p": 0.0,
+        "top_p": 0.8,
+        "top_k": 20,
+        "adapter": {
+            "system_start": "<|im_start|>system\n",
+            "system_end": "<|im_end|>\n",
+            "user_start": "<|im_start|>user\n",
+            "user_end": "<|im_end|>\n",
+            "assistant_start": "<|im_start|>assistant\n<think>\n\n</think>\n\n",
+            "assistant_end": "<|im_end|>\n"
+        }
+    },
+    keptPreviousMessagesLimit: 50,
+    createMessages: (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
+        const sourceLanguageName = getLanguageName(sourceLanguage);
+        const targetLanguageName = getLanguageName(targetLanguage)
+
+        return [
+            {
+                role: 'system',
+                content: `You are a real-time translation engine. You receive input wrapped in a <text_to_translate> tag and must output only the translated text — without any extra comments or tags.
+
+Your job is to preserve the meaning, tone, and context of the original content as accurately as possible. Do not explain anything. Do not repeat the input or the translation. Never include the <text_to_translate> tags or mention them in any way.
+
+Translation domain: You're translating a visual novel - White Album 2, which is a Japanese one, but the user has its English version.
+
+Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}, and output only the translated result. /no_think`
+            },
+            ...previousMessages,
+            {
+                role: 'user',
+                content: `Translate <text_to_translate>${text}</text_to_translate> Translation:`,
+            }
+        ];
+    }
+});
+```
+
+###### A translator attempting to use a list of translators, with retries and caching (streaming support is not implemented here)
 
 ```js
 /**
