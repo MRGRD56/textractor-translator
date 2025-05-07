@@ -1,13 +1,13 @@
 {
   "name": "textractor-translator",
   "productName": "TextractorTranslator",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Textractor Translator",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "package-win": "yarn package --platform=win32 --arch=x64 && yarn package --platform=win32 --arch=ia32",
+    "package-win": "yarn package --platform=win32 --arch=x64",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx --fix ."
@@ -23,7 +23,6 @@
     "antd": "^4.24.5",
     "classnames": "^2.3.2",
     "decompress": "^4.2.1",
-    "electron-fetch": "^1.9.1",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "express": "^4.18.2",

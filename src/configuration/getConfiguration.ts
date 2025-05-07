@@ -7,6 +7,9 @@ import httpRequest from '../utils/httpRequest';
 import * as queryString from 'query-string';
 import {DefinedTranslatorsImpl} from '../translation/DefinedTranslators';
 import * as net from 'net';
+import OpenAI from 'openai';
+import langs, {Langs} from 'langs';
+import languagesMap from '../utils/languagesMap';
 
 interface CommonConfigContext {
     config: Configuration;
@@ -18,7 +21,10 @@ interface CommonConfigContext {
     console: Console;
     URL: typeof URL,
     URLSearchParams: typeof URLSearchParams,
-    net: typeof net
+    net: typeof net,
+    OpenAI: typeof OpenAI,
+    langs: Langs,
+    languagesCodeToNameMap: Record<string, string>
 }
 
 interface CustomConfigContext extends CommonConfigContext {
@@ -59,7 +65,10 @@ const getCommonConfiguration = (configSourceCode: string | undefined): CommonCon
         console,
         URL,
         URLSearchParams,
-        net
+        net,
+        OpenAI,
+        langs,
+        languagesCodeToNameMap: languagesMap
     };
 
     if (configSourceCode != null) {

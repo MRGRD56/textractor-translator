@@ -8,6 +8,9 @@ import queryStringDeclarations from '!!raw-loader!query-string/index.d.ts'
 // @ts-ignore
 // eslint-disable-next-line
 import nodeNetDeclarations from '!!raw-loader!@types/node/net.d.ts'
+// @ts-ignore
+// eslint-disable-next-line
+import langsDeclarations from '!!raw-loader!@types/langs/index.d.ts'
 import * as monaco from 'monaco-editor';
 import SavedProfile from '../profiles/SavedProfile';
 import {COMMON_PROFILE_ID} from '../profiles/constants';
@@ -27,6 +30,11 @@ const initializeMonacoTypes = (isCommon: boolean) => {
             filePath: 'node/net.ts'
         },
         {
+            content: langsDeclarations
+                .replace('export = langs;', ''),
+            filePath: 'langs.ts'
+        },
+        {
             content: 'declare namespace queryString {\n' + (queryStringDeclarations.toString()
                 .replace(/export \{.*};/g, ''))
             + '\n}',
@@ -40,6 +48,8 @@ const memory: object;
 const Translators: DefinedTranslators;
 const queryString: any;
 const httpRequest: typeof window.fetch;
+const OpenAI: any;
+const languagesCodeToNameMap: Record<string, string>;
 `.trimEnd() + (isCommon ? '' : `
 
 declare const commonConfig: Configuration;
