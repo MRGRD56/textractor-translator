@@ -432,7 +432,18 @@ config.transformTranslated = (text) => {
 
 ##### Implementing a custom translator
 
-`net` (the node.js module), `httpRequest` ("node-fetch"), `queryString` ("query-string" library), `URL`, `URLSearchParams`, `OpenAI` ("openai" library), `langs` ("langs" library), `languagesCodeToNameMap` (ISO language code to its name like `{"en": "English", "ja": "Japanese"}`) variables can help you create your custom translators.
+The following variables can help you create your custom translators:
+
+| Variable/Module                  | Description                                                                                      | Library/Source       |
+|----------------------------------|--------------------------------------------------------------------------------------------------|----------------------|
+| `net`                            | Node.js built-in module used for low-level networking operations                                 | Node.js              |
+| `httpRequest`                    | Function used to make HTTP requests                                                              | [`node-fetch`](https://www.npmjs.com/package/node-fetch) |
+| `queryString`                    | Utility for parsing and stringifying URL query strings                                           | [`query-string`](https://www.npmjs.com/package/query-string) |
+| `URL`, `URLSearchParams`         | Classes for working with URLs and query parameters                                               | Node.js              |
+| `OpenAI`                         | Interface for communicating with OpenAI’s API                                                    | [`openai`](https://www.npmjs.com/package/openai) |
+| `langs`                          | Library providing language information like codes and names                                      | [`langs`](https://www.npmjs.com/package/langs) |
+| `languagesCodeToNameMap`        | Object mapping ISO language codes to language names (e.g., `{ "en": "English", "ja": "Japanese" }`) | Custom/Utility       |
+
 
 ###### LibreTranslate
 
