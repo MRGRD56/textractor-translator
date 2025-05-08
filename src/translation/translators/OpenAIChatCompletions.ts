@@ -3,11 +3,14 @@ import OpenAI from 'openai';
 import {ChatCompletionMessageParam} from 'openai/resources';
 import httpRequest from '../../utils/httpRequest';
 import languagesMap from '../../utils/languagesMap';
+import {identity} from 'lodash';
 
 class OpenAIChatCompletions implements StreamingTranslator {
     private readonly openai: OpenAI;
     private readonly messagesHistory: ChatCompletionMessageParam[] = [];
     private readonly messagesHistoryLimit: number;
+
+    private readonly transformAssistantResponseForChatHistory: (assistantResponse: string) => string;
 
     constructor(private readonly config: OpenAIChatCompletionsConfig) {
         this.openai = new OpenAI({
@@ -19,6 +22,8 @@ class OpenAIChatCompletions implements StreamingTranslator {
 
         config.keptPreviousMessagesLimit ??= 10;
         this.messagesHistoryLimit = (config.keptPreviousMessagesLimit) * 2;
+
+        this.transformAssistantResponseForChatHistory = config.transformAssistantResponseForChatHistory ?? identity;
     }
 
     private putSentenceToHistory(userMessage: ChatCompletionMessageParam, translation: string) {
@@ -73,7 +78,7 @@ Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${s
         });
 
         const result = response.choices[0]?.message?.content ?? '';
-        this.putSentenceToHistory(messages[messages.length - 1], result);
+        this.putSentenceToHistory(messages[messages.length - 1], this.transformAssistantResponseForChatHistory(result));
 
         return result;
     }
@@ -102,7 +107,7 @@ Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${s
             }
         }
 
-        this.putSentenceToHistory(messages[messages.length - 1], full);
+        this.putSentenceToHistory(messages[messages.length - 1], this.transformAssistantResponseForChatHistory(full));
         return full;
     }
 }

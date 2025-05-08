@@ -43,6 +43,7 @@ export interface OpenAIChatCompletionsConfig {
     systemPrompt?: object;
     createMessages?: (text: string, sourceLanguage: string, targetLanguage: string, previousMessages: ChatCompletionMessageParam[], getLanguageName: (languageCode: string | undefined) => string | undefined) => ChatCompletionMessageParam[];
     keptPreviousMessagesLimit?: number;
+    transformAssistantResponseForChatHistory?: (assistantResponse: string) => string;
 }
 
 export interface DefinedTranslators {
