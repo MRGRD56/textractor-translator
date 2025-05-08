@@ -261,6 +261,75 @@ Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${s
 });
 ```
 
+##### Using LLM with OpenAI-compatible `/v1/chat/completions` + thinking
+
+```js
+const openAITranslatorThinking = Translators.OpenAIChatCompletions({
+    baseURL: 'https://your-openai-api/v1',
+    apiKey: '...',
+    requestBodyParams: {
+        "model": "koboldcpp/Qwen3-30B-A3B-Q5_K_M",
+        "temperature": 0.6,
+        "min_p": 0.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "max_tokens": 2 * 1024,
+        "adapter": {
+            "system_start": "<|im_start|>system\n",
+            "system_end": "<|im_end|>\n",
+            "user_start": "<|im_start|>user\n",
+            "user_end": "<|im_end|>\n",
+            "assistant_start": "<|im_start|>assistant\n",
+            "assistant_end": "<|im_end|>\n"
+        }
+    },
+    keptPreviousMessagesLimit: 50,
+    createMessages: (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
+        const sourceLanguageName = getLanguageName(sourceLanguage);
+        const targetLanguageName = getLanguageName(targetLanguage)
+
+        return [
+            {
+                role: 'system',
+                content: `You are a real-time translation engine. You receive input wrapped in a <text_to_translate> tag and must output only the translated text — without any extra comments or tags.
+
+Your job is to preserve the meaning, tone, and context of the original content as accurately as possible. Do not explain anything. Do not repeat the input or the translation. Never include the <text_to_translate> tags or mention them in any way.
+
+Translate text inside the text_to_translate tag ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}, and output only the translated result. /think` // `/think` can be used for Qwen 3
+            },
+            ...previousMessages,
+            {
+                role: 'user',
+                content: `Translate <text_to_translate>${text}</text_to_translate> Translation:`,
+            }
+        ];
+    },
+    // using this so thinking is not included in the chat history
+    transformAssistantResponseForChatHistory: (response) => {
+        return response.replace(/\<think\>\n.*\n\<\/think\>\n\n/s, '');
+    }
+});
+
+config.translator = openAITranslatorThinking;
+
+config.transformTranslated = (text) => {
+    // with streaming, transformTranslated is called every time we get a new chunk. `text` contains the whole response we have so far, not just the new chunk
+
+    // #region working with the thinking block
+    text = text
+        .replace(/\<think\>\n.*\n\<\/think\>\n\n/s, '') // if the model has finished thinking - just removing the thinking part
+        .replace(/\<think\>\n.*/s, 'Thinking...'); // if it is in the process of thinking - replacing the incomplete thinking part with a 'Thinking...' placeholder
+    // #endregion
+
+    return {
+        plain: text,
+        displayed: common.htmlifyText(text),
+        isHtml: true
+    };
+};
+
+```
+
 ##### Siglus Engine
 
 ```js
