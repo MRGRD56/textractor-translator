@@ -7,11 +7,21 @@ export interface Sentence {
 }
 
 export interface SentenceMeta {
+    sentenceId: string;
     isCurrentSelect: boolean;
     processId: number;
     threadNumber: number;
     threadName: number;
     timestamp: number;
+}
+
+export type TranslationState =
+    | 'STREAMING'
+    | 'COMPLETED';
+
+export interface TranslationMeta {
+    isStreamingMode: boolean;
+    state: TranslationState;
 }
 
 export interface Translator {
@@ -94,5 +104,5 @@ export interface Configuration {
 
     transformOriginal?(sentence: Sentence): MultiTransformedText;
 
-    transformTranslated?(translatedText: string, originalSentence: Sentence): OptionalTransformedText;
+    transformTranslated?(translatedText: string, originalSentence: Sentence, translationMeta: TranslationMeta): OptionalTransformedText;
 }

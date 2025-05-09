@@ -1,5 +1,12 @@
 import {listenToPipe} from '../../../textractorServer';
-import {Configuration, ExtraHtml, OptionalTransformedText, Sentence,} from '../../../configuration/Configuration';
+import {
+    Configuration,
+    ExtraHtml,
+    OptionalTransformedText,
+    Sentence,
+    TranslationMeta,
+    TranslationState,
+} from '../../../configuration/Configuration';
 import getProfileConfig from '../../../configuration/getProfileConfig';
 import nodeConsole from '../../../utils/nodeConsole';
 import {isHistoryShownRef} from '../preload';
@@ -69,6 +76,10 @@ const translateText = (
     );
 };
 
+const scrollToBottom = (textContainerWrapper: HTMLElement) => {
+    textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+};
+
 const showSentence = (
     config: Configuration,
     textContainer: HTMLElement,
@@ -129,7 +140,7 @@ const showSentence = (
     }
 
     if (isHistoryShownRef.current) {
-        textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+        scrollToBottom(textContainerWrapper);
     }
 
     /**
@@ -158,12 +169,12 @@ const showSentence = (
         }
 
         // extra html / css для перевода — применяем один раз, когда впервые получили контент
-        if (extraHtmlTr && !sentenceTranslatedElement.dataset.extraApplied) {
+        if (extraHtmlTr && !sentenceTranslatedElement.dataset.extraHtmlApplied) {
             appendExtraHtmls(extraHtmlTr.sentenceContainer, sentenceContainerElement);
             appendExtraHtmls(extraHtmlTr.sentence, sentenceElement);
             appendExtraHtmls(extraHtmlTr.textContainer, sentenceOriginalElement);
             appendExtraHtmls(extraHtmlTr.text, sentenceTranslatedElement);
-            sentenceTranslatedElement.dataset.extraApplied = '1';
+            sentenceTranslatedElement.dataset.extraHtmlApplied = '1';
         }
         if (extraCssTr && !sentenceTranslatedElement.dataset.extraCssApplied) {
             applyExtraCss(extraCssTr.sentenceContainer, sentenceContainerElement);
@@ -175,15 +186,20 @@ const showSentence = (
     };
 
     if (!translatedTextHandle) {
-        // нет перевода — ничего не делаем
+        // no translation — doing nothing
         return;
     }
 
-    // ---- PROMISE‑БАЗОВЫЙ ПЕРЕВОД ----
+    // ---- PROMISE‑BASED TRANSLATION ----
     if (!isAsyncGenerator<string, string>(translatedTextHandle)) {
         translatedTextHandle
             .then((translatedText) => {
-                const transformedText = config.transformTranslated?.(translatedText, originalSentence);
+                const translatedSentenceMeta: TranslationMeta = {
+                    isStreamingMode: false,
+                    state: 'COMPLETED'
+                };
+
+                const transformedText = config.transformTranslated?.(translatedText, originalSentence, translatedSentenceMeta);
 
                 if (transformedText === undefined) {
                     sentenceTranslatedElement.remove();
@@ -199,22 +215,42 @@ const showSentence = (
             })
             .finally(() => {
                 if (isHistoryShownRef.current) {
-                    textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+                    scrollToBottom(textContainerWrapper);
                 }
             });
         return;
     }
 
-    // ---- СТРИМИНГ ----
+    // ---- STREAMING ----
     (async () => {
         let fullTranslation = '';
         try {
             for await (const chunk of translatedTextHandle) {
                 fullTranslation += chunk;
-                const transformed = config.transformTranslated?.(fullTranslation, originalSentence);
+
+                const streamedSentenceMeta: TranslationMeta = {
+                    isStreamingMode: true,
+                    state: 'STREAMING'
+                };
+
+                const transformed = config.transformTranslated?.(fullTranslation, originalSentence, streamedSentenceMeta);
                 if (transformed !== undefined) {
                     renderTranslated(transformed);
                 }
+
+                if (isHistoryShownRef.current) {
+                    scrollToBottom(textContainerWrapper);
+                }
+            }
+
+            const streamedSentenceMeta: TranslationMeta = {
+                isStreamingMode: true,
+                state: 'COMPLETED'
+            };
+
+            const transformed = config.transformTranslated?.(fullTranslation, originalSentence, streamedSentenceMeta);
+            if (transformed !== undefined) {
+                renderTranslated(transformed);
             }
         } catch (error) {
             console.error('An error occurred while translating', error);
@@ -222,7 +258,7 @@ const showSentence = (
             sentenceTranslatedElement.textContent = 'Error while translating';
         } finally {
             if (isHistoryShownRef.current) {
-                textContainerWrapper.scrollTo(0, textContainerWrapper.scrollHeight);
+                scrollToBottom(textContainerWrapper);
             }
         }
     })();

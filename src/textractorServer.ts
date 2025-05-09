@@ -2,6 +2,7 @@ import nodeConsole from './utils/nodeConsole';
 import {Sentence} from './configuration/Configuration';
 import * as net from 'net';
 import delay from './utils/delay';
+import {v4} from 'uuid';
 
 const PIPE_NAME = 'MRGRD56_TextractorPipe_f30799d5-c7eb-48e2-b723-bd6314a03ba2';
 const PIPE_PATH = '\\\\.\\pipe\\' + PIPE_NAME;
@@ -62,6 +63,9 @@ export const listenToPipe = async (onSentence: (sentence: Sentence) => void): Pr
                 remainingBuffer = remainingBuffer.subarray(4 + messageLength);
 
                 const data = JSON.parse(message.toString('utf-8'));
+                if (typeof data.meta.sentenceId !== 'string') {
+                    data.meta.sentenceId = v4();
+                }
                 onSentence(data as Sentence);
             } else {
                 // Не достаточно данных для полного сообщения, ожидать больше данных
