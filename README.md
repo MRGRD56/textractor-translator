@@ -63,6 +63,9 @@ It can work with both `Textractor x86` and `Textractor x64`.
 13. Now, text seen in Textractor should be displayed in Textractor Translator too:  
     ![image](https://github.com/MRGRD56/textractor-translator/assets/35491968/c38cf2e4-8228-4a47-89aa-cd87f4706037)
 
+> [!Note]
+> Application data is stored in `%APPDATA%\TextractorTranslator`
+
 <hr>
 
 ### The following part of this README is supposed to be rewritten. Some info below might be obsolete.
