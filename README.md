@@ -327,7 +327,65 @@ config.transformTranslated = (text) => {
         isHtml: true
     };
 };
+```
 
+##### LLM Translation Optimizations
+
+```js
+/**
+ * @param baseTranslator {StreamingTranslator}
+ * @returns {StreamingTranslator}
+ */
+Translators.Custom.MainLLMTranslator = (baseTranslator) => {
+    return {
+        translate: async (text, sourceLanguage, targetLanguage) => {
+            throw new Error('Not supported.');
+        },
+        translateStreaming: async function* (text, sourceLanguage, targetLanguage) {
+            if (sourceLanguage === 'en' && !/[a-z]+/i.test(text)) {
+                console.log('Used original text:', text);
+                yield text;
+                return text;
+            }
+
+            let isToBeCached = false;
+
+            const translatedCache = memory.translatedCache ??= {};
+
+            if (text.length <= 200) {
+                const cachedTranslation = translatedCache[text];
+                if (cachedTranslation === undefined) {
+                    isToBeCached = true;
+                } else {
+                    console.log('Used cached translation:', cachedTranslation);
+                    yield cachedTranslation;
+                    return cachedTranslation;
+                }
+            }
+
+            try {
+                let translation = '';
+
+                const translationGenerator = baseTranslator.translateStreaming(text, sourceLanguage, targetLanguage);
+                for await (const chunk of translationGenerator) {
+                    translation += chunk;
+                    yield chunk;
+                }
+
+                console.log(`${baseTranslator.__name__} translation result:`, translation);
+
+                if (isToBeCached) {
+                    translatedCache[text] = translation;
+                }
+
+                return translation;
+            } catch (err) {
+                console.error(`${baseTranslator.__name__} translation error:`, err);
+                throw err;
+            }
+        }
+    };
+};
 ```
 
 ##### Siglus Engine
@@ -460,6 +518,261 @@ config.transformOriginal = ({text, meta}) => {
         isHtml: true
     };
 };
+```
+
+##### White Album 2 - v2: LLM translation, better styles
+
+```js
+/** @param {string} text */
+const htmlifyText = (text) => {
+    return text
+        .replace(/^([^:]+?): ["«](.+)["»][.!?]?$/, '«$2»')
+        .replace(/^([^:]+?): ["«]([^"»]*)$/, '«$2')
+};
+
+const DEFAULT_CHARACTER_NAMES = [
+    'Haruki',
+    'Setsuna',
+    'Kazusa',
+    'Takeya',
+    'Io',
+    'Chikashi',
+    'Takahiro',
+    'Youko',
+    'Homeroom Teacher',
+    'Guidance Counselor'
+];
+
+memory.wa2CharacterNames ??= new Set(DEFAULT_CHARACTER_NAMES);
+for (const characterName of DEFAULT_CHARACTER_NAMES) {
+    memory.wa2CharacterNames.add(characterName);
+}
+
+config.transformOriginal = ({text, meta}) => {
+    text = commonConfig.transformOriginal({text, meta});
+    if (!text) {
+        return;
+    }
+
+    if (/^mv\d+$/.test(text) || text === 'sepia.AMP' || text === 'CATCH') {
+        return;
+    }
+
+    const normalText = text
+        .replaceAll('~', ',')
+        .replaceAll('\\n', ' ')
+        .replaceAll('�c', '...')
+        .replaceAll('�`', '~')
+        .replaceAll('�[', ' - ')
+        .replaceAll('\\k', '❄️');
+
+    const isOnlyCharacterName = memory.wa2CharacterNames.has(normalText);
+
+    if (isOnlyCharacterName) {
+        memory.wa2LastCharacterName = normalText;
+
+        return undefined;
+    }
+
+    const characterName = /^([^:"]+?\S)"(.+)$/.exec(normalText)?.[1];
+
+    if (characterName) {
+        memory.wa2LastCharacterName = characterName;
+        memory.wa2CharacterNames.add(characterName);
+    }
+    
+    let plainText = normalText
+        .replace(/^([^:"]+?\S)(".+"?)$/, '$1: $2');
+
+    if (plainText === normalText && /^".+"?$/.test(plainText) && memory.wa2LastCharacterName) {
+        plainText = `${memory.wa2LastCharacterName}: ${plainText}`;
+    }
+    
+    return {
+        plain: plainText,
+        displayed: htmlifyText(plainText),
+        isHtml: true
+    };
+};
+
+const openAITranslatorMistralWA2AtPC = Translators.OpenAIChatCompletions({
+    baseURL: 'http://localhost:15846/v1',
+    apiKey: '...',
+    requestBodyParams: {
+        "model": "koboldcpp/Mistral-Small-3.1-24B-Instruct-2503-UD-Q4_K_XL",
+        "temperature": 0.0,
+        "min_p": 0.0,
+        "top_p": 0.95,
+        "top_k": 64,
+        "stream": true,
+        "adapter": {
+            "system_start": "[SYSTEM_PROMPT]",
+            "system_end": "[/SYSTEM_PROMPT]",
+            "user_start": "[INST]",
+            "user_end": "[/INST]",
+            "assistant_start": "",
+            "assistant_end": "</s>"
+        }
+    },
+    keptPreviousMessagesLimit: 75,
+    createMessages: (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
+        const sourceLanguageName = getLanguageName(sourceLanguage);
+        const targetLanguageName = getLanguageName(targetLanguage);
+
+        return [
+            {
+                role: 'system',
+                content: `You are a real-time translation engine. You receive input wrapped in a <text_to_translate> tag and must output only the translated text — without any extra comments or tags. Preserve punctuation, including quotes, though.
+
+Your job is to preserve the meaning, tone, and context of the original content as accurately as possible. Do not explain anything. Do not repeat the input or the translation. Never include the <text_to_translate> tags or mention them in any way.
+
+Translation field: You're translating a visual novel - White Album 2, which is a Japanese one, but the user has its English version.
+
+Characters:
+
+Haruki Kitahara (Харуки Китахара) - male - the protagonist;
+Setsuna Ogiso (Сэцуна Огисо) - female - the first main heroine;
+Kazusa Touma (Кадзуса Тома) - female - the second main heroine;
+Takeya Iizuka (Такэя Идзука) - male - Haruki's close friend;
+Io Mizusawa (Ио Мидзусава) - female;
+Chikashi Hayasaka (Тикаси Хаясака) - male;
+Takahiro Ogiso (Такахиро Огисо) - male;
+Youko Touma (Ёко Тома) - female.
+
+Translate the text that is inside the text_to_translate tag ${sourceLanguageName ? `from ${sourceLanguageName} ` : ''}into ${targetLanguageName}, and output only the translated result.`
+            },
+            ...previousMessages,
+            {
+                role: 'user',
+                content: `Translate <text_to_translate>${text}</text_to_translate> Translation:`,
+            }
+        ];
+    }
+});
+openAITranslatorMistralWA2AtPC.__name__ = 'OpenAIChatCompletions-mistral@pc/WA2';
+
+config.translator = Translators.Custom.MainLLMTranslator(openAITranslatorMistralWA2AtPC);
+
+
+config.transformTranslated = (text, original, meta) => {
+    text = text.replace(/^— (.+)$/, '«$1»');
+
+    if (config.translator.__thinking__) {
+        text = text
+            .replace(/\<think\>\n.*\n\<\/think\>\n\n/s, '')
+            .replace(/\<think\>\n.*/s, 'Thinking...');
+    }
+
+    // console.log(`Streaming [${original.meta.sentenceId}]`, text, original, meta);
+
+    if (meta.isStreamingMode && meta.state === 'STREAMING') {
+        if (text.length <= 15) {
+            console.log('Not displaying piece of sentence', text);
+            return;
+        }
+    }
+
+    let name = undefined;
+    let phrase = undefined;
+
+    const regexResult = /^([^:"]+?):\s?(["'«“].+(["'»”][.!?])?)?$/.exec(text);
+    if (regexResult) {
+        [, name, phrase] = regexResult;
+    } else {
+        phrase = text;
+    }
+
+    phrase = (phrase ?? '')
+        .replace(/^— (.+)$/, '«$1»')
+        .replace(/^["'«“](.+)["'»”]([.!?]*)$/, '«$1$2»')
+        .replace(/^["'«“]([^"'»”]+)$/, '«$1');
+
+    return {
+        plain: phrase,
+        displayed: `${name ? (`<span class="character-name">${name}</span> `) : (`<span class="character-name character-name-narrator">Narrator</span> `)}<span class="phrase">${phrase}</span>`,
+        isHtml: true
+    };
+};
+```
+
+```css
+.sentence-original {
+    /* letter-spacing: -0.2rem; */
+}
+
+.text-container:not(.history-visible) .sentence-translated {
+    /* letter-spacing: -0.1rem; */
+    min-height: 115px;
+}
+
+.text-container-wrapper:has(.history-visible) {
+    background-color: #1f4970b0 !important;
+}
+
+.character-name {
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #ffffff;
+    background: linear-gradient(90deg, rgba(82,202,251,0.75) 0%, rgba(62,177,238,0.75) 100%);
+    padding: 6px 18px 3px 18px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: -5px;
+    margin-bottom: 9px;
+}
+
+.character-name-narrator {
+    visibility: hidden;
+}
+
+.text-container.history-visible .character-name-narrator {
+    display: none;
+}
+
+.phrase {
+    font-weight: 500;
+    background: #386896bf;
+    padding: 6px 10px;
+    border-radius: 5px;
+    display: block;
+    line-height: 2rem;
+}
+
+.text-container.history-visible .phrase {
+    border-radius: 5px 5px 0 0;
+}
+
+.text-container.history-visible .character-name:not(.character-name-narrator) + .phrase {
+    border-radius: 0px 5px 0 0;
+}
+
+.text-container.history-visible .sentence-original .sentence-text {
+    border-radius: 0 0 5px 5px;
+}
+
+.text-container.history-visible .character-name {
+    margin-bottom: 0;
+    border-radius: 5px 5px 0 0;
+}
+
+.text-container.history-visible .sentence {
+    gap: 0;
+}
+
+.text-container.history-visible .sentence-container,
+.text-container.history-visible .sentence-original,
+.text-container.history-visible .sentence-translated {
+    width: 100%;
+}
+
+.sentence-original .sentence-text {
+    font-weight: 500;
+    background: rgba(142, 196, 218, 0.1);
+    padding: 6px 10px !important;
+    border-radius: 5px;
+    display: block !important;
+    line-height: 1.45rem;
+}
 ```
 
 ##### eden* PLUS+MOSAIC (English edition)
