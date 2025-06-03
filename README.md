@@ -41,7 +41,7 @@ It allows you to perform and configure the following things for each game:
 
 ## Installation
 
-Currently, only Windows x64 it supported.
+Currently, only Windows x64 is supported.
 It can work with both `Textractor x86` and `Textractor x64`.
 
 1. Download the binaries in the [Releases](https://github.com/MRGRD56/textractor-translator/releases) section [x64](https://github.com/MRGRD56/textractor-translator/releases/latest/download/TextractorTranslator-win32-x64.zip)).  
