@@ -229,7 +229,7 @@ const openAITranslatorWA2 = Translators.OpenAIChatCompletions({
         "top_k": 20,
         "stream": true // streaming is enabled by default but can also be disabled
     },
-    keptPreviousMessagesLimit: 15, // 10 by default. can be set to 0 if needed
+    keptPreviousMessagesLimit: 15, // 10 by default. can be set to 0 if unneeded
     // `createMessages` is optional, but you can override the default logic like this
     createMessages: (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
         const sourceLanguageName = getLanguageName(sourceLanguage);
