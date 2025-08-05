@@ -219,25 +219,17 @@ common.style = (text, css) => {
 
 ```js
 const openAITranslatorWA2 = Translators.OpenAIChatCompletions({
-    baseURL: 'http://localhost:15846/v1',
+    baseURL: 'http://localhost:10001/v1', // using llama-swap + llama.cpp
     apiKey: '...',
     requestBodyParams: { // everything in the request body except `messages`, which is set by `createMessages`
-        "model": "koboldcpp/gemma-3-12b-it-q4_0",
+        "model": "unsloth/gemma-3-27b-it-UD-Q6_K_XL",
         "temperature": 0.0,
         "min_p": 0.0,
         "top_p": 0.8,
         "top_k": 20,
-        "stream": true, // streaming is enabled by default but can also be disabled
-        "adapter": { // additional property for koboldcpp
-            "system_start": "<start_of_turn>user\n",
-            "system_end": "<end_of_turn>\n",
-            "user_start": "<start_of_turn>user\n",
-            "user_end": "<end_of_turn>\n",
-            "assistant_start": "<start_of_turn>model\n",
-            "assistant_end": "<end_of_turn>\n"
-        }
+        "stream": true // streaming is enabled by default but can also be disabled
     },
-    keptPreviousMessagesLimit: 75, // 10 by default. can be set to 0 if needed
+    keptPreviousMessagesLimit: 15, // 10 by default. can be set to 0 if needed
     // `createMessages` is optional, but you can override the default logic like this
     createMessages: (text, sourceLanguage, targetLanguage, previousMessages, getLanguageName) => {
         const sourceLanguageName = getLanguageName(sourceLanguage);
@@ -277,7 +269,7 @@ const openAITranslatorThinking = Translators.OpenAIChatCompletions({
         "top_p": 0.95,
         "top_k": 20,
         "max_tokens": 2 * 1024,
-        "adapter": {
+        "adapter": { // additional property for koboldcpp
             "system_start": "<|im_start|>system\n",
             "system_end": "<|im_end|>\n",
             "user_start": "<|im_start|>user\n",
